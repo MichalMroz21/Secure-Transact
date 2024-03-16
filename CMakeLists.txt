@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake)
 set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 
-set(BOOST_INCLUDE_LIBRARIES describe type_index endian algorithm)
+set(BOOST_INCLUDE_LIBRARIES date_time filesystem iostreams)
 set(BOOST_ENABLE_CMAKE ON)
 
 set(QT_INCLUDE_LIBRARIES Quick)
@@ -23,6 +23,8 @@ include(${CMAKE_DIR}/UpdateSubmodules.cmake)
 include(${CMAKE_DIR}/AddFiles.cmake)
 
 find_package(Qt6 6.4 REQUIRED COMPONENTS ${QT_INCLUDE_LIBRARIES})
+find_package(Boost COMPONENTS ${BOOST_INCLUDE_LIBRARIES})
+find_package(GTest)
 
 add_subdirectory(dependencies)
 
@@ -42,7 +44,7 @@ list(TRANSFORM BOOST_INCLUDE_LIBRARIES PREPEND "Boost::")
 list(TRANSFORM QT_INCLUDE_LIBRARIES PREPEND "Qt6::")
 
 target_link_libraries(appTask-Management-App
-    PRIVATE ${GTEST_LINK} ${BOOST_INCLUDE_LIBRARIES} ${QT_INCLUDE_LIBRARIES}
+    PRIVATE ${BOOST_INCLUDE_LIBRARIES} ${QT_INCLUDE_LIBRARIES}
 )
 
 qt_add_qml_module(appTask-Management-App

@@ -1,12 +1,10 @@
-find_package(Boost)
-
-if(NOT ${Boost_FOUND})
+if(${Boost_FOUND})
+    include_directories(${Boost_INCLUDE_DIRS})
+else()
     update_submodule("${CMAKE_CURRENT_LIST_DIR}/boost")
     add_subdirectory(boost)
+    include_directories(${Boost_INCLUDE_DIRS})
 endif()
-
-enable_testing()
-find_package(GTest)
 
 if(${GTest_FOUND})
     set(GTEST_LINK gtest gtest_main PARENT_SCOPE)
