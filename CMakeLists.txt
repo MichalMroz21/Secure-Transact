@@ -23,7 +23,7 @@ include(GNUInstallDirs)
 include(${CMAKE_DIR}/UpdateSubmodules.cmake)
 include(${CMAKE_DIR}/AddFiles.cmake)
 
-find_package(Qt6 6.4 COMPONENTS ${QT_INCLUDE_LIBRARIES} GLOBAL)
+find_package(Qt6 6.4 COMPONENTS ${QT_INCLUDE_LIBRARIES})
 
 add_subdirectory(dependencies)
 

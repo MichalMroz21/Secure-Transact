@@ -1,4 +1,4 @@
-find_package(Boost COMPONENTS ${BOOST_INCLUDE_LIBRARIES})
+find_package(Boost)
 
 if(NOT ${Boost_FOUND})
     update_submodule("${CMAKE_CURRENT_LIST_DIR}/boost")
