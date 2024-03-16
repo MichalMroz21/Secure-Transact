@@ -4,6 +4,9 @@
 #include <boost/algorithm/algorithm.hpp>
 #include <boost/algorithm/cxx11/is_sorted.hpp>
 
+#include <boost/assert.hpp>
+#include <boost/array.hpp>
+
 #include <CMakeConfig.hpp>
 
 int main(int argc, char *argv[])

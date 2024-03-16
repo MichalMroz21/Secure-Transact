@@ -8,7 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake)
 set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 
-set(BOOST_INCLUDE_LIBRARIES date_time filesystem iostreams)
+#Some libraries are header-only and some required building, this separation is required as boost is added both with find_package and submodules
+#As described here: https://www.boost.org/doc/libs/1_84_0/more/getting_started/windows.html#header-only-libraries
+set(BOOST_HEADER_ONLY_LIBRARIES algorithm)
+set(BOOST_BUILD_LIBRARIES filesystem)
 set(BOOST_ENABLE_CMAKE ON)
 
 set(QT_INCLUDE_LIBRARIES Quick)
@@ -23,7 +26,7 @@ include(${CMAKE_DIR}/UpdateSubmodules.cmake)
 include(${CMAKE_DIR}/AddFiles.cmake)
 
 find_package(Qt6 6.4 REQUIRED COMPONENTS ${QT_INCLUDE_LIBRARIES})
-find_package(Boost COMPONENTS ${BOOST_INCLUDE_LIBRARIES})
+find_package(Boost COMPONENTS ${BOOST_BUILD_LIBRARIES})
 find_package(GTest)
 
 add_subdirectory(dependencies)
@@ -40,11 +43,15 @@ target_include_directories(appTask-Management-App PRIVATE
     ${INCLUDE_DIR}
 )
 
-list(TRANSFORM BOOST_INCLUDE_LIBRARIES PREPEND "Boost::")
+list(TRANSFORM BOOST_BUILD_LIBRARIES PREPEND "Boost::")
+list(TRANSFORM BOOST_HEADER_ONLY_LIBRARIES PREPEND "Boost::")
 list(TRANSFORM QT_INCLUDE_LIBRARIES PREPEND "Qt6::")
 
+list(APPEND BOOST_LIBRARIES ${BOOST_BUILD_LIBRARIES})
+list(APPEND BOOST_LIBRARIES ${BOOST_HEADER_ONLY_LIBRARIES})
+
 target_link_libraries(appTask-Management-App
-    PRIVATE ${BOOST_INCLUDE_LIBRARIES} ${QT_INCLUDE_LIBRARIES}
+    PRIVATE ${BOOST_LIBRARIES} ${QT_INCLUDE_LIBRARIES}
 )
 
 qt_add_qml_module(appTask-Management-App

@@ -1,9 +1,9 @@
 if(${Boost_FOUND})
-    include_directories(${Boost_INCLUDE_DIRS})
+    include_directories(${Boost_INCLUDE_DIR})
+    list(CLEAR ${BOOST_HEADER_ONLY_LIBRARIES})
 else()
     update_submodule("${CMAKE_CURRENT_LIST_DIR}/boost")
     add_subdirectory(boost)
-    include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
 if(${GTest_FOUND})
