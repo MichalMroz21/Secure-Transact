@@ -1,4 +1,4 @@
-#find_package(Boost COMPONENTS ${BOOST_INCLUDE_LIBRARIES})
+find_package(Boost COMPONENTS ${BOOST_INCLUDE_LIBRARIES})
 
 if(${Boost_FOUND})
     include_directories(${Boost_INCLUDE_DIRS})
@@ -6,7 +6,6 @@ else()
     update_submodule("${CMAKE_CURRENT_LIST_DIR}/boost")
     add_subdirectory(boost)
 endif()
-
 
 enable_testing()
 find_package(GTest)
