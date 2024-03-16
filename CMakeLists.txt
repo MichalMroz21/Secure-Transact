@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake)
 set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 
-#Some libraries are header-only and some required building, this separation is required as boost is added both with find_package and submodules
+#Some libraries are header-only and some require building, this separation is required as boost is added both with find_package and submodules
 #As described here: https://www.boost.org/doc/libs/1_84_0/more/getting_started/windows.html#header-only-libraries
 set(BOOST_HEADER_ONLY_LIBRARIES algorithm)
 set(BOOST_BUILD_LIBRARIES filesystem)
