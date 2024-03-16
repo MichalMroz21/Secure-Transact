@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 
 project(Task-Management-App VERSION 0.1 LANGUAGES CXX)
 
@@ -22,23 +22,23 @@ qt_standard_project_setup()
 qt_add_executable(appTask-Management-App)
 qt_policy(SET QTP0001 NEW)
 
+include(GNUInstallDirs)
+
+#Macros
 include(${CMAKE_DIR}/UpdateSubmodules.cmake)
 include(${CMAKE_DIR}/AddFiles.cmake)
-include(GNUInstallDirs)
 
 add_subdirectory(dependencies)
 add_subdirectory(include)
 add_subdirectory(source)
 add_subdirectory(source_gui)
 
-list(TRANSFORM BOOST_INCLUDE_LIBRARIES PREPEND "Boost::")
-
 target_include_directories(appTask-Management-App PRIVATE
     ${INCLUDE_DIR}
 )
 
 target_link_libraries(appTask-Management-App
-    PRIVATE Qt6::Quick GTest::gtest_main ${BOOST_INCLUDE_LIBRARIES}
+    PRIVATE Qt6::Quick ${GTEST_LINK} ${BOOST_INCLUDE_LIBRARIES}
 )
 
 qt_add_qml_module(appTask-Management-App
@@ -67,3 +67,6 @@ install(TARGETS appTask-Management-App
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+#cmake -B build -S . -G "MinGW Makefiles" && cd build && make && cd ..
+#cmake -B build -S . -G "MinGW Makefiles" && cd build && make && cd tests && export GTEST_COLOR=1 && ./Tester.exe
