@@ -8,7 +8,7 @@ macro(update_submodule SUBMODULE_NAME)
 
         message(STATUS "Updating git submodule: ${SUBMODULE_NAME}")
 
-        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive ${SUBMODULE_NAME}
+        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive --progress ${SUBMODULE_NAME}
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         RESULT_VARIABLE RETURN_CODE)
 
