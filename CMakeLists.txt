@@ -38,7 +38,7 @@ target_include_directories(appTask-Management-App PRIVATE
 )
 
 target_link_libraries(appTask-Management-App
-    PRIVATE Qt6::Quick ${BOOST_INCLUDE_LIBRARIES}
+    PRIVATE Qt6::Quick GTest::gtest_main ${BOOST_INCLUDE_LIBRARIES}
 )
 
 qt_add_qml_module(appTask-Management-App
