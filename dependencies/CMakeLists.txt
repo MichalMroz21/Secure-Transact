@@ -1,6 +1,6 @@
 if(${Boost_FOUND})
     include_directories(${Boost_INCLUDE_DIR})
-    list(CLEAR ${BOOST_HEADER_ONLY_LIBRARIES})
+    set(BOOST_HEADER_ONLY_LIBRARIES "" PARENT_SCOPE)
 else()
     update_submodule("${CMAKE_CURRENT_LIST_DIR}/boost")
     add_subdirectory(boost)
