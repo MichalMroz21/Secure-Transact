@@ -17,13 +17,12 @@ option(MAKE_TEST_EXE "Run GTests" ON)
 
 #CMakeConfig.hpp Constants
 add_definitions(-DROOT_PATH_CMAKE=${CMAKE_CURRENT_SOURCE_DIR})
-include(GNUInstallDirs)
 
 #Macros
 include(${CMAKE_DIR}/UpdateSubmodules.cmake)
 include(${CMAKE_DIR}/AddFiles.cmake)
 
-find_package(Qt6 6.4 COMPONENTS ${QT_INCLUDE_LIBRARIES})
+find_package(Qt6 6.4 REQUIRED COMPONENTS ${QT_INCLUDE_LIBRARIES})
 
 add_subdirectory(dependencies)
 

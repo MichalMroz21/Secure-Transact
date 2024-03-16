@@ -15,8 +15,3 @@ else()
     add_subdirectory(gtest)
     set(GTEST_LINK GTest::gtest GTest::gtest_main PARENT_SCOPE)
 endif()
-
-if(NOT ${Qt6_FOUND})
-    update_submodule("${CMAKE_CURRENT_LIST_DIR}/qt")
-    add_subdirectory(qt)
-endif()
