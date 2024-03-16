@@ -37,6 +37,9 @@ target_include_directories(appTask-Management-App PRIVATE
     ${INCLUDE_DIR}
 )
 
+list(TRANSFORM BOOST_INCLUDE_LIBRARIES PREPEND "Boost::")
+
+
 target_link_libraries(appTask-Management-App
     PRIVATE Qt6::Quick ${GTEST_LINK} ${BOOST_INCLUDE_LIBRARIES}
 )
