@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.24)
 
 project(Task-Management-App VERSION 0.1 LANGUAGES CXX)
 
@@ -11,24 +11,26 @@ set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(BOOST_INCLUDE_LIBRARIES describe type_index endian algorithm)
 set(BOOST_ENABLE_CMAKE ON)
 
+set(QT_INCLUDE_LIBRARIES Quick)
+
 option(MAKE_TEST_EXE "Run GTests" ON)
 
 #CMakeConfig.hpp Constants
 add_definitions(-DROOT_PATH_CMAKE=${CMAKE_CURRENT_SOURCE_DIR})
-
-find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
-
-qt_standard_project_setup()
-qt_add_executable(appTask-Management-App)
-qt_policy(SET QTP0001 NEW)
-
 include(GNUInstallDirs)
 
 #Macros
 include(${CMAKE_DIR}/UpdateSubmodules.cmake)
 include(${CMAKE_DIR}/AddFiles.cmake)
 
+find_package(Qt6 6.4 COMPONENTS ${QT_INCLUDE_LIBRARIES} GLOBAL)
+
 add_subdirectory(dependencies)
+
+qt_standard_project_setup()
+qt_add_executable(appTask-Management-App)
+qt_policy(SET QTP0001 NEW)
+
 add_subdirectory(include)
 add_subdirectory(source)
 add_subdirectory(source_gui)
@@ -38,10 +40,10 @@ target_include_directories(appTask-Management-App PRIVATE
 )
 
 list(TRANSFORM BOOST_INCLUDE_LIBRARIES PREPEND "Boost::")
-
+list(TRANSFORM QT_INCLUDE_LIBRARIES PREPEND "Qt6::")
 
 target_link_libraries(appTask-Management-App
-    PRIVATE Qt6::Quick ${GTEST_LINK} ${BOOST_INCLUDE_LIBRARIES}
+    PRIVATE ${GTEST_LINK} ${BOOST_INCLUDE_LIBRARIES} ${QT_INCLUDE_LIBRARIES}
 )
 
 qt_add_qml_module(appTask-Management-App

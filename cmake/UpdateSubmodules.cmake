@@ -6,7 +6,7 @@ macro(update_submodule SUBMODULE_NAME)
 
     if(GIT_FOUND)
 
-        message(STATUS "Updating git submodule:\n${SUBMODULE_NAME}")
+        message(STATUS "Updating git submodule: ${SUBMODULE_NAME}")
 
         execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive ${SUBMODULE_NAME}
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -17,7 +17,7 @@ macro(update_submodule SUBMODULE_NAME)
             return()
         endif()
 
-        message(STATUS "Git submodule ${SUBMODULE_NAME} updated successfully")
+        message(STATUS "Git submodule - ${SUBMODULE_NAME} updated successfully")
     endif()
 
 endmacro()

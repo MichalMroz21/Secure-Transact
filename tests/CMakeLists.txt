@@ -4,7 +4,7 @@ add_executable(Tester ${TEST_FILES} ${SRC_FILES})
 
 target_include_directories(Tester PUBLIC ${INCLUDE_DIR})
 
-target_link_libraries(Tester PRIVATE ${GTEST_LINK} ${BOOST_INCLUDE_LIBRARIES})
+target_link_libraries(Tester PRIVATE ${GTEST_LINK} ${BOOST_INCLUDE_LIBRARIES} ${QT_INCLUDE_LIBRARIES})
 
 include(GoogleTest)
 
