@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake)
 set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
+set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
 
 #Some libraries are header-only and some require building, this separation is required as boost is added both with find_package and submodules
 #As described here: https://www.boost.org/doc/libs/1_84_0/more/getting_started/windows.html#header-only-libraries
@@ -41,10 +42,17 @@ qt_standard_project_setup()
 qt_add_executable(appTask-Management-App)
 qt_policy(SET QTP0001 NEW)
 
+#Get cpp files to add to Executables
+file(GLOB_RECURSE SOURCE_FILES ${SOURCE_DIR}/*.cpp)
+
+#Get include files to add to Executables (Required for MOC)
+file(GLOB_RECURSE INCLUDE_FILES ${INCLUDE_DIR}/*.hpp)
+
 #Get project files
 add_subdirectory(include)
 add_subdirectory(source)
 add_subdirectory(source_gui)
+add_subdirectory(assets)
 
 #Files in include can be included with just a file name now
 target_include_directories(appTask-Management-App PRIVATE
