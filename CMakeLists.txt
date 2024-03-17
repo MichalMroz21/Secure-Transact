@@ -59,6 +59,10 @@ target_include_directories(appTask-Management-App PRIVATE
     ${INCLUDE_DIR}
 )
 
+if(${Boost_FOUND})
+    target_include_directories(appTask-Management-App PRIVATE ${Boost_INCLUDE_DIRS})
+endif()
+
 #Transform library names into proper form for linking
 list(TRANSFORM BOOST_BUILD_LIBRARIES PREPEND "Boost::")
 list(TRANSFORM BOOST_HEADER_ONLY_LIBRARIES PREPEND "Boost::")
