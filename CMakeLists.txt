@@ -13,7 +13,7 @@ set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
 #As described here: https://www.boost.org/doc/libs/1_84_0/more/getting_started/windows.html#header-only-libraries
 #The name has to be BOOST_INCLUDE_LIBRARIES!
 set(BOOST_INCLUDE_LIBRARIES algorithm)
-set(BOOST_BUILD_LIBRARIES filesystem)
+set(BOOST_BUILD_LIBRARIES)
 set(BOOST_ENABLE_CMAKE ON)
 
 set(QT_INCLUDE_LIBRARIES Quick)
