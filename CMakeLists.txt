@@ -31,8 +31,8 @@ include(${CMAKE_DIR}/AddFiles.cmake)
 find_package(Qt6 6.4 REQUIRED COMPONENTS ${QT_INCLUDE_LIBRARIES})
 
 #Boost and GTest can be downloaded via git submodules
-find_package(Boost COMPONENTS ${BOOST_BUILD_LIBRARIES})
-find_package(GTest)
+find_package(Boost REQUIRED COMPONENTS ${BOOST_BUILD_LIBRARIES})
+find_package(GTest REQUIRED)
 
 #Set dependencies if found or not by find_package
 #If not found then get from git submodules
