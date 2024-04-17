@@ -9,12 +9,11 @@ set(CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake)
 set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
 
-set(BOOST_COMPONENTS regex filesystem)
 set(BOOST_ENABLE_CMAKE ON)
 
 set(QT_INCLUDE_LIBRARIES Quick)
-
-set(GTEST_LINK GTest::gtest_main GTest::gmock_main)
+set(BOOST_COMPONENTS regex filesystem)
+set(GTEST_LINK gtest_main gmock_main)
 
 option(MAKE_TEST_EXE "Run GTests" ON)
 
@@ -68,6 +67,7 @@ endif()
 
 #Transform library names into proper form for linking
 list(TRANSFORM QT_INCLUDE_LIBRARIES PREPEND "Qt6::")
+list(TRANSFORM GTEST_LINK PREPEND "GTest::")
 
 #Link to main application
 target_link_libraries(appTask-Management-App
