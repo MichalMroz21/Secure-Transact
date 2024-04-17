@@ -9,9 +9,6 @@ set(CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake)
 set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
 
-#Some libraries are header-only and some require building, this separation is required as boost is added both with find_package and submodules
-#As described here: https://www.boost.org/doc/libs/1_84_0/more/getting_started/windows.html#header-only-libraries
-#The name has to be BOOST_INCLUDE_LIBRARIES!
 set(BOOST_COMPONENTS regex filesystem)
 set(BOOST_ENABLE_CMAKE ON)
 
