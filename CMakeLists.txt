@@ -17,7 +17,7 @@ set(BOOST_ENABLE_CMAKE ON)
 
 set(QT_INCLUDE_LIBRARIES Quick)
 
-set(GTEST_LINK GTest::gtest GTest::gtest_main)
+set(GTEST_LINK GTest::gtest_main GTest::gmock_main)
 
 option(MAKE_TEST_EXE "Run GTests" ON)
 
