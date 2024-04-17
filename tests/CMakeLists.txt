@@ -15,7 +15,7 @@ if(${Boost_FOUND})
     target_include_directories(Tester PRIVATE ${Boost_INCLUDE_DIRS})
 endif()
 
-target_link_libraries(Tester PRIVATE ${GTEST_LINK} ${BOOST_LIBRARIES} ${QT_INCLUDE_LIBRARIES})
+target_link_libraries(Tester PRIVATE ${GTEST_LINK} ${Boost_LIBRARIES} ${QT_INCLUDE_LIBRARIES})
 
 include(GoogleTest)
 

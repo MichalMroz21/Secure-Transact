@@ -12,11 +12,12 @@ set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
 #Some libraries are header-only and some require building, this separation is required as boost is added both with find_package and submodules
 #As described here: https://www.boost.org/doc/libs/1_84_0/more/getting_started/windows.html#header-only-libraries
 #The name has to be BOOST_INCLUDE_LIBRARIES!
-set(BOOST_INCLUDE_LIBRARIES algorithm)
-set(BOOST_BUILD_LIBRARIES)
+set(BOOST_COMPONENTS regex filesystem)
 set(BOOST_ENABLE_CMAKE ON)
 
 set(QT_INCLUDE_LIBRARIES Quick)
+
+set(GTEST_LINK GTest::gtest GTest::gtest_main)
 
 option(MAKE_TEST_EXE "Run GTests" ON)
 
@@ -30,9 +31,13 @@ include(${CMAKE_DIR}/AddFiles.cmake)
 #QT6 is required to be installed
 find_package(Qt6 6.4 REQUIRED COMPONENTS ${QT_INCLUDE_LIBRARIES})
 
-#Boost and GTest can be downloaded via git submodules
-find_package(Boost REQUIRED COMPONENTS ${BOOST_BUILD_LIBRARIES})
-find_package(GTest REQUIRED)
+#Boost has to be installed on operating system
+find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+
+#GTest can be downloaded via git submodules
+if(MAKE_TEST_EXE)
+    find_package(GTest)
+endif()
 
 #Set dependencies if found or not by find_package
 #If not found then get from git submodules
@@ -65,17 +70,11 @@ if(${Boost_FOUND})
 endif()
 
 #Transform library names into proper form for linking
-list(TRANSFORM BOOST_BUILD_LIBRARIES PREPEND "Boost::")
-list(TRANSFORM BOOST_INCLUDE_LIBRARIES PREPEND "Boost::")
 list(TRANSFORM QT_INCLUDE_LIBRARIES PREPEND "Qt6::")
-
-#Combine 2 lists into one
-list(APPEND BOOST_LIBRARIES ${BOOST_BUILD_LIBRARIES})
-list(APPEND BOOST_LIBRARIES ${BOOST_INCLUDE_LIBRARIES})
 
 #Link to main application
 target_link_libraries(appTask-Management-App
-    PRIVATE ${BOOST_LIBRARIES} ${QT_INCLUDE_LIBRARIES}
+    PRIVATE ${Boost_LIBRARIES} ${QT_INCLUDE_LIBRARIES}
 )
 
 #Add resources and GUI files
