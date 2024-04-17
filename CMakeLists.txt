@@ -10,12 +10,11 @@ set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
 
 set(BOOST_ENABLE_CMAKE ON)
+set(MAKE_TEST_EXE ON)
 
-set(QT_INCLUDE_LIBRARIES Quick)
+set(QT_INCLUDE_LIBRARIES Core Concurrent Quick)
 set(BOOST_COMPONENTS regex filesystem)
 set(GTEST_LINK gtest_main gmock_main)
-
-set(MAKE_TEST_EXE ON)
 
 #CMakeConfig.hpp Constants
 add_definitions(-DROOT_PATH_CMAKE=${CMAKE_CURRENT_SOURCE_DIR})
