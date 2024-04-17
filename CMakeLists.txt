@@ -15,7 +15,7 @@ set(QT_INCLUDE_LIBRARIES Quick)
 set(BOOST_COMPONENTS regex filesystem)
 set(GTEST_LINK gtest_main gmock_main)
 
-option(MAKE_TEST_EXE "Run GTests" ON)
+set(MAKE_TEST_EXE ON)
 
 #CMakeConfig.hpp Constants
 add_definitions(-DROOT_PATH_CMAKE=${CMAKE_CURRENT_SOURCE_DIR})
