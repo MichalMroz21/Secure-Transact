@@ -5,7 +5,6 @@
 #include <boost/algorithm/cxx11/is_sorted.hpp>
 
 #include <boost/assert.hpp>
-#include <boost/array.hpp>
 
 #include <CMakeConfig.hpp>
 
