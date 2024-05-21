@@ -10,7 +10,6 @@ set(MAKE_TEST_EXE ON)
 set(Boost_COMPILER "mgw9")
 set(Boost_USE_STATIC_RUNTIME ON)
 
-option(LINK_INSIGHT "Link Qt Insight Tracker library" ON)
 option(BUILD_QDS_COMPONENTS "Build design studio components" ON)
 
 #Set used components
@@ -74,7 +73,9 @@ target_link_libraries(SecureTransactApp PRIVATE
     ${QT_COMPONENTS} ${Boost_LIBRARIES}
 )
 
-target_include_directories(SecureTransactApp PRIVATE ${Boost_INCLUDE_DIRS})
+target_sources(SecureTransactApp PRIVATE ${INCLUDE_FILES})
+
+target_include_directories(SecureTransactApp PRIVATE ${Boost_INCLUDE_DIRS} ${INCLUDE_DIR})
 
 #Create separate Tester executables that runs tests
 if(MAKE_TEST_EXE)
@@ -82,6 +83,7 @@ if(MAKE_TEST_EXE)
     add_subdirectory(tests)
 endif()
 
+#Design Studio Components
 if (BUILD_QDS_COMPONENTS)
     include(${CMAKE_CURRENT_SOURCE_DIR}/qmlcomponents)
 endif()

@@ -1,12 +1,12 @@
 import QmlProject
 
 Project {
-    mainFile: "content/App.qml"
-    mainUiFile: "content/Screen01.ui.qml"
+    mainFile: "source_gui/App.qml"
+    mainUiFile: "source_gui/Screen01.ui.qml"
 
     /* Include .qml, .js, and image files from current directory and subdirectories */
     QmlFiles {
-        directory: "content"
+        directory: "source_gui"
     }
 
     QmlFiles {
@@ -14,7 +14,7 @@ Project {
     }
 
     JavaScriptFiles {
-        directory: "content"
+        directory: "source_gui"
     }
 
     JavaScriptFiles {
@@ -22,7 +22,7 @@ Project {
     }
 
     ImageFiles {
-        directory: "content"
+        directory: "source_gui"
     }
 
     ImageFiles {
@@ -31,7 +31,7 @@ Project {
 
     Files {
         filter: "*.conf"
-        files: ["qtquickcontrols2.conf"]
+        files: ["configs/qtquickcontrols2.conf"]
     }
 
     Files {

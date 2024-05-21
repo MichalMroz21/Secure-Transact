@@ -4,9 +4,9 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include "app_environment.h"
-#include "import_qml_components_plugins.h"
-#include "import_qml_plugins.h"
+#include <app_environment.hpp>
+#include <import_qml_components_plugins.hpp>
+#include <import_qml_plugins.hpp>
 
 int main(int argc, char *argv[])
 {
