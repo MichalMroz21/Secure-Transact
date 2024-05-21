@@ -1,30 +1,47 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.21.1)
 
-project(Task-Management-App VERSION 0.1 LANGUAGES CXX)
+project(SecureTransactApp LANGUAGES CXX)
 
+#Set project options
 set(CMAKE_CXX_STANDARD 20)
-
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC ON)
 set(BOOST_ENABLE_CMAKE ON)
 set(MAKE_TEST_EXE ON)
+set(Boost_COMPILER "mgw9")
+set(Boost_USE_STATIC_RUNTIME ON)
 
-set(CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake)
-set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
-set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
+option(LINK_INSIGHT "Link Qt Insight Tracker library" ON)
+option(BUILD_QDS_COMPONENTS "Build design studio components" ON)
 
-set(QT_INCLUDE_LIBRARIES Core Concurrent Quick)
+#Set used components
+set(QT_COMPONENTS Core Gui Qml Quick)
 set(BOOST_COMPONENTS regex filesystem)
 set(GTEST_LINK gtest_main gmock_main)
+
+#Set constant variables
+set(QT_QML_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml)
+set(CONFIGS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/configs)
+set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
+set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(CMAKE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(QML_IMPORT_PATH ${QT_QML_OUTPUT_DIRECTORY}
+    CACHE STRING "Import paths for Qt Creator's code model"
+    FORCE
+)
+
+#Get all files in folders
+file(GLOB_RECURSE CONFIG_FILES_RELATIVE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CONFIGS_DIR}/*.conf ${CONFIGS_DIR}/*.json)
+file(GLOB_RECURSE INCLUDE_FILES ${INCLUDE_DIR}/*.h ${INCLUDE_DIR}/*.hpp)
+file(GLOB_RECURSE SOURCE_FILES ${SOURCE_DIR}/*.cpp ${SOURCE_DIR}/*.c)
 
 #CMakeConfig.hpp Constants
 add_definitions(-DROOT_PATH_CMAKE=${CMAKE_CURRENT_SOURCE_DIR})
 
 #Macros
 include(${CMAKE_DIR}/UpdateSubmodules.cmake)
-include(${CMAKE_DIR}/AddFiles.cmake)
 
 #QT6 is required to be installed
-find_package(Qt6 6.4 REQUIRED COMPONENTS ${QT_INCLUDE_LIBRARIES})
+find_package(Qt6 6.2 REQUIRED COMPONENTS ${QT_COMPONENTS})
 
 #Boost has to be installed on operating system
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
@@ -34,54 +51,30 @@ if(MAKE_TEST_EXE)
     find_package(GTest)
 endif()
 
-#Set dependencies if found or not by find_package
-#If not found then get from git submodules
 add_subdirectory(dependencies)
 
-#Create executable
-qt_standard_project_setup()
-qt_add_executable(appTask-Management-App)
-qt_policy(SET QTP0001 NEW)
-
-#Get cpp files to add to Executables
-file(GLOB_RECURSE SOURCE_FILES ${SOURCE_DIR}/*.cpp)
-
-#Get include files to add to Executables (Required for MOC)
-file(GLOB_RECURSE INCLUDE_FILES ${INCLUDE_DIR}/*.hpp)
-
-#Get project files
-add_subdirectory(include)
-add_subdirectory(source)
-add_subdirectory(source_gui)
-add_subdirectory(assets)
-
-#Files in include can be included with just a file name now
-target_include_directories(appTask-Management-App PRIVATE
-    ${INCLUDE_DIR}
-)
-
-if(${Boost_FOUND})
-    target_include_directories(appTask-Management-App PRIVATE ${Boost_INCLUDE_DIRS})
+if (Qt6_VERSION VERSION_GREATER_EQUAL 6.3)
+    qt_standard_project_setup()
 endif()
 
+qt_add_executable(SecureTransactApp ${SOURCE_FILES})
+
+qt_add_resources(SecureTransactApp "configs"
+    PREFIX "/"
+    FILES ${CONFIG_FILES_RELATIVE}
+)
+
+qt_policy(SET QTP0001 NEW)
+
 #Transform library names into proper form for linking
-list(TRANSFORM QT_INCLUDE_LIBRARIES PREPEND "Qt6::")
+list(TRANSFORM QT_COMPONENTS PREPEND "Qt6::")
 list(TRANSFORM GTEST_LINK PREPEND "GTest::")
 
-#Link to main application
-target_link_libraries(appTask-Management-App
-    PRIVATE ${Boost_LIBRARIES} ${QT_INCLUDE_LIBRARIES}
+target_link_libraries(SecureTransactApp PRIVATE
+    ${QT_COMPONENTS} ${Boost_LIBRARIES}
 )
 
-#Add resources and GUI files
-qt_add_qml_module(appTask-Management-App
-    URI Task-Management-App
-    VERSION 1.0
-    RESOURCE_PREFIX "/"
-
-    QML_FILES ${QML_FILES}
-    RESOURCES ${RESOURCES}
-)
+target_include_directories(SecureTransactApp PRIVATE ${Boost_INCLUDE_DIRS})
 
 #Create separate Tester executables that runs tests
 if(MAKE_TEST_EXE)
@@ -89,18 +82,20 @@ if(MAKE_TEST_EXE)
     add_subdirectory(tests)
 endif()
 
-set_target_properties(appTask-Management-App PROPERTIES
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
-)
+if (BUILD_QDS_COMPONENTS)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/qmlcomponents)
+endif()
 
-install(TARGETS appTask-Management-App
+include(${CMAKE_CURRENT_SOURCE_DIR}/qmlmodules)
+
+include(GNUInstallDirs)
+
+install(TARGETS SecureTransactApp
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-#cmake -B build -S . -G "MinGW Makefiles" && cd build && make && cd ..
-#cmake -B build -S . -G "MinGW Makefiles" && cd build && make && cd tests && export GTEST_COLOR=1 && ./Tester.exe
+# make IDEs aware of the QML import path
+set(QML_IMPORT_PATH ${PROJECT_BINARY_DIR}/qml CACHE PATH
+    "Path to the custom QML components defined by the project")

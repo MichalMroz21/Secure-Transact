@@ -1,33 +1,36 @@
+// Copyright (C) 2021 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only
+
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include <boost/algorithm/algorithm.hpp>
-#include <boost/algorithm/cxx11/is_sorted.hpp>
-
-#include <boost/assert.hpp>
-
-#include <CMakeConfig.hpp>
+#include "app_environment.h"
+#include "import_qml_components_plugins.h"
+#include "import_qml_plugins.h"
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
+    set_qt_environment();
 
+    QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
-    int c[] = {1,2,3,4};
-
-    bool ans = boost::algorithm::is_sorted(c);
-
-    const QUrl url(u"qrc:/Task-Management-App/source_gui/Main.qml"_qs);
+    const QUrl url(u"qrc:/qt/qml/Main/main.qml"_qs);
 
     QObject::connect(
         &engine,
-        &QQmlApplicationEngine::objectCreationFailed,
+        &QQmlApplicationEngine::objectCreated,
         &app,
-        []() { QCoreApplication::exit(-1); },
+        [url](QObject *obj, const QUrl &objUrl) {
+            if (!obj && url == objUrl)
+                QCoreApplication::exit(-1);
+        },
         Qt::QueuedConnection);
 
+    engine.addImportPath(QCoreApplication::applicationDirPath() + "/qml");
+    engine.addImportPath(":/");
     engine.load(url);
 
+    if (engine.rootObjects().isEmpty()) return -1;
     return app.exec();
 }
