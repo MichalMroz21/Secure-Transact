@@ -2,7 +2,6 @@ import QtQuick 2.15
 
 Text {
     id: textItem
-    x: 654
     y: 112
     width: 630
     height: 169

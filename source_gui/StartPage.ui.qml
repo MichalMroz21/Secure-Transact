@@ -1,4 +1,7 @@
-import QtQuick 2.15
+import QtQuick
+import QtQuick.Studio.Effects
+import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 
 Rectangle {
     id: rectangle
@@ -9,24 +12,26 @@ Rectangle {
     border.color: "#1e1e1e"
     border.width: 18
 
-    AnimatedMainText {
-        id: appNameMain
-        x: 655
-        y: 185
+    AnimatedTitle {
+        id: animatedText
+        y: 70
+        anchors.left: parent.left
+        anchors.right: parent.right
     }
 
     FadeInText {
         property string textProperty: "Login"
         id: appName
-        x: 655
         y: 324
+        anchors.left: parent.left
+        anchors.right: parent.right
     }
 
     LoginForm {
         id: columnLayout
+        anchors.horizontalCenter: parent.horizontalCenter
         height: 533
         width: 307
-        x: 816
-        y: 441
+        y: 471
     }
 }
