@@ -2,6 +2,7 @@
 ### Do not change
 
 file(GLOB QML_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.qml)
+file(GLOB RESOURCE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.qrc *.txt)
 
 
 qt_add_library(content STATIC)
@@ -12,5 +13,5 @@ qt6_add_qml_module(content
     QML_FILES
         ${QML_FILES}
     RESOURCES
-        fonts/fonts.txt
+        ${RESOURCE_FILES}
 )
