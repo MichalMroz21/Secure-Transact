@@ -40,7 +40,7 @@ Text {
             target: gradient1
             property: "position"
             from: -0.1
-            to: 1.0
+            to: 0.9
             duration: 5000
         }
         NumberAnimation {
@@ -54,7 +54,7 @@ Text {
             target: gradient3
             property: "position"
             from: 0.1
-            to: 1.0
+            to: 1.1
             duration: 5000
         }
     }

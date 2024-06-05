@@ -8,6 +8,9 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 import QtQuick 6.2
 import QtQuick.Controls 6.2
 import SecureTransact
+import QtQuick.Scene3D 2.15
+import QtQuick3D 6.2
+import Quick3DAssets.Bitcoin
 
 Rectangle {
     id: rectangle
@@ -24,5 +27,9 @@ Rectangle {
         StartPage {
             id: startPage
         }
+    }
+
+    Item {
+        id: __materialLibrary__
     }
 }
