@@ -24,7 +24,7 @@ Rectangle {
         width: 200
         height: 200
 
-        StartPage {
+        LoginPage {
             id: startPage
         }
     }

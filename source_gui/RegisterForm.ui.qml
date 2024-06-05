@@ -4,9 +4,26 @@ import QtQuick.Controls 6.2
 import QtQuick.Studio.Effects
 
 ColumnLayout {
-    id: columnLayout
+    id: registerForm
     spacing: 20 //spacing between items in layout
     width: 600
+
+    InputBox {
+
+        property string initialText: "Email"
+
+        Image {
+            id: mail
+            x: 8
+            y: 4
+            width: 61
+            height: 42
+            source: "../asset_imports/mail.png"
+            fillMode: Image.PreserveAspectFit
+        }
+
+        property bool showText: true
+    }
 
     InputBox {
 
@@ -46,21 +63,11 @@ ColumnLayout {
     ClickableText {
         Layout.alignment: Qt.AlignHCenter
         id: textRegister
-        property string pageName: "RegisterPage.ui.qml"
+        property string pageName: "LoginPage.ui.qml"
         property var textSize: 26
         property string textColor: "#034efc"
         property string hoverColor: "#200299"
-        property string textValue: "New? Click to Register"
-    }
-
-    ClickableText {
-        Layout.alignment: Qt.AlignHCenter
-        id: textForgot
-        property string pageName: "PasswordForgot.qml"
-        property string textColor: "#034efc"
-        property string hoverColor: "#200299"
-        property var textSize: 26
-        property string textValue: "Forgot Password?"
+        property string textValue: "Already have an account? Click to Login"
     }
 
     Item {
