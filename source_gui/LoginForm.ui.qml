@@ -21,10 +21,13 @@ ColumnLayout {
             source: "../asset_imports/my-account-login-64.png"
             fillMode: Image.PreserveAspectFit
         }
+
+        property bool showText: true
     }
 
     LoginBox {
 
+        property bool showText: false
         property string initialText: "Password"
 
         Image {
@@ -39,6 +42,26 @@ ColumnLayout {
     }
 
     LoginButton {}
+
+    ClickableText {
+        Layout.alignment: Qt.AlignHCenter
+        id: textRegister
+        property string pageName: "Register.qml"
+        property var textSize: 26
+        property string textColor: "#034efc"
+        property string hoverColor: "#200299"
+        property string textValue: "New? Click to Register"
+    }
+
+    ClickableText {
+        Layout.alignment: Qt.AlignHCenter
+        id: textForgot
+        property string pageName: "PasswordForgot.qml"
+        property string textColor: "#034efc"
+        property string hoverColor: "#200299"
+        property var textSize: 26
+        property string textValue: "Forgot Password?"
+    }
 
     Item {
         Layout.fillHeight: true

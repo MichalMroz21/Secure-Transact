@@ -12,6 +12,7 @@ Rectangle {
 
     TextField {
         id: textInput
+        echoMode: showText ? TextField.Normal : TextField.Password
         width: 80
         height: 20
         placeholderText: initialText
@@ -22,6 +23,7 @@ Rectangle {
         background: Rectangle {
             border.width: 0
         }
+        maximumLength: 16
         placeholderTextColor: textInput.activeFocus ? appName.color : "gray"
     }
 
