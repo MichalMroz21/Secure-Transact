@@ -5,11 +5,17 @@ Node {
     id: node
 
     // Resources
+    PrincipledMaterial {
+        id: material_001_material
+        objectName: "Material.001"
+        baseColor: "#ff999999"
+        indexOfRefraction: 1
+    }
 
     // Nodes:
     Node {
-        id: etherium
-        objectName: "uploads_files_993453_etherium.obj"
+        id: etherium_obj
+        objectName: "Etherium.obj"
         Model {
             id: circle_002
             objectName: "Circle.002"
@@ -25,17 +31,6 @@ Node {
             materials: [
                 material_001_material
             ]
-        }
-    }
-
-    Node {
-        id: __materialLibrary__
-
-        PrincipledMaterial {
-            id: material_001_material
-            objectName: "Material.001"
-            baseColor: "#ffa3a3a3"
-            indexOfRefraction: 1
         }
     }
 

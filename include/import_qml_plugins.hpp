@@ -7,3 +7,4 @@
 
 Q_IMPORT_QML_PLUGIN(contentPlugin)
 Q_IMPORT_QML_PLUGIN(SecureTransactPlugin)
+Q_IMPORT_QML_PLUGIN(Quick3DAssetsPlugin)

@@ -66,4 +66,8 @@ ColumnLayout {
     Item {
         Layout.fillHeight: true
     }
+
+    Item {
+        id: __materialLibrary__
+    }
 }

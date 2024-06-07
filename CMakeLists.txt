@@ -56,7 +56,8 @@ if (Qt6_VERSION VERSION_GREATER_EQUAL 6.3)
     qt_standard_project_setup()
 endif()
 
-qt_add_executable(SecureTransactApp ${SOURCE_FILES})
+qt_add_executable(SecureTransactApp ${SOURCE_FILES}
+)
 
 qt_add_resources(SecureTransactApp "configs"
     PREFIX "/"
@@ -97,6 +98,8 @@ install(TARGETS SecureTransactApp
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+target_link_libraries(SecureTransactApp PRIVATE Quick3DAssetsplugin)
 
 # make IDEs aware of the QML import path
 set(QML_IMPORT_PATH ${PROJECT_BINARY_DIR}/qml CACHE PATH
