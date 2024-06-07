@@ -58,6 +58,6 @@ foreach(DIR ${DIRECTORIES})
         get_filename_component(PARENT_DIR ${DIR} DIRECTORY)
         get_filename_component(PARENT_DIR_NAME ${PARENT_DIR} NAME)
 
-        file(COPY ${DIR} DESTINATION ${CMAKE_BINARY_DIR}/qml/${PARENT_DIR_NAME}/${PARENT_DIR_NAME})
+        file(COPY ${DIR} DESTINATION ${CMAKE_BINARY_DIR}/qml/${PARENT_DIR_NAME})
     endif()
 endforeach()
