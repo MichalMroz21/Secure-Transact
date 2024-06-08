@@ -35,6 +35,7 @@ include(${CMAKE_DIR}/IndividualSettings.cmake)
 file(GLOB_RECURSE CONFIG_FILES_RELATIVE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CONFIGS_DIR}/*.conf ${CONFIGS_DIR}/*.json)
 file(GLOB_RECURSE INCLUDE_FILES ${INCLUDE_DIR}/*.h ${INCLUDE_DIR}/*.hpp)
 file(GLOB_RECURSE SOURCE_FILES ${SOURCE_DIR}/*.cpp ${SOURCE_DIR}/*.c)
+file(GLOB_RECURSE RESOURCE_FILES ${ASSET_IMPORTS_DIR}/*.qrc)
 
 #CMakeConfig.hpp Constants
 add_definitions(-DROOT_PATH_CMAKE=${CMAKE_CURRENT_SOURCE_DIR})
@@ -61,7 +62,7 @@ endif()
 
 qt_add_executable(SecureTransactApp
     ${SOURCE_FILES}
-    ${ASSET_IMPORTS_DIR}/images.qrc
+    ${RESOURCE_FILES}
 )
 
 qt_add_resources(SecureTransactApp "configs"

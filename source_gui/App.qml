@@ -5,15 +5,13 @@ import QtQuick 6.2
 import SecureTransact
 
 Window {
+    title: "SecureTransact"
     width: mainScreen.width
     height: mainScreen.height
-
     visible: true
-    title: "SecureTransact"
 
-    Screen01 {
+    MainScreen {
         id: mainScreen
     }
-
 }
 

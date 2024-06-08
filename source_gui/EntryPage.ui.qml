@@ -9,21 +9,20 @@ import Qt3D.Extras 2.7
 import Qt3D.Input 2.7
 
 import QtQuick3D
-import Quick3DAssets.Orbiter_Space
-import Quick3DAssets.Coin
-import Quick3DAssets.Tuomodesign_ethereum
 import QtQuick.Layouts
 import Quick3DAssets.Bitcoin
 import Quick3DAssets.Etherium
 
 Rectangle {
-    id: rectangle
+    id: entryPage
     width: 1920
     height: 1080
     color: "white"
     radius: 0
     border.color: "#1e1e1e"
     border.width: 18
+
+    property string currentForm: "LoginForm.ui.qml"
 
     RadialGradient {
         anchors.fill: parent
@@ -33,7 +32,7 @@ Rectangle {
                 color: "white"
             }
             GradientStop {
-                id: gradient12
+                id: gradientBg
                 position: 0.5
                 color: "#c7c7c7"
             }
@@ -42,10 +41,10 @@ Rectangle {
 
     SequentialAnimation {
         running: true
-        loops: Animation.Infinity
+        loops: Animation.Infinite
 
         NumberAnimation {
-            target: gradient12
+            target: gradientBg
             property: "position"
             from: 0.5
             to: 0.7
@@ -53,7 +52,7 @@ Rectangle {
         }
 
         NumberAnimation {
-            target: gradient12
+            target: gradientBg
             property: "position"
             from: 0.7
             to: 0.5
@@ -63,48 +62,23 @@ Rectangle {
 
     RowLayout {
         id: rowLayout
-        x: 0
-        y: 48
         width: parent.width
-        height: 333
 
         RowLayout {
             Layout.alignment: Qt.AlignCenter
-            View3D {
-                id: view3D
-                y: -15
+
+            ThreeDObject {
+                y: -75
                 width: 150
                 height: 333
-                environment: sceneEnvironment
-
-                SceneEnvironment {
-                    id: sceneEnvironment
-                    antialiasingQuality: SceneEnvironment.High
-                    antialiasingMode: SceneEnvironment.MSAA
-                }
-
-                Node {
-                    id: scene
-                    DirectionalLight {
-                        id: directionalLight
-                    }
-
-                    PerspectiveCamera {
-                        id: sceneCamera
-                        x: -286.671
-                        y: 27.51
-                        z: 368.9527
-                    }
-
-                    Bitcoin {
-                        id: bitcoin
-                        x: -304.35
-                        y: -402.641
-                        scale.z: 200
-                        scale.x: 200
-                        scale.y: 200
-                        z: -530.37915
-                    }
+                Bitcoin {
+                    id: bitcoin
+                    x: -304.35
+                    y: -402.641
+                    scale.z: 200
+                    scale.x: 200
+                    scale.y: 200
+                    z: -530.37915
                 }
 
                 NumberAnimation {
@@ -123,35 +97,12 @@ Rectangle {
                 y: 70
             }
 
-            View3D {
-                id: view3D2
-                y: -15
+            ThreeDObject {
+                y: -75
                 width: 200
                 height: 333
-                environment: sceneEnvironment2
-
-                SceneEnvironment {
-                    id: sceneEnvironment2
-                    antialiasingQuality: SceneEnvironment.High
-                    antialiasingMode: SceneEnvironment.MSAA
-                }
-
-                Node {
-                    id: scene2
-                    DirectionalLight {
-                        id: directionalLight2
-                    }
-
-                    PerspectiveCamera {
-                        id: sceneCamera2
-                        x: -286.671
-                        y: 27.51
-                        z: 368.9527
-                    }
-                }
-
                 Etherium {
-                    id: tuomodesign_ethereum
+                    id: ethereum
                     x: -309.619
                     y: -162.217
                     eulerRotation.z: 0.00001
@@ -164,7 +115,7 @@ Rectangle {
                 }
 
                 NumberAnimation {
-                    target: tuomodesign_ethereum
+                    target: ethereum
                     property: "eulerRotation.y"
                     loops: Animation.Infinite
                     running: true
@@ -176,20 +127,9 @@ Rectangle {
         }
     }
 
-    FadeInText {
-        property string textProperty: "Register"
-        id: appName
-        y: 324
-        anchors.left: parent.left
-        anchors.right: parent.right
-    }
-
-    RegisterForm {
-        id: columnLayout
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: 533
-        width: 465
-        y: 471
+    Loader {
+        anchors.centerIn: parent
+        source: currentForm
     }
 
     Item {

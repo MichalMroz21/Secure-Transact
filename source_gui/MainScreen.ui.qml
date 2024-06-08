@@ -13,18 +13,14 @@ import QtQuick3D 6.2
 import Quick3DAssets.Bitcoin 1.0
 
 Rectangle {
-    id: rectangle
     width: Constants.width
     height: Constants.height
-
     color: Constants.backgroundColor
 
     StackView {
         id: stackView
-        width: 200
-        height: 200
 
-        LoginPage {
+        EntryPage {
             id: startPage
         }
     }
