@@ -10,7 +10,7 @@ import QtQuick.Controls 6.2
 import SecureTransact
 import QtQuick.Scene3D 2.15
 import QtQuick3D 6.2
-import Quick3DAssets.Bitcoin
+import Quick3DAssets.Bitcoin 1.0
 
 Rectangle {
     id: rectangle

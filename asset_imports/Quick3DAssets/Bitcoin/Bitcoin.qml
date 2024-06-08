@@ -5,36 +5,6 @@ Node {
     id: node
 
     // Resources
-    PrincipledMaterial {
-        id: svgmat_material
-        objectName: "SVGMat"
-        baseColor: "#ff000000"
-        indexOfRefraction: 1
-    }
-    PrincipledMaterial {
-        id: gold_material
-        objectName: "GOLD"
-        baseColor: "#ffcccccc"
-        indexOfRefraction: 1.4500000476837158
-    }
-    PrincipledMaterial {
-        id: gold_001_material
-        objectName: "GOLD.001"
-        baseColor: "#ffcccccc"
-        indexOfRefraction: 1.4500000476837158
-    }
-    PrincipledMaterial {
-        id: gold_002_material
-        objectName: "GOLD.002"
-        baseColor: "#ffcccccc"
-        indexOfRefraction: 1.4500000476837158
-    }
-    PrincipledMaterial {
-        id: material_004_material
-        objectName: "Material.004"
-        baseColor: "#ff030303"
-        indexOfRefraction: 1.4500000476837158
-    }
 
     // Nodes:
     Node {
@@ -73,6 +43,45 @@ Node {
             materials: [
                 gold_material
             ]
+        }
+    }
+
+    Node {
+        id: __materialLibrary__
+
+        PrincipledMaterial {
+            id: svgmat_material
+            objectName: "SVGMat"
+            baseColor: "#ff000000"
+            indexOfRefraction: 1
+        }
+
+        PrincipledMaterial {
+            id: gold_material
+            objectName: "GOLD"
+            baseColor: "#ffcccccc"
+            indexOfRefraction: 1.4500000476837158
+        }
+
+        PrincipledMaterial {
+            id: gold_001_material
+            objectName: "GOLD.001"
+            baseColor: "#ffcccccc"
+            indexOfRefraction: 1.4500000476837158
+        }
+
+        PrincipledMaterial {
+            id: gold_002_material
+            objectName: "GOLD.002"
+            baseColor: "#ffcccccc"
+            indexOfRefraction: 1.4500000476837158
+        }
+
+        PrincipledMaterial {
+            id: material_004_material
+            objectName: "Material.004"
+            baseColor: "#ff030303"
+            indexOfRefraction: 1.4500000476837158
         }
     }
 

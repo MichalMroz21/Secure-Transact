@@ -9,12 +9,12 @@ import Qt3D.Extras 2.7
 import Qt3D.Input 2.7
 
 import QtQuick3D
-import Quick3DAssets.Orbiter_Space_Shuttle_OV_103_Discovery_150k_4096
+import Quick3DAssets.Orbiter_Space
 import Quick3DAssets.Coin
 import Quick3DAssets.Tuomodesign_ethereum
 import QtQuick.Layouts
 import Quick3DAssets.Bitcoin
-import Quick3DAssets.Uploads_files_993453_etherium
+import Quick3DAssets.Etherium
 
 Rectangle {
     id: rectangle
@@ -148,19 +148,19 @@ Rectangle {
                         y: 27.51
                         z: 368.9527
                     }
+                }
 
-                    Uploads_files_993453_etherium {
-                        id: tuomodesign_ethereum
-                        x: -309.619
-                        y: -162.217
-                        eulerRotation.z: 0.00001
-                        eulerRotation.y: -0
-                        eulerRotation.x: -19.74361
-                        scale.z: 45
-                        scale.x: 45
-                        scale.y: 45
-                        z: -473.4837
-                    }
+                Etherium {
+                    id: tuomodesign_ethereum
+                    x: -309.619
+                    y: -162.217
+                    eulerRotation.z: 0.00001
+                    eulerRotation.y: -0
+                    eulerRotation.x: -19.74361
+                    scale.z: 45
+                    scale.x: 45
+                    scale.y: 45
+                    z: -473.4837
                 }
 
                 NumberAnimation {

@@ -5,24 +5,6 @@ Node {
     id: node
 
     // Resources
-    PrincipledMaterial {
-        id: bg_material
-        objectName: "BG"
-        baseColor: "#ff040404"
-        indexOfRefraction: 1.4500000476837158
-    }
-    PrincipledMaterial {
-        id: gold_material
-        objectName: "Gold"
-        baseColor: "#ffcc6312"
-        indexOfRefraction: 1.4500000476837158
-    }
-    PrincipledMaterial {
-        id: gold_bump_material
-        objectName: "Gold.bump"
-        baseColor: "#ffcc6312"
-        indexOfRefraction: 1.4500000476837158
-    }
 
     // Nodes:
     Node {
@@ -142,6 +124,31 @@ Node {
                 gold_material,
                 gold_bump_material
             ]
+        }
+    }
+
+    Node {
+        id: __materialLibrary__
+
+        PrincipledMaterial {
+            id: bg_material
+            objectName: "BG"
+            baseColor: "#ff040404"
+            indexOfRefraction: 1.4500000476837158
+        }
+
+        PrincipledMaterial {
+            id: gold_material
+            objectName: "Gold"
+            baseColor: "#ffcc6312"
+            indexOfRefraction: 1.4500000476837158
+        }
+
+        PrincipledMaterial {
+            id: gold_bump_material
+            objectName: "Gold.bump"
+            baseColor: "#ffcc6312"
+            indexOfRefraction: 1.4500000476837158
         }
     }
 

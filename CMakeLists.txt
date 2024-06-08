@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_AUTOMOC ON)
 set(BOOST_ENABLE_CMAKE ON)
 set(MAKE_TEST_EXE ON)
-set(Boost_COMPILER "mgw9")
 set(Boost_USE_STATIC_RUNTIME ON)
+set(CMAKE_AUTORCC ON)
 
 option(BUILD_QDS_COMPONENTS "Build design studio components" ON)
 
@@ -27,6 +27,9 @@ set(QML_IMPORT_PATH ${QT_QML_OUTPUT_DIRECTORY}
     CACHE STRING "Import paths for Qt Creator's code model"
     FORCE
 )
+set(ASSET_IMPORTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/asset_imports)
+
+include(${CMAKE_DIR}/IndividualSettings.cmake)
 
 #Get all files in folders
 file(GLOB_RECURSE CONFIG_FILES_RELATIVE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CONFIGS_DIR}/*.conf ${CONFIGS_DIR}/*.json)
@@ -56,7 +59,10 @@ if (Qt6_VERSION VERSION_GREATER_EQUAL 6.3)
     qt_standard_project_setup()
 endif()
 
-qt_add_executable(SecureTransactApp ${SOURCE_FILES})
+qt_add_executable(SecureTransactApp
+    ${SOURCE_FILES}
+    ${ASSET_IMPORTS_DIR}/images.qrc
+)
 
 qt_add_resources(SecureTransactApp "configs"
     PREFIX "/"
@@ -97,6 +103,8 @@ install(TARGETS SecureTransactApp
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+target_link_libraries(SecureTransactApp PRIVATE Quick3DAssetsplugin)
 
 # make IDEs aware of the QML import path
 set(QML_IMPORT_PATH ${PROJECT_BINARY_DIR}/qml CACHE PATH
