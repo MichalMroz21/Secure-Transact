@@ -9,20 +9,10 @@ Text {
     MouseArea{
         id: mouseArea
         anchors.fill: parent
-        onClicked: stackView.push(pageName)
+        onClicked: {
+            currentForm = pageName;
+        }
+
         hoverEnabled: true
-    }
-
-    NumberAnimation {
-        id: fadeInAnimation
-        target: textClickable
-        properties: "opacity"
-        duration: 5000
-        to: 1
-        from: 0
-    }
-
-    Component.onCompleted: {
-        fadeInAnimation.start();
     }
 }

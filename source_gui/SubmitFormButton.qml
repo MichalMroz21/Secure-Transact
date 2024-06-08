@@ -42,16 +42,7 @@ Rectangle {
         opacity: 0
     }
 
-    Component.onCompleted: {
-        fadeInAnimation.start();
-    }
-
-    NumberAnimation {
-        id: fadeInAnimation
-        target: rectangle
-        properties: "opacity"
-        duration: 5000
-        to: 1
-        from: 0
+    Item {
+        id: __materialLibrary__
     }
 }

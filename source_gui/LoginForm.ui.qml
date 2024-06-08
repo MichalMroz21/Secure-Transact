@@ -4,70 +4,63 @@ import QtQuick.Controls 6.2
 import QtQuick.Studio.Effects
 
 ColumnLayout {
-    id: columnLayout
-    spacing: 20 //spacing between items in layout
-    width: 600
+    id: loginForm
+    spacing: 20
+    width: 400
 
-    InputBox {
+    FadeInText {
+        id: appName
+        property string textProperty: "Login"
+        property string text_color: "#21a0ff"
+        property int text_y: 112
+        property int text_width: 630
+        property int text_height: 169
+        property int text_letterSpacing: 4
+        property int text_pixelSize: 80
+        Layout.alignment: Qt.AlignHCenter
+    }
 
+    InputFormBox {
         property string initialText: "Login"
-
-        Image {
-            id: icon
-            x: 8
-            y: 4
-            width: 61
-            height: 42
-            source: "../asset_imports/my-account-login-64.png"
-            fillMode: Image.PreserveAspectFit
-        }
-
         property bool showText: true
+        property string imageSource: "../asset_imports/my-account-login-64.png"
     }
 
-    InputBox {
-
-        property bool showText: false
+    InputFormBox {
         property string initialText: "Password"
-
-        Image {
-            id: clipart683514
-            x: 8
-            y: 4
-            width: 61
-            height: 42
-            source: "../asset_imports/clipart683514.png"
-            fillMode: Image.PreserveAspectFit
-        }
+        property bool showText: false
+        property string imageSource: "../asset_imports/clipart683514.png"
     }
 
-    SubmitButton {}
+    SubmitFormButton {}
 
     ClickableText {
-        Layout.alignment: Qt.AlignHCenter
         id: textRegister
-        property string pageName: "RegisterPage.ui.qml"
-        property var textSize: 26
+        property int textSize: 26
+        property string pageName: "RegisterForm.ui.qml"
         property string textColor: "#034efc"
         property string hoverColor: "#200299"
         property string textValue: "New? Click to Register"
+        Layout.alignment: Qt.AlignHCenter
     }
 
     ClickableText {
-        Layout.alignment: Qt.AlignHCenter
         id: textForgot
+        property int textSize: 26
         property string pageName: "PasswordForgot.qml"
         property string textColor: "#034efc"
         property string hoverColor: "#200299"
-        property var textSize: 26
         property string textValue: "Forgot Password?"
+        Layout.alignment: Qt.AlignHCenter
     }
 
     Item {
         Layout.fillHeight: true
     }
 
-    Item {
-        id: __materialLibrary__
+    FadeInAnimation {
+        target: loginForm
+        duration: 2000
+        to: 1.0
     }
 }
