@@ -27,6 +27,7 @@ set(QML_IMPORT_PATH ${QT_QML_OUTPUT_DIRECTORY}
     CACHE STRING "Import paths for Qt Creator's code model"
     FORCE
 )
+set(ASSET_IMPORTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/asset_imports)
 
 include(${CMAKE_DIR}/IndividualSettings.cmake)
 
@@ -60,8 +61,7 @@ endif()
 
 qt_add_executable(SecureTransactApp
     ${SOURCE_FILES}
-    asset_imports/images.qrc
-    cmake/IndividualSettings.cmake
+    ${ASSET_IMPORTS_DIR}/images.qrc
 )
 
 qt_add_resources(SecureTransactApp "configs"

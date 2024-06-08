@@ -29,9 +29,6 @@ int main(int argc, char *argv[])
 
     engine.addImportPath(QCoreApplication::applicationDirPath() + "/qml");
     engine.addImportPath(":/");
-    engine.addImportPath("qrc:/qt/qml/asset_imports/asset_imports_qml_module_dir_map.qrc");
-    engine.addImportPath("qrc:/qt/qml/asset_imports/asset_imports/");
-    engine.addImportPath(QCoreApplication::applicationDirPath() + "/qml/asset_imports/asset_imports/");
     engine.load(url);
 
     if (engine.rootObjects().isEmpty()) return -1;
