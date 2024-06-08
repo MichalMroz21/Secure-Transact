@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_AUTOMOC ON)
 set(BOOST_ENABLE_CMAKE ON)
 set(MAKE_TEST_EXE ON)
-set(Boost_COMPILER "mgw9")
 set(Boost_USE_STATIC_RUNTIME ON)
 set(CMAKE_AUTORCC ON)
 
@@ -28,6 +27,8 @@ set(QML_IMPORT_PATH ${QT_QML_OUTPUT_DIRECTORY}
     CACHE STRING "Import paths for Qt Creator's code model"
     FORCE
 )
+
+include(${CMAKE_DIR}/IndividualSettings.cmake)
 
 #Get all files in folders
 file(GLOB_RECURSE CONFIG_FILES_RELATIVE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CONFIGS_DIR}/*.conf ${CONFIGS_DIR}/*.json)
@@ -60,6 +61,7 @@ endif()
 qt_add_executable(SecureTransactApp
     ${SOURCE_FILES}
     asset_imports/images.qrc
+    cmake/IndividualSettings.cmake
 )
 
 qt_add_resources(SecureTransactApp "configs"
