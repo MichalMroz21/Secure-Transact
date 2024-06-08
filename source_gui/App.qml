@@ -8,6 +8,7 @@ Window {
     title: "SecureTransact"
     width: mainScreen.width
     height: mainScreen.height
+    visible: true
 
     MainScreen {
         id: mainScreen
