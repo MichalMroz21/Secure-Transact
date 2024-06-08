@@ -9,6 +9,7 @@ set(BOOST_ENABLE_CMAKE ON)
 set(MAKE_TEST_EXE ON)
 set(Boost_COMPILER "mgw9")
 set(Boost_USE_STATIC_RUNTIME ON)
+set(CMAKE_AUTORCC ON)
 
 option(BUILD_QDS_COMPONENTS "Build design studio components" ON)
 
@@ -56,7 +57,9 @@ if (Qt6_VERSION VERSION_GREATER_EQUAL 6.3)
     qt_standard_project_setup()
 endif()
 
-qt_add_executable(SecureTransactApp ${SOURCE_FILES}
+qt_add_executable(SecureTransactApp
+    ${SOURCE_FILES}
+    asset_imports/images.qrc
 )
 
 qt_add_resources(SecureTransactApp "configs"

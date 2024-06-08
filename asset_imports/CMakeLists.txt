@@ -4,14 +4,18 @@
 
 file(GLOB RESOURCE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.png)
 
-qt_add_library(asset_imports STATIC)
+#qt_add_library(asset_imports STATIC)
 
-qt6_add_qml_module(asset_imports
-    URI "asset_imports"
-    VERSION 1.0
-    RESOURCE_PREFIX "/qt/qml"
-    RESOURCES
-        ${RESOURCE_FILES}
+#qt6_add_qml_module(asset_imports
+ #   URI "asset_imports"
+  #  VERSION 1.0
+   # RESOURCE_PREFIX "/qt/qml"
+    #RESOURCES
+     #   ${RESOURCE_FILES}
+#)
+
+qt_add_resources(SecureTransactApp
+    FILES ${RESOURCE_FILES}
 )
 
 function(find_directories_up_to_depth BASE_DIR OUT_VAR CURRENT_DEPTH MAX_DEPTH)
