@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/qt/qml/asset_imports">
-        <file>clipart683514.png</file>
-        <file>mail.png</file>
-        <file>my-account-login-64.png</file>
-    </qresource>
-</RCC>
