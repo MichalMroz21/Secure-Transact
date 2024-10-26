@@ -6,6 +6,12 @@ import base64
 # W tym przypadku użyjemy 'qwerty' i dopełnimy go do 16 znaków
 
 def encrypt_data_ecb(data, keyRaw):
+    """
+    Encrypt given data with specified key
+    :param data: data to be encrypted
+    :param keyRaw:
+    :return: Encrypted data
+    """
     key = keyRaw.ljust(16)[:16].encode()
     # Utwórz obiekt szyfrujący AES w trybie ECB z użyciem klucza
     cipher = AES.new(key, AES.MODE_ECB)
@@ -15,6 +21,12 @@ def encrypt_data_ecb(data, keyRaw):
     return encrypted_base64
 
 def decrypt_data_ecb(encrypted_base64, keyRaw):
+    """
+    Decrypt data from Base64
+    :param encrypted_base64: Data encrypted in Base64 format
+    :param keyRaw: Key to be used in decryption
+    :return: Decrypted data
+    """
     key = keyRaw.ljust(16)[:16].encode()
     encrypted_data = base64.b64decode(encrypted_base64)
     # Utwórz obiekt deszyfrujący AES w trybie ECB z użyciem klucza
@@ -24,6 +36,12 @@ def decrypt_data_ecb(encrypted_base64, keyRaw):
     return decrypted_data.decode()
 
 def create_key(friendList, myPort):
+    """
+    Creates symmetric key unique to host machine and connected device
+    :param friendList:
+    :param myPort: Port of host machine
+    :return: Symmetric key used to encrypt and decrypt data between host machine and connected device
+    """
     keyList = []
     for friend in friendList:
         keyList.append(friend.port)

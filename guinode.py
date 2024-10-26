@@ -12,11 +12,21 @@ peerPort = IntVar()
 
 # CALLBACKS
 def send():
+    """
+    Add message to the data block and send message
+
+    """
+
     print("Send message")
     me.add_data(message.get())
     message.set("")
 
 def peer():
+    """
+    Connect to a second device
+
+    """
+
     print("Peer with node")
     me.peer(peerHost.get(), peerPort.get())
     peerHost.set("")
@@ -43,13 +53,18 @@ peerBtn.grid(row=3, column=2)
 ccLabel.grid(row=4, column=2)
 
 host = restnode.ip()
-port = restnode.getPort()
+port = restnode.get_port()
 
 myAddr.set("Peer: ({host}, {port})".format(host=host, port=port))
 
 me = restnode.start(port)
 
+
 def updateChatbox():
+    """
+    Refreshes the chat area
+
+    """
     data = ""
     for block in me.chain.blocks:
         if block.index != 0:
