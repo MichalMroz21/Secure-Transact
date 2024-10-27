@@ -150,8 +150,7 @@ class Peer:
         :return: Blockchain
         """
         print("Fetching chain from {}".format((self.addr, self.port)))
-        message = requests.get("http://{}:{}/chain".format(self.addr,
-                                                               self.port)).text
+        message = requests.get("http://{}:{}/chain".format(self.addr, self.port)).text
         return blockchain.Blockchain.fromjson(message)
 
 def start(listen_port):

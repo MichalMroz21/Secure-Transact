@@ -110,14 +110,14 @@ class Blockchain:
 
     def jsonrep(self):
         """
-        Converts a Python object into a JSON formatted string
+        Converts blockchain into a JSON formatted string
         :return: JSON formatted string
         """
         return json.dumps([block.dictrep() for block in self.blocks])
 
     def fromjson(message):
         """
-        Converting a blockchain from JSON to a Blockchain class object
+        Converting a JSON string into a Blockchain class object
         :return: Blockchain
         """
         jblocks = json.loads(message)
