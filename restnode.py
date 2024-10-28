@@ -7,6 +7,8 @@ import flask
 import requests
 import random
 
+from flask import jsonify, request
+
 import blockchain
 import encryption
 
@@ -27,7 +29,7 @@ def ip():
     :return: str
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("40.114.26.190", 80)) # doesn't actually send traffic
+    s.connect(("40.114.26.190", 80))  # doesn't actually send traffic
     ipa = s.getsockname()[0]
     s.close()
     return ipa
@@ -50,7 +52,7 @@ class Node:
         self.peers = []
         self.chain = blockchain.Blockchain()
         self.chain.genesis()
-        self.staging = [] # staging data to add to block
+        self.staging = []  # staging data to add to block
 
         # socket stuff
         self.port = port
@@ -61,7 +63,7 @@ class Node:
         """
         chains = []
         for peer in self.peers:
-            pass # get that peer's chain
+            pass  # get that peer's chain
         for chain in chains:
             self.chain.consensus(chain)
 
@@ -89,6 +91,23 @@ class Node:
         """
         self.peers.append(Peer(addr, port))
 
+    def send_mes(self, host_addr, message):
+        peer = self.peers[0]
+        requests.post("http://{}:{}/send_message".format(host_addr, self.port),
+                      json={"addr": peer.addr, "port": peer.port, "message": message})
+
+    def get_mes(self, host_addr):
+        try:
+            json_messages = requests.get("http://{}:{}/get_messages".format(host_addr, self.port)).json()
+            messages = ""
+            if json_messages:
+                for message in json_messages:
+                    messages += message["user"] + ": " + message["message"] + "\n"
+            return messages
+        except Exception as e:
+            return e
+
+
     def serve_chain(self, app):
         app.run("0.0.0.0", self.port)
 
@@ -101,10 +120,10 @@ class Node:
                 chain = peer.get_chain()
                 if self.chain.consensus(chain):
                     print("Checked chain with {}, ours is right".format(
-                                                        (peer.addr, peer.port)))
+                        (peer.addr, peer.port)))
                 else:
                     print("Checked chain with {}, theirs is right".format(
-                                                        (peer.addr, peer.port)))
+                        (peer.addr, peer.port)))
             time.sleep(5)
 
     def add_blocks(self):
@@ -133,6 +152,7 @@ class Node:
             if cmd[0] == "chain":
                 print([block.data for block in self.chain.blocks])
 
+
 class Peer:
     def __init__(self, address, port):
         """
@@ -143,7 +163,6 @@ class Peer:
         self.addr = address
         self.port = port
 
-        
     def get_chain(self):
         """
         Gets blockchain from the second device
@@ -153,6 +172,22 @@ class Peer:
         message = requests.get("http://{}:{}/chain".format(self.addr, self.port)).text
         return blockchain.Blockchain.fromjson(message)
 
+    # def send_mes(self, message):
+    #
+    #     try:
+    #         response = requests.post("http://{}:{}/receive_message".format(self.addr, self.port),
+    #                                  json={"message": message})
+    #         if response.status_code == 200:
+    #             print("Message succesfully deployed")
+    #             return True
+    #         else:
+    #             print("Something went wrong")
+    #             return False
+    #     except Exception as e:
+    #         print(e)
+    #         return False
+
+
 def start(listen_port):
     """
     Starts application threads
@@ -160,11 +195,65 @@ def start(listen_port):
     """
     me = Node(listen_port)
 
+    # messages has information about which user sent which message.
+    # ["user": "user_address"],["message", "message_content"]
+    messages = []
+
     app = flask.Flask(__name__)
 
     @app.route("/chain")
     def chain():
         return me.chain.jsonrep()
+
+    @app.route('/send_message', methods=['POST'])
+    def send_message():
+        """
+        Endpoint do wysyłania wiadomości do drugiego użytkownika
+        """
+        # return Peer("0.0.0.0", listen_port).send_mes()
+
+        port = request.json.get("port")
+        addr = request.json.get("addr")
+        #target_url = request.json.get("target_url")  # URL serwera odbiorcy
+        message = request.json.get("message")  # Wiadomość do wysłania
+
+        if not port or not addr or not message:
+            return jsonify({"error": "Musisz podać addr, port i message"}), 400
+
+        try:
+            # Wysyłamy wiadomość HTTP POST do endpointu odbiorcy
+            response = requests.post("http://{}:{}/receive_message".format(addr, port),
+                          json={"user": request.host, "message": message})
+            #response = requests.post(f"{target_url}/receive_message", json={"message": message})
+            if response.status_code == 200:
+                messages.append({"user": request.host, "message": message})
+                return jsonify({"status": "Message was successfully sent"}), 200
+            else:
+                return jsonify({"error": "Error occured!"}), response.status_code
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+
+    @app.route('/receive_message', methods=['POST'])
+    def receive_message():
+        """
+        Endpoint do odbierania wiadomości od innego użytkownika
+        """
+        message = request.json
+        print(message.get("message"))
+        print(message)
+        if message:
+            messages.append(message)
+            return jsonify({"status": "Message received!"}), 200
+        else:
+            return jsonify({"error": "Got no message"}), 400
+
+    @app.route('/get_messages', methods=['GET'])
+    def get_messages():
+        """
+        Endpoint do pobierania wszystkich odebranych wiadomości
+        """
+        return jsonify(messages)
 
     server_thread = threading.Thread(target=me.serve_chain, args=(app,))
     consensus_thread = threading.Thread(target=me.check_consensus)
@@ -176,4 +265,3 @@ def start(listen_port):
     miner_thread.start()
     #me.handle_input()
     return me
-

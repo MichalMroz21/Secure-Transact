@@ -1,8 +1,13 @@
 from tkinter import *
+
+import requests
+
 import restnode
 from encryption import decrypt_data_ecb, create_key
 
 master = Tk()
+
+
 
 # TK VARS
 message = StringVar()
@@ -16,10 +21,11 @@ def send():
     Add message to the data block and send message
 
     """
-
     print("Send message")
-    me.add_data(message.get())
+    #me.add_data(message.get())
+    me.send_mes(host, message.get())
     message.set("")
+
 
 def peer():
     """
@@ -59,24 +65,32 @@ myAddr.set("Peer: ({host}, {port})".format(host=host, port=port))
 
 me = restnode.start(port)
 
+messages = ""
 
 def updateChatbox():
     """
     Refreshes the chat area
 
     """
-    data = ""
-    for block in me.chain.blocks:
-        if block.index != 0:
-            flatedList = "".join(block.data)
-            decryptedBlock = decrypt_data_ecb(flatedList, create_key(me.peers, me.port))
-            dataList = [decryptedBlock]
-            data += "\n".join(dataList) + "\n"
-        else:
-            data += "\n".join(block.data)+"\n"
-    print(data)
+
+    # data = ""
+    # for block in me.chain.blocks:
+    #     if block.index != 0:
+    #         flatedList = "".join(block.data)
+    #         decryptedBlock = decrypt_data_ecb(flatedList, create_key(me.peers, me.port))
+    #         dataList = [decryptedBlock]
+    #         data += "\n".join(dataList) + "\n"
+    #     else:
+    #         data += "\n".join(block.data)+"\n"
+    # print(data)
+    # messagesBlock.delete('1.0', END)
+    # messagesBlock.insert('1.0', data)
+    # master.after(100, updateChatbox)
+
+    messages = me.get_mes(host)
+
     messagesBlock.delete('1.0', END)
-    messagesBlock.insert('1.0', data)
+    messagesBlock.insert('1.0', messages)
     master.after(100, updateChatbox)
 
 master.after(100, updateChatbox)
