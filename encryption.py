@@ -38,7 +38,7 @@ def decrypt_data_ecb(encrypted_base64, keyRaw):
 def create_key(friendList, myPort):
     """
     Creates symmetric key unique to host machine and connected device
-    :param friendList:
+    :param friendList: List of peers
     :param myPort: Port of host machine
     :return: Symmetric key used to encrypt and decrypt data between host machine and connected device
     """

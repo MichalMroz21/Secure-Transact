@@ -93,8 +93,9 @@ class Node:
 
     def send_mes(self, host_addr, message):
         peer = self.peers[0]
+        encrypted_message = encryption.encrypt_data_ecb(message, encryption.create_key(self.peers, self.port))
         requests.post("http://{}:{}/send_message".format(host_addr, self.port),
-                      json={"addr": peer.addr, "port": peer.port, "message": message})
+                      json={"addr": peer.addr, "port": peer.port, "message": encrypted_message})
 
     def get_mes(self, host_addr):
         try:
@@ -102,7 +103,8 @@ class Node:
             messages = ""
             if json_messages:
                 for message in json_messages:
-                    messages += message["user"] + ": " + message["message"] + "\n"
+                    decrypted_message = encryption.decrypt_data_ecb(message["message"], encryption.create_key(self.peers, self.port))
+                    messages += message["user"] + ": " + decrypted_message + "\n"
             return messages
         except Exception as e:
             return e
