@@ -20,18 +20,33 @@ Message     Description         Response
 
 """
 
+
 def ip():
+    """
+    Gets host machine IP address
+    :return: str
+    """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("40.114.26.190", 80)) # doesn't actually send traffic
     ipa = s.getsockname()[0]
     s.close()
     return ipa
 
-def getPort():
+
+def get_port():
+    """
+    Gets host machine port value
+    :return: int
+    """
     return random.randint(1024, 65535)
+
 
 class Node:
     def __init__(self, port):
+        """
+        Creates a node
+        :param port: Host machine port
+        """
         self.peers = []
         self.chain = blockchain.Blockchain()
         self.chain.genesis()
@@ -41,6 +56,9 @@ class Node:
         self.port = port
 
     def consensus(self):
+        """
+        Checks the correctness of peers and chains
+        """
         chains = []
         for peer in self.peers:
             pass # get that peer's chain
@@ -48,21 +66,36 @@ class Node:
             self.chain.consensus(chain)
 
     def add_block(self):
+        """
+        Adds block to be sent to other device
+        """
         self.chain.add_block(self.staging)
 
     def add_data(self, data):
+        """
+        Adds data to the block
+        :param data: Data to be sent
+        """
         if data != "":
             data += ""
         data = encryption.encrypt_data_ecb(data, encryption.create_key(self.peers, self.port))
         self.staging.append(data)
 
     def peer(self, addr, port):
+        """
+        Creates peer with second device
+        :param addr: Second's device IP address
+        :param port: Second's device port
+        """
         self.peers.append(Peer(addr, port))
 
     def serve_chain(self, app):
         app.run("0.0.0.0", self.port)
 
     def check_consensus(self):
+        """
+        Checks both blockchains (one from the host machine and other from the second device) which one is correct
+        """
         while True:
             for peer in self.peers:
                 chain = peer.get_chain()
@@ -75,6 +108,9 @@ class Node:
             time.sleep(5)
 
     def add_blocks(self):
+        """
+        Adds blocks to blockchain
+        """
         while True:
             if len(self.staging) > 0:
                 print("Mining new block...")
@@ -85,6 +121,9 @@ class Node:
                 time.sleep(5)
 
     def handle_input(self):
+        """
+        Steering application in the console
+        """
         while True:
             cmd = input("> ").split(";")
             if cmd[0] == "peer":
@@ -96,17 +135,29 @@ class Node:
 
 class Peer:
     def __init__(self, address, port):
+        """
+        Creates connection with second device
+        :param address: Second device's IP address
+        :param port: Second device's port
+        """
         self.addr = address
         self.port = port
 
         
     def get_chain(self):
+        """
+        Gets blockchain from the second device
+        :return: Blockchain
+        """
         print("Fetching chain from {}".format((self.addr, self.port)))
-        message = requests.get("http://{}:{}/chain".format(self.addr,
-                                                               self.port)).text
+        message = requests.get("http://{}:{}/chain".format(self.addr, self.port)).text
         return blockchain.Blockchain.fromjson(message)
 
 def start(listen_port):
+    """
+    Starts application threads
+    :param listen_port: Port to be listened to
+    """
     me = Node(listen_port)
 
     app = flask.Flask(__name__)
