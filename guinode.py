@@ -69,6 +69,10 @@ me = restnode.start(port)
 
 messages = ""
 
+
+# which index has last message in the current block
+last_index = 0
+
 def parse_messages(restnode, messages):
     parsed_messages = ""
     for message in messages:
@@ -96,7 +100,7 @@ def updateChatbox():
     # messagesBlock.delete('1.0', END)
     # messagesBlock.insert('1.0', data)
     # master.after(100, updateChatbox)
-
+    global last_index
     data = ""
     for block in me.chain.blocks:
         if block.index != 0:
@@ -117,9 +121,15 @@ def updateChatbox():
             data += json.dumps(message)
         me.add_data(data)
         me.remove_messages_block(host)
+        # reset index of last message
+        last_index = 0
 
-    messagesBlock.delete('1.0', END)
-    messagesBlock.insert('1.0', data)
+    # this if statement prevents from updating chat all the time for no reason
+    if len(json_messages) > last_index:
+        # there is at least one new message to show. update chat
+        messagesBlock.delete('1.0', END)
+        messagesBlock.insert('1.0', data)
+        last_index = len(json_messages)
     master.after(100, updateChatbox)
 
 master.after(100, updateChatbox)
