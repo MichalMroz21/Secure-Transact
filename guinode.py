@@ -1,9 +1,11 @@
+import json
 from tkinter import *
 
 import requests
 
+import encryption
 import restnode
-from encryption import decrypt_data_ecb, create_key
+from encryption import decrypt_data_ecb, create_key, encrypt_data_ecb, encrypt_message_block
 
 master = Tk()
 
@@ -67,6 +69,14 @@ me = restnode.start(port)
 
 messages = ""
 
+def parse_messages(restnode, messages):
+    parsed_messages = ""
+    for message in messages:
+        decrypted_message = encryption.decrypt_data_ecb(message["message"],
+                                                        encryption.create_key(restnode.peers, restnode.port))
+        parsed_messages += message["user"] + " (" + message["date"] + "): " + decrypted_message + "\n"
+    return parsed_messages
+
 def updateChatbox():
     """
     Refreshes the chat area
@@ -87,10 +97,29 @@ def updateChatbox():
     # messagesBlock.insert('1.0', data)
     # master.after(100, updateChatbox)
 
-    messages = me.get_mes(host)
+    data = ""
+    for block in me.chain.blocks:
+        if block.index != 0:
+            flatedList = "".join(block.data)
+            decryptedBlock = decrypt_data_ecb(flatedList, create_key(me.peers, me.port))
+            dataList = [decryptedBlock]
+            data += "\n".join(dataList) + "\n"
+
+    json_messages = me.get_messages_block(host)
+    messages = parse_messages(me, json_messages)
+
+    data += messages
+    # messages = me.view_parsed_messages(host)
+
+    if len(json_messages) >= 20:
+        data = ""
+        for message in json_messages:
+            data += json.dumps(message)
+        me.add_data(data)
+        me.remove_messages_block(host)
 
     messagesBlock.delete('1.0', END)
-    messagesBlock.insert('1.0', messages)
+    messagesBlock.insert('1.0', data)
     master.after(100, updateChatbox)
 
 master.after(100, updateChatbox)

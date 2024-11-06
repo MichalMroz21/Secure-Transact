@@ -3,6 +3,8 @@ import select
 import threading
 import json
 import time
+import datetime
+
 import flask
 import requests
 import random
@@ -97,17 +99,31 @@ class Node:
         requests.post("http://{}:{}/send_message".format(host_addr, self.port),
                       json={"addr": peer.addr, "port": peer.port, "message": encrypted_message})
 
-    def get_mes(self, host_addr):
+    def view_parsed_messages(self, host_addr):
         try:
             json_messages = requests.get("http://{}:{}/get_messages".format(host_addr, self.port)).json()
             messages = ""
             if json_messages:
                 for message in json_messages:
                     decrypted_message = encryption.decrypt_data_ecb(message["message"], encryption.create_key(self.peers, self.port))
-                    messages += message["user"] + ": " + decrypted_message + "\n"
+                    messages += message["user"] + " (" + message["date"] + "): " + decrypted_message + "\n"
             return messages
         except Exception as e:
             return e
+
+    def get_messages_block(self, host_addr):
+        try:
+            return requests.get("http://{}:{}/get_messages".format(host_addr, self.port)).json()
+        except Exception as e:
+            return e
+
+    def remove_messages_block(self, host_addr):
+        try:
+            return requests.post("http://{}:{}/remove_messages".format(host_addr, self.port))
+        except Exception as e:
+            return e
+
+
 
 
     def serve_chain(self, app):
@@ -224,11 +240,11 @@ def start(listen_port):
 
         try:
             # Wysyłamy wiadomość HTTP POST do endpointu odbiorcy
+            date = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M:%S")
             response = requests.post("http://{}:{}/receive_message".format(addr, port),
-                          json={"user": request.host, "message": message})
-            #response = requests.post(f"{target_url}/receive_message", json={"message": message})
+                          json={"user": request.host, "message": message, "date": date})
             if response.status_code == 200:
-                messages.append({"user": request.host, "message": message})
+                messages.append({"user": request.host, "message": message, "date": date})
                 return jsonify({"status": "Message was successfully sent"}), 200
             else:
                 return jsonify({"error": "Error occured!"}), response.status_code
@@ -256,6 +272,17 @@ def start(listen_port):
         Endpoint do pobierania wszystkich odebranych wiadomości
         """
         return jsonify(messages)
+
+    @app.route('/remove_messages', methods=['POST'])
+    def remove_messages():
+        """
+        Endpoint do odbierania wiadomości od innego użytkownika
+        """
+        messages.clear()
+        if not messages:
+            return jsonify({"status": "Messages removed!"}), 200
+        else:
+            return jsonify({"error": "Could not remove messages!"}), 400
 
     server_thread = threading.Thread(target=me.serve_chain, args=(app,))
     consensus_thread = threading.Thread(target=me.check_consensus)

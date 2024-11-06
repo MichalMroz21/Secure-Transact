@@ -1,3 +1,5 @@
+import json
+
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import base64
@@ -52,3 +54,10 @@ def create_key(friendList, myPort):
     keyRaw = " ".join(str(x) for x in keyList)
     key = keyRaw.ljust(16)[:16]
     return key
+
+def encrypt_message_block(json_messages, key):
+    encrypted_data = ""
+    for message in json_messages:
+        data = json.dumps(message) + ","
+        encrypted_data += encrypt_data_ecb(data, key)
+    return encrypted_data
