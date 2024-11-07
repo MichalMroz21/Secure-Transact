@@ -56,8 +56,23 @@ def create_key(friendList, myPort):
     return key
 
 def encrypt_message_block(json_messages, key):
+    """
+    Encrypts messages in JSON format to the block
+    :param json_messages: messages to be encrypted
+    :param key:
+    :return:
+    """
     encrypted_data = ""
     for message in json_messages:
-        data = json.dumps(message) + ","
+        data = json.dumps(message)
         encrypted_data += encrypt_data_ecb(data, key)
     return encrypted_data
+
+def decrypt_message_block(block, block_key, messages_key):
+    """
+    Decrypt data from block
+    :param block: block to be decrypted
+    :param block_key: key to be used in block decryption
+    :param messages_key: key to be used in messages decryption
+    :return:
+    """
