@@ -65,6 +65,11 @@ portBox.grid(row=2, column=2)
 peerBtn.grid(row=3, column=2)
 ccLabel.grid(row=4, column=2)
 
+# CLICK ENTER EVENT
+messageBox.bind("<Return>", lambda event: send())
+hostBox.bind("<Return>", lambda event: peer())
+portBox.bind("<Return>", lambda event: peer())
+
 host = restnode.ip()
 port = restnode.get_port()
 
