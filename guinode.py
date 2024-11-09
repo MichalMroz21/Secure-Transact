@@ -1,5 +1,6 @@
 import json
 from tkinter import *
+import os
 
 import requests
 
@@ -8,7 +9,8 @@ import restnode
 from encryption import decrypt_data_ecb, create_key, encrypt_data_ecb, encrypt_message_block
 
 master = Tk()
-
+if "TITLE" in os.environ:
+    master.title("Klient {0}".format(os.environ["TITLE"]))
 
 
 # TK VARS
@@ -76,8 +78,8 @@ messages = ""
 # which index has last message in the current block
 last_message_index = 0
 
-# which block was the last read (origin block is 0 so last normal block at the beggining is 1)
-last_block_index = 1
+# which block was the last read
+last_block_index = 0
 
 # it prevents from reading blockchain all the time
 read_from_block = True
@@ -135,7 +137,7 @@ def updateChatbox():
                     json_list.append(json.loads(json_messages_array[index]))
                 parsed_messages = parse_messages(me, json_list)
                 data += parsed_messages
-                if block.index == me.chain.blocks[-1].index:
+                if block.index > last_block_index:
                     chat_history_from_blocks += "/\\/\\DEBUG/\\/\\ Block number {0}\n".format(block.index)
                     chat_history_from_blocks += parsed_messages
                     last_block_index = block.index
@@ -169,8 +171,8 @@ def updateChatbox():
         # reset index of last message
         last_message_index = 0
         read_from_block = True
-    master.after(100, updateChatbox)
+    master.after(500, updateChatbox)
 
-master.after(100, updateChatbox)
+master.after(500, updateChatbox)
 master.mainloop()
 

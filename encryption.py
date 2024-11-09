@@ -49,8 +49,8 @@ def create_key(friendList, myPort):
         keyList.append(friend.port)
     keyList.append(myPort)
     keyList.sort() # wazne sortuj liste by taka sama byla
-    for key in keyList:
-        print(key)
+    # for key in keyList:
+    #     print(key)
     keyRaw = " ".join(str(x) for x in keyList)
     key = keyRaw.ljust(16)[:16]
     return key

@@ -39,10 +39,37 @@ def ip():
 
 def get_port():
     """
-    Gets host machine port value
+    Gets host machine port value from config file
     :return: int
     """
     return random.randint(1024, 65535)
+
+    # In the future port number will be stored in a config file.
+    # Now for testing purposes program randomizes it so there's no problem with running few instances of the program
+
+    # try:
+    #     file = open("cfg.txt", "x")
+    #     file.close()
+    # except Exception as e:
+    #     print(e)
+    # try:
+    #     f = open("cfg.txt", "r+")
+    #     output = f.read()
+    #     json_string = ""
+    #     if output != "":
+    #         json_string = json.loads(output)
+    #         if "port" in json_string:
+    #             f.close()
+    #             return int(json_string["port"])
+    #     port = random.randint(1024, 65535)
+    #     input = json.dumps({"port": port})
+    #     f.write(input)
+    #     f.close()
+    #     return port
+    # except Exception as e:
+    #     f.close()
+    #     print(e)
+    #     return random.randint(1024, 65535)
 
 
 class Node:
@@ -94,10 +121,12 @@ class Node:
         self.peers.append(Peer(addr, port))
 
     def send_mes(self, host_addr, message):
-        peer = self.peers[0]
-        encrypted_message = encryption.encrypt_data_ecb(message, encryption.create_key(self.peers, self.port))
-        requests.post("http://{}:{}/send_message".format(host_addr, self.port),
-                      json={"addr": peer.addr, "port": peer.port, "message": encrypted_message})
+        client_number = 0
+        for peer in self.peers:
+            encrypted_message = encryption.encrypt_data_ecb(message, encryption.create_key(self.peers, self.port))
+            requests.post("http://{}:{}/send_message".format(host_addr, self.port),
+                          json={"addr": peer.addr, "port": peer.port, "message": encrypted_message, "client_number": client_number})
+            client_number += 1
 
     def view_parsed_messages(self, host_addr):
         try:
@@ -244,7 +273,9 @@ def start(listen_port):
             response = requests.post("http://{}:{}/receive_message".format(addr, port),
                           json={"user": request.host, "message": message, "date": date})
             if response.status_code == 200:
-                messages.append({"user": request.host, "message": message, "date": date})
+                # check if the message was sent to multiple peers (group chat)
+                if request.json.get("client_number") == 0:
+                    messages.append({"user": request.host, "message": message, "date": date})
                 return jsonify({"status": "Message was successfully sent"}), 200
             else:
                 return jsonify({"error": "Error occured!"}), response.status_code
