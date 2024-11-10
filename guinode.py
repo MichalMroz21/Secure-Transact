@@ -79,7 +79,7 @@ peerHost.set(host)
 
 myAddr.set("Peer: ({host}, {port})".format(host=host, port=port))
 
-me = restnode.start(port)
+me = start.start(port)
 
 messages = ""
 
