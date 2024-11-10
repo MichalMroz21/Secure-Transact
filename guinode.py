@@ -163,11 +163,6 @@ def updateChatbox():
     data = chat_history_from_blocks + messages
     # messages = me.view_parsed_messages(host)
 
-    if new_block_in_progress == False:
-        new_block_in_progress = stake.receive_create_block_signal(host, port)
-        if new_block_in_progress:
-            print("New block is being created")
-
     # this if statement prevents from updating chat all the time for no reason
     if len(json_messages) > last_message_index:
         update_chat = True
@@ -182,9 +177,8 @@ def updateChatbox():
         data = ""
         for message in json_messages:
             data += json.dumps(message)
-        #me.add_data(data)
-        #me.remove_messages_block(host)
-        stake.send_create_block_signal(host, port, me)
+        me.add_data(data)
+        me.remove_messages_block(host)
         # reset index of last message
         last_message_index = 0
         read_from_block = True
