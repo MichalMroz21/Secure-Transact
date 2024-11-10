@@ -5,6 +5,8 @@ import os
 import requests
 
 import encryption
+import stake
+import start
 import restnode
 from encryption import decrypt_data_ecb, create_key, encrypt_data_ecb, encrypt_message_block
 
@@ -39,7 +41,7 @@ def peer():
 
     print("Peer with node")
     me.peer(peerHost.get(), peerPort.get())
-    peerHost.set("")
+    #peerHost.set("")
     peerPort.set("")
 
 # UI ELEMENTS
@@ -73,6 +75,8 @@ portBox.bind("<Return>", lambda event: peer())
 host = restnode.ip()
 port = restnode.get_port()
 
+peerHost.set(host)
+
 myAddr.set("Peer: ({host}, {port})".format(host=host, port=port))
 
 me = restnode.start(port)
@@ -94,6 +98,9 @@ update_chat = False
 
 # string containing chat history
 chat_history_from_blocks = ""
+
+# notification about new block
+new_block_in_progress = False
 
 def parse_messages(restnode, messages):
     parsed_messages = ""
@@ -127,6 +134,7 @@ def updateChatbox():
     global update_chat
     global last_block_index
     global chat_history_from_blocks
+    global new_block_in_progress
     data = ""
     if read_from_block:
         for block in me.chain.blocks:
@@ -155,7 +163,10 @@ def updateChatbox():
     data = chat_history_from_blocks + messages
     # messages = me.view_parsed_messages(host)
 
-
+    if new_block_in_progress == False:
+        new_block_in_progress = stake.receive_create_block_signal(host, port)
+        if new_block_in_progress:
+            print("New block is being created")
 
     # this if statement prevents from updating chat all the time for no reason
     if len(json_messages) > last_message_index:
@@ -171,8 +182,9 @@ def updateChatbox():
         data = ""
         for message in json_messages:
             data += json.dumps(message)
-        me.add_data(data)
-        me.remove_messages_block(host)
+        #me.add_data(data)
+        #me.remove_messages_block(host)
+        stake.send_create_block_signal(host, port, me)
         # reset index of last message
         last_message_index = 0
         read_from_block = True
