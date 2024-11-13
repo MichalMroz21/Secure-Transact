@@ -1,3 +1,4 @@
+import os
 import socket
 
 import time
@@ -73,10 +74,11 @@ class Node:
         Creates a node
         :param port: Host machine port
         """
-        self.peers = []
-        self.chain = blockchain.Blockchain()
-        self.chain.genesis()
-        self.staging = []  # staging data to add to block
+        self.peers = []                                     # connections with other devices
+        self.chain = blockchain.Blockchain()                # copy of blockchain
+        self.chain.genesis()                                # initiating first block of blockchain
+        self.staging = []                                   # staging data to add to block
+        self.stake = 10000 * int(os.environ["TITLE"])       # currency
 
         # socket stuff
         self.port = port
@@ -173,6 +175,7 @@ class Node:
         Adds blocks to blockchain
         """
         while True:
+
             if len(self.staging) > 0:
                 print("Mining new block...")
                 self.add_block()

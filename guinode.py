@@ -1,4 +1,5 @@
 import json
+import threading
 from tkinter import *
 import os
 
@@ -29,7 +30,7 @@ def send():
     """
     print("Send message")
     #me.add_data(message.get())
-    me.send_mes(host, message.get())
+    main_node.send_mes(host, message.get())
     message.set("")
 
 
@@ -40,7 +41,10 @@ def peer():
     """
 
     print("Peer with node")
-    me.peer(peerHost.get(), peerPort.get())
+    try:
+        main_node.peer(peerHost.get(), peerPort.get())
+    except Exception as e:
+        print(e)
     #peerHost.set("")
     peerPort.set("")
 
@@ -79,10 +83,19 @@ peerHost.set(host)
 
 myAddr.set("Peer: ({host}, {port})".format(host=host, port=port))
 
-me = start.start(port)
+main_node = restnode.Node(port)
+threads = start.start(main_node)
+#start.start(main_node)
 
 messages = ""
 
+
+# def exit_program(tk_window, threads):
+#     for thread in threads:
+#         thread.join()
+#     tk_window.destroy()
+#
+# master.protocol("WM_DELETE_WINDOW", lambda: exit_program(master, threads))
 
 # which index has last message in the current block
 last_message_index = 0
@@ -137,18 +150,18 @@ def updateChatbox():
     global new_block_in_progress
     data = ""
     if read_from_block:
-        for block in me.chain.blocks:
+        for block in main_node.chain.blocks:
             if block.index != 0:
                 data += "/\\/\\DEBUG/\\/\\ Block number {0}\n".format(block.index)
                 flatedList = "".join(block.data)
-                decryptedBlock = decrypt_data_ecb(flatedList, create_key(me.peers, me.port))
+                decryptedBlock = decrypt_data_ecb(flatedList, create_key(main_node.peers, main_node.port))
                 json_messages_array = decryptedBlock.split("}")
                 json_messages_array.pop()
                 json_list = []
                 for index, message in enumerate(json_messages_array):
                     json_messages_array[index] += "}"
                     json_list.append(json.loads(json_messages_array[index]))
-                parsed_messages = parse_messages(me, json_list)
+                parsed_messages = parse_messages(main_node, json_list)
                 data += parsed_messages
                 if block.index > last_block_index:
                     chat_history_from_blocks += "/\\/\\DEBUG/\\/\\ Block number {0}\n".format(block.index)
@@ -157,11 +170,30 @@ def updateChatbox():
                     read_from_block = False
                     update_chat = True
 
-    json_messages = me.get_messages_block(host)
-    messages = parse_messages(me, json_messages)
+    json_messages = main_node.get_messages_block(host)
+    messages = parse_messages(main_node, json_messages)
 
     data = chat_history_from_blocks + messages
     # messages = me.view_parsed_messages(host)
+
+    if new_block_in_progress == False:
+        new_block_signal = stake.receive_create_block_signal(host, port)
+        new_block_in_progress = new_block_signal["new_block_creation"]
+        if new_block_in_progress:
+            # DEBUG ONLY
+            # Simulate participation of creating new blockchain's block
+            if int(os.environ["TITLE"]) % 2 == 1:
+                stake.send_participation_signal(host, port, main_node, main_node.stake / 2)
+                print("I want to participate in block creation! Sending signal...")
+            print("New block is being created")
+
+    if new_block_in_progress:
+        participants = stake.get_participants(host, port)
+        print(participants)
+        participants = stake.verify_participants_lists(host,port,main_node)
+        print("\n\nPROSZE MNIE WYSLUCHAC\nPONIZEJ ZNAJDUJE SIE WSPOLNA LISTA OCHOTNIKOW")
+        print(participants)
+        print("\n\n")
 
     # this if statement prevents from updating chat all the time for no reason
     if len(json_messages) > last_message_index:
@@ -177,8 +209,9 @@ def updateChatbox():
         data = ""
         for message in json_messages:
             data += json.dumps(message)
-        me.add_data(data)
-        me.remove_messages_block(host)
+        #me.add_data(data)
+        #me.remove_messages_block(host)
+        stake.send_create_block_signal(host, port, main_node)
         # reset index of last message
         last_message_index = 0
         read_from_block = True
