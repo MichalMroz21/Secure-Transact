@@ -101,7 +101,7 @@ def verify_participants_lists(host_addr, host_port, node):
     except Exception as e:
         print(e)
 
-def participants_raffle(host_addr, host_port):
+def participants_raffle(host_addr, host_port, node):
     """
     Raffle participants
     :param node:
@@ -110,8 +110,8 @@ def participants_raffle(host_addr, host_port):
     """
     # get participants list
 
-                    #participants_list = verify_participants_lists(host_addr, host_port, node)
-    participants_list = get_participants(host_addr, host_port)
+    participants_list = verify_participants_lists(host_addr, host_port, node)
+    #participants_list = get_participants(host_addr, host_port)
     # prepare list of participants stakes and stakes sum
     stakes_list = []
     stake_sum = 0

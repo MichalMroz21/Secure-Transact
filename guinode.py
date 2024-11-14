@@ -191,6 +191,7 @@ def updateChatbox():
         participants = stake.get_participants(host, port)
         print(participants)
         participants = stake.verify_participants_lists(host,port,main_node)
+        participants.sort(key=lambda x: x["stake"])
         print("\n\nPROSZE MNIE WYSLUCHAC\nPONIZEJ ZNAJDUJE SIE WSPOLNA LISTA OCHOTNIKOW")
         print(participants)
         print("\n\n")

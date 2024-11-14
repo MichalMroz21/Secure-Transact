@@ -50,9 +50,6 @@ def start(node):
             response = requests.post("http://{}:{}/receive_message".format(addr, port),
                           json={"user": request.host, "message": message, "date": date})
             if response.status_code == 200:
-                # check if the message was sent to multiple peers (group chat)
-                if request.json.get("client_number") == 0:
-                    messages.append({"user": request.host, "message": message, "date": date})
                 return jsonify({"status": "Message was successfully sent"}), 200
             else:
                 return jsonify({"error": "Error occured!"}), response.status_code

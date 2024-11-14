@@ -118,12 +118,16 @@ class Node:
         self.peers.append(Peer(addr, port))
 
     def send_mes(self, host_addr, message):
-        client_number = 0
+        appended_message = False
         for peer in self.peers:
             encrypted_message = encryption.encrypt_data_ecb(message, encryption.create_key(self.peers, self.port))
-            requests.post("http://{}:{}/send_message".format(host_addr, self.port),
-                          json={"addr": peer.addr, "port": peer.port, "message": encrypted_message, "client_number": client_number})
-            client_number += 1
+            response = requests.post("http://{}:{}/send_message".format(host_addr, self.port),
+                          json={"addr": peer.addr, "port": peer.port, "message": encrypted_message})
+            if response.status_code == 200 and not appended_message:
+                response = requests.post("http://{}:{}/send_message".format(host_addr, self.port),
+                                         json={"addr": host_addr, "port": self.port, "message": encrypted_message})
+                if response.status_code == 200:
+                    appended_message = True
 
     def view_parsed_messages(self, host_addr):
         try:
