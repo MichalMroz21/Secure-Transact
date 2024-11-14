@@ -78,7 +78,10 @@ class Node:
         self.chain = blockchain.Blockchain()                # copy of blockchain
         self.chain.genesis()                                # initiating first block of blockchain
         self.staging = []                                   # staging data to add to block
-        self.stake = 10000 * int(os.environ["TITLE"])       # currency
+        if "TITLE" in os.environ:
+            self.stake = 10000 * int(os.environ["TITLE"])       # currency
+        else:
+            self.stake = 10000
 
         # socket stuff
         self.port = port
