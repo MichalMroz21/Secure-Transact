@@ -151,27 +151,6 @@ def updateChatbox():
     messages = parse_messages(main_node, json_messages)
 
     data = chat_history_from_blocks + messages
-    # messages = me.view_parsed_messages(host)
-
-    if new_block_in_progress == False:
-        new_block_signal = stake.receive_create_block_signal(host, port)
-        new_block_in_progress = new_block_signal["new_block_creation"]
-        if new_block_in_progress:
-            # DEBUG ONLY
-            # Simulate participation of creating new blockchain's block
-            if int(os.environ["TITLE"]) % 2 == 1:
-                stake.send_participation_signal(host, port, main_node, main_node.stake / 2)
-                print("I want to participate in block creation! Sending signal...")
-            print("New block is being created")
-
-    if new_block_in_progress:
-        participants = stake.get_participants(host, port)
-        print(participants)
-        participants = stake.verify_participants_lists(host,port,main_node)
-        participants.sort(key=lambda x: x["stake"])
-        print("\n\nPROSZE MNIE WYSLUCHAC\nPONIZEJ ZNAJDUJE SIE WSPOLNA LISTA OCHOTNIKOW")
-        print(participants)
-        print("\n\n")
 
     # this if statement prevents from updating chat all the time for no reason
     if len(json_messages) > last_message_index:
@@ -187,9 +166,8 @@ def updateChatbox():
         data = ""
         for message in json_messages:
             data += json.dumps(message)
-        #main_node.add_data(data)
-        #main_node.remove_messages_block(host)
-        stake.send_create_block_signal(host, port, main_node)
+        main_node.add_data(data)
+        main_node.remove_messages_block(host)
         # reset index of last message
         last_message_index = 0
         read_from_block = True
