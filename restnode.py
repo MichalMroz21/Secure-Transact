@@ -121,6 +121,11 @@ class Node:
         self.peers.append(Peer(addr, port))
 
     def send_mes(self, host_addr, message):
+        """
+        Sends message to other device
+        :param host_addr: Sender IP address
+        :param message: message to be sent
+        """
         appended_message = False
         for peer in self.peers:
             encrypted_message = encryption.encrypt_data_ecb(message, encryption.create_key(self.peers, self.port))
@@ -133,6 +138,10 @@ class Node:
                     appended_message = True
 
     def view_parsed_messages(self, host_addr):
+        """
+        :param host_addr: sender IP address
+        :return: messages string
+        """
         try:
             json_messages = requests.get("http://{}:{}/get_messages".format(host_addr, self.port)).json()
             messages = ""
@@ -145,18 +154,23 @@ class Node:
             return e
 
     def get_messages_block(self, host_addr):
+        """
+        :param host_addr: sender IP address
+        :return: messages
+        """
         try:
             return requests.get("http://{}:{}/get_messages".format(host_addr, self.port)).json()
         except Exception as e:
             return e
 
     def remove_messages_block(self, host_addr):
+        """
+        :param host_addr: sender IP address
+        """
         try:
             return requests.post("http://{}:{}/remove_messages".format(host_addr, self.port))
         except Exception as e:
             return e
-
-
 
 
     def serve_chain(self, app):
@@ -223,20 +237,4 @@ class Peer:
         print("Fetching chain from {}".format((self.addr, self.port)))
         message = requests.get("http://{}:{}/chain".format(self.addr, self.port)).text
         return blockchain.Blockchain.fromjson(message)
-
-    # def send_mes(self, message):
-    #
-    #     try:
-    #         response = requests.post("http://{}:{}/receive_message".format(self.addr, self.port),
-    #                                  json={"message": message})
-    #         if response.status_code == 200:
-    #             print("Message succesfully deployed")
-    #             return True
-    #         else:
-    #             print("Something went wrong")
-    #             return False
-    #     except Exception as e:
-    #         print(e)
-    #         return False
-
 

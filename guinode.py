@@ -85,17 +85,8 @@ myAddr.set("Peer: ({host}, {port})".format(host=host, port=port))
 
 main_node = restnode.Node(port)
 threads = start.start(main_node)
-#start.start(main_node)
 
 messages = ""
-
-
-# def exit_program(tk_window, threads):
-#     for thread in threads:
-#         thread.join()
-#     tk_window.destroy()
-#
-# master.protocol("WM_DELETE_WINDOW", lambda: exit_program(master, threads))
 
 # which index has last message in the current block
 last_message_index = 0
@@ -128,20 +119,6 @@ def updateChatbox():
     Refreshes the chat area
 
     """
-
-    # data = ""
-    # for block in me.chain.blocks:
-    #     if block.index != 0:
-    #         flatedList = "".join(block.data)
-    #         decryptedBlock = decrypt_data_ecb(flatedList, create_key(me.peers, me.port))
-    #         dataList = [decryptedBlock]
-    #         data += "\n".join(dataList) + "\n"
-    #     else:
-    #         data += "\n".join(block.data)+"\n"
-    # print(data)
-    # messagesBlock.delete('1.0', END)
-    # messagesBlock.insert('1.0', data)
-    # master.after(100, updateChatbox)
     global last_message_index
     global read_from_block
     global update_chat
@@ -210,8 +187,8 @@ def updateChatbox():
         data = ""
         for message in json_messages:
             data += json.dumps(message)
-        #me.add_data(data)
-        #me.remove_messages_block(host)
+        #main_node.add_data(data)
+        #main_node.remove_messages_block(host)
         stake.send_create_block_signal(host, port, main_node)
         # reset index of last message
         last_message_index = 0

@@ -75,6 +75,11 @@ def get_participants(host_addr, host_port):
 
 
 def find_common_elemenets_in_dictionaries(list_of_dictionaries):
+    """
+    Checks if all elemenets in the dictionary are common elemenets
+    :param list_of_dictionaries: list to be checked
+    :return: list of dictionaries wth common elemenets
+    """
     try:
         # Tworzymy zbiór z pierwszej listy, zamieniając słowniki na tuple (aby móc użyć z operatorem AND)
         common = set(tuple(sorted(d.items())) for d in list_of_dictionaries[0])
@@ -89,6 +94,13 @@ def find_common_elemenets_in_dictionaries(list_of_dictionaries):
         print(e)
 
 def verify_participants_lists(host_addr, host_port, node):
+    """
+
+    :param host_addr: Host IP address
+    :param host_port: Host port number
+    :param node: node from which are taken peers
+    :return:
+    """
     participants_lists = []
     try:
         participants = get_participants(host_addr, host_port)
