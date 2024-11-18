@@ -7,14 +7,13 @@ import base64
 # Używamy funkcji hashlib do stworzenia klucza o odpowiedniej długości
 # W tym przypadku użyjemy 'qwerty' i dopełnimy go do 16 znaków
 
-def encrypt_data_ecb(data, keyRaw):
+def encrypt_data_ecb(data, key):
     """
     Encrypt given data with specified key
     :param data: data to be encrypted
     :param keyRaw:
     :return: Encrypted data
     """
-    key = keyRaw.ljust(16)[:16].encode()
     # Utwórz obiekt szyfrujący AES w trybie ECB z użyciem klucza
     cipher = AES.new(key, AES.MODE_ECB)
     # Zaszyfruj dane (z paddingiem, aby były wielokrotnością 16 bajtów)
@@ -22,14 +21,13 @@ def encrypt_data_ecb(data, keyRaw):
     encrypted_base64 = base64.b64encode(encrypted_data).decode('utf-8')
     return encrypted_base64
 
-def decrypt_data_ecb(encrypted_base64, keyRaw):
+def decrypt_data_ecb(encrypted_base64, key):
     """
     Decrypt data from Base64
     :param encrypted_base64: Data encrypted in Base64 format
     :param keyRaw: Key to be used in decryption
     :return: Decrypted data
     """
-    key = keyRaw.ljust(16)[:16].encode()
     encrypted_data = base64.b64decode(encrypted_base64)
     # Utwórz obiekt deszyfrujący AES w trybie ECB z użyciem klucza
     cipher = AES.new(key, AES.MODE_ECB)

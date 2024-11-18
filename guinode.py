@@ -1,8 +1,8 @@
 import json
+import os
 import threading
 from tkinter import *
-import os
-
+import base64
 import requests
 
 import encryption
@@ -10,17 +10,24 @@ import stake
 import start
 import restnode
 from encryption import decrypt_data_ecb, create_key, encrypt_data_ecb, encrypt_message_block
+import traceback
+
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import hashes
 
 master = Tk()
 if "TITLE" in os.environ:
     master.title("Klient {0}".format(os.environ["TITLE"]))
 
 
+
 # TK VARS
 message = StringVar()
 myAddr = StringVar()
 peerHost = StringVar()
+publicKeyText = StringVar() #mozliwa zmiana
 peerPort = IntVar()
+peerPublicKey = StringVar()
 
 # CALLBACKS
 def send():
@@ -41,12 +48,39 @@ def peer():
     """
 
     print("Peer with node")
-    try:
-        main_node.peer(peerHost.get(), peerPort.get())
-    except Exception as e:
-        print(e)
-    #peerHost.set("")
+    main_node.peer(peerHost.get(), peerPort.get(), peerPublicKey.get())
+    peerHost.set("")
     peerPort.set("")
+    peerPublicKey.set("")
+
+def generate_every_key():
+    print("Generate every_key")
+    main_node.sendEncryptedKeys()
+
+def copy_to_clipboard(text_box):
+    # Pobierz tekst z pola tekstowego
+    text = text_box.get("1.0", END).strip()  # Pobierz tekst od początku do końca, usuń nadmiarowe białe znaki
+    if text:
+        master.clipboard_clear()  # Wyczyść schowek
+        master.clipboard_append(text)  # Dodaj tekst do schowka
+        master.update()  # Uaktualnij zawartość schowka
+
+def paste_from_clipboard(entry_box):
+    try:
+        text = master.clipboard_get() # Pobierz tekst ze schowka
+        entry_box.delete(0, END) # Usuń aktualną zawartość pola Entry
+        entry_box.insert(0, text) # Wstaw tekst ze schowka
+    except TclError as e:
+        print(f"Błąd schowka: {e}")
+
+
+host = restnode.ip()
+port = restnode.get_port()
+
+main_node = restnode.Node(port)
+threads = start.start(main_node)
+
+RawPublicKey = main_node.get_public_key()
 
 # UI ELEMENTS
 scrollbar = Scrollbar(master)
@@ -54,37 +88,59 @@ messagesBlock = Text(master, yscrollcommand=scrollbar.set)
 scrollbar.config(command=messagesBlock.yview)
 messageBox = Entry(master, textvariable=message)
 sendBtn = Button(master, text="Send", command=send)
-statusLabel = Label(master, textvariable=myAddr)
-hostBox = Entry(master, textvariable=peerHost)
+ipText = Text(master, height=1, width=50)
+ipText.insert("1.0", host)
+portText = Text(master, height=1, width=50)
+portText.insert("1.0", port)
+# statusText = Text(master, height=2, width=50)
+# statusText.insert("1.0", "Peer: ({host}, {port})".format(host=host, port=port))
+publicKeyText = Text(master, height=16, width=50)
+publicKeyText.insert("1.0", main_node.public_key_to_pem())
+copyIp = Button(master, text="kopiuj", command=lambda: copy_to_clipboard(ipText))
+copyPort = Button(master, text="kopiuj", command=lambda: copy_to_clipboard(portText))
+copyPublicKey = Button(master, text="kopiuj", command=lambda: copy_to_clipboard(publicKeyText))
+ipBox = Entry(master, textvariable=peerHost)
 portBox = Entry(master, textvariable=peerPort)
+publicKeyBox = Entry(master, textvariable=peerPublicKey, width=50)
+pasteIp = Button(master, text="wklej", command=lambda: paste_from_clipboard(ipBox))
+pastePort = Button(master, text="wklej", command=lambda: paste_from_clipboard(portBox))
+pastePublicKey = Button(master, text="wklej", command=lambda: paste_from_clipboard(publicKeyBox))
 peerBtn = Button(master, text="Peer", command=peer)
+generateKeysBtn = Button(master, text="Generate keys", command=generate_every_key)
 ccLabel = Label(master, text="")
 
 # UI GRIDDING
-messagesBlock.grid(row=0, column=0, columnspan=1, rowspan=4)
-scrollbar.grid(row=0, column=1, rowspan=4, sticky="ns")
+messagesBlock.grid(row=0, column=0, columnspan=1, rowspan=8)
+scrollbar.grid(row=0, column=1, rowspan=3, sticky="ns")
 messageBox.grid(row=4, column=0)
 sendBtn.grid(row=4, column=1)
-statusLabel.grid(row=0, column=2)
-hostBox.grid(row=1, column=2)
-portBox.grid(row=2, column=2)
-peerBtn.grid(row=3, column=2)
-ccLabel.grid(row=4, column=2)
+ipText.grid(row=0, column=2)
+portText.grid(row=1, column=2)
+#statusText.grid(row=0, column=2)
+publicKeyText.grid(row=2, column=2)
+ipBox.grid(row=3, column=2)
+portBox.grid(row=4, column=2)
+publicKeyBox.grid(row=5, column=2)
+peerBtn.grid(row=6, column=2)
+generateKeysBtn.grid(row=7, column=2)
+ccLabel.grid(row=8, column=2)
+copyIp.grid(row=0, column=3)
+copyPort.grid(row=1, column=3)
+copyPublicKey.grid(row=2, column=3)
+pasteIp.grid(row=3, column=3)
+pastePort.grid(row=4, column=3)
+pastePublicKey.grid(row=5, column=3)
 
 # CLICK ENTER EVENT
 messageBox.bind("<Return>", lambda event: send())
-hostBox.bind("<Return>", lambda event: peer())
+ipBox.bind("<Return>", lambda event: peer())
 portBox.bind("<Return>", lambda event: peer())
-
-host = restnode.ip()
-port = restnode.get_port()
 
 peerHost.set(host)
 
 myAddr.set("Peer: ({host}, {port})".format(host=host, port=port))
 
-main_node = restnode.Node(port)
-threads = start.start(main_node)
+
 
 messages = ""
 
@@ -106,12 +162,42 @@ chat_history_from_blocks = ""
 # notification about new block
 new_block_in_progress = False
 
+def convert_key(base64keyEncypted):
+    byteKey = base64.b64decode(base64keyEncypted)
+    decryptedSessionKey = main_node.private_key.decrypt(
+        byteKey,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        ))
+    sessionKey = main_node.random_key
+    privateKey = main_node.private_key
+    pemPrivateKey = restnode.private_key_to_pem(privateKey)
+    publicKey = main_node.public_key
+    pemPublicKey = restnode.public_key_to_pem(publicKey)
+    encryptedKey = main_node.EncryptedKBytes
+    encryptedKString = main_node.EncryptedKString
+    print("Konwersje")
+    return decryptedSessionKey
+
 def parse_messages(restnode, messages):
     parsed_messages = ""
     for message in messages:
-        decrypted_message = encryption.decrypt_data_ecb(message["message"],
-                                                        encryption.create_key(restnode.peers, restnode.port))
-        parsed_messages += message["user"] + " (" + message["date"] + "): " + decrypted_message + "\n"
+        print("Poczatek wiadomosci")
+        print(message)
+        print("Koniec wiadomosci")
+        if message["message"].startswith("-----BEGIN ENCRYPTED KEY-----"):
+            editedMessage = message["message"].replace("-----BEGIN ENCRYPTED KEY-----", "").replace("\n", "")
+            print("Przed konwersja klucza")
+            real_key = convert_key(editedMessage)
+            main_node.useful_key = real_key
+            print("Konwersja klucza")
+            editedMessage += "\n"
+            parsed_messages += base64.b64encode(real_key).decode('utf-8') + "\n" + main_node.drawString + "\n"
+        else:
+            decrypted_message = encryption.decrypt_data_ecb(message["message"], main_node.useful_key)
+            parsed_messages += message["user"] + " (" + message["date"] + "): " + decrypted_message + "\n"
     return parsed_messages
 
 def updateChatbox():
@@ -131,7 +217,7 @@ def updateChatbox():
             if block.index != 0:
                 data += "/\\/\\DEBUG/\\/\\ Block number {0}\n".format(block.index)
                 flatedList = "".join(block.data)
-                decryptedBlock = decrypt_data_ecb(flatedList, create_key(main_node.peers, main_node.port))
+                decryptedBlock = decrypt_data_ecb(flatedList, main_node.useful_key)
                 json_messages_array = decryptedBlock.split("}")
                 json_messages_array.pop()
                 json_list = []

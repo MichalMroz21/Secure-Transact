@@ -1,3 +1,5 @@
+import base64
+import hashlib
 import os
 import socket
 
@@ -9,6 +11,14 @@ import random
 
 import blockchain
 import encryption
+
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization
+
+import restnode
 
 """
 PEARSCOIN CHAIN TRANSFER PROTOCOL:
@@ -40,33 +50,39 @@ def get_port():
     """
     return random.randint(1024, 65535)
 
-    # In the future port number will be stored in a config file.
-    # Now for testing purposes program randomizes it so there's no problem with running few instances of the program
+def private_key_to_pem(private_key):
+    pem_private_key = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,  # Kodowanie PEM
+        format=serialization.PrivateFormat.TraditionalOpenSSL,  # Format klucza
+        encryption_algorithm=serialization.NoEncryption()  # Bez hasła
+    )
+    return pem_private_key.decode('utf-8')
 
-    # try:
-    #     file = open("cfg.txt", "x")
-    #     file.close()
-    # except Exception as e:
-    #     print(e)
-    # try:
-    #     f = open("cfg.txt", "r+")
-    #     output = f.read()
-    #     json_string = ""
-    #     if output != "":
-    #         json_string = json.loads(output)
-    #         if "port" in json_string:
-    #             f.close()
-    #             return int(json_string["port"])
-    #     port = random.randint(1024, 65535)
-    #     input = json.dumps({"port": port})
-    #     f.write(input)
-    #     f.close()
-    #     return port
-    # except Exception as e:
-    #     f.close()
-    #     print(e)
-    #     return random.randint(1024, 65535)
 
+def public_key_to_pem(public_key):
+    pem = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+    return pem.decode('utf-8')  # Konwersja do tekstu
+
+def load_public_key_from_pem(pem_data):
+    public_key = serialization.load_pem_public_key(
+        pem_data.encode('utf-8'),  # Konwersja tekstu na bajty
+        backend=default_backend()
+    )
+    return public_key
+
+def encrypt_with_public_key(public_key, key):
+    """Szyfrowanie klucza AES przy użyciu klucza publicznego RSA."""
+    return public_key.encrypt(
+        key,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
 
 class Node:
     def __init__(self, port):
@@ -82,9 +98,28 @@ class Node:
             self.stake = 10000 * int(os.environ["TITLE"])       # currency
         else:
             self.stake = 10000
+        self.private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+            backend=default_backend()
+        )
+        self.public_key = self.private_key.public_key()
+        self.random_key = os.urandom(32)
+        self.EncryptedKBytes = encrypt_with_public_key(self.public_key, self.random_key)
+        self.EncryptedKString = encrypted_base64 = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
+        self.useful_key = os.urandom(32)
+        self.drawString = ""
 
         # socket stuff
         self.port = port
+
+    def update_group_session_key(self):
+        # Szyfrowanie klucza sesji dla każdego użytkownika w grupie
+        self.EncryptedKBytes = encrypt_with_public_key(self.public_key, self.random_key)
+        self.EncryptedKString = encrypted_base64 = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
+        for peer in self.peers:
+            peer.EncryptedKBytes = encrypt_with_public_key(peer.PKBytes, self.random_key)
+            self.EncryptedKString = encrypted_base64 = base64.b64encode(peer.EncryptedKBytes).decode('utf-8')
 
     def consensus(self):
         """
@@ -95,6 +130,16 @@ class Node:
             pass  # get that peer's chain
         for chain in chains:
             self.chain.consensus(chain)
+
+    def get_public_key(self):
+        return self.public_key
+
+    def public_key_to_pem(self):
+        pem = self.public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        return pem.decode('utf-8')  # Konwersja do tekstu
 
     def add_block(self):
         """
@@ -109,16 +154,53 @@ class Node:
         """
         if data != "":
             data += ""
-        data = encryption.encrypt_data_ecb(data, encryption.create_key(self.peers, self.port))
+        data = encryption.encrypt_data_ecb(data, self.useful_key)
         self.staging.append(data)
 
-    def peer(self, addr, port):
+    def drawPerson(self):
+        keyList = []
+        for peer in self.peers:
+            keyList.append(peer.port)
+        keyList.append(self.port)
+        keyList.sort()  # wazne sortuj liste by taka sama byla
+        keyRaw = " ".join(str(x) for x in keyList)
+        self.drawString = keyRaw
+        numeric_seed = int.from_bytes(hashlib.sha256(keyRaw.encode('utf-8')).digest())  # Konwersja stringa na liczbę
+        random.seed(numeric_seed)
+        chosen_port = random.choice(keyList)
+        return chosen_port
+
+    def peer(self, addr, port, PKString):
         """
         Creates peer with second device
         :param addr: Second's device IP address
         :param port: Second's device port
         """
-        self.peers.append(Peer(addr, port))
+        self.peers.append(Peer(addr, port, PKString))
+        self.EncryptedKBytes = encrypt_with_public_key(self.public_key, self.random_key)
+        self.EncryptedKString = encrypted_base64 = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
+        for peer in self.peers:
+            peer.EncryptedKBytes = encrypt_with_public_key(peer.PKBytes, self.random_key)
+            peer.EncryptedKString = base64.b64encode(peer.EncryptedKBytes).decode('utf-8')
+
+        self.sendEncryptedKeys()
+
+        if self.port == self.drawPerson():
+            print(self.public_key_to_pem())
+            for peer in self.peers:
+                print(peer.PKString)
+        print("dodano")
+
+    def sendEncryptedKeys(self):
+        drawnPerson = self.drawPerson()
+        if self.port == self.drawPerson():
+            requests.post("http://{}:{}/send_message".format(ip(), self.port),
+                          json={"addr": ip(), "port": self.port,
+                                "message": "-----BEGIN ENCRYPTED KEY-----\n"+self.EncryptedKString+"\n"})
+            for peer in self.peers:
+                requests.post("http://{}:{}/send_message".format(peer.addr, peer.port),
+                              json={"addr": peer.addr, "port": peer.port,
+                                    "message": "-----BEGIN ENCRYPTED KEY-----\n"+peer.EncryptedKString+"\n"})
 
     def send_mes(self, host_addr, message):
         """
@@ -128,7 +210,7 @@ class Node:
         """
         appended_message = False
         for peer in self.peers:
-            encrypted_message = encryption.encrypt_data_ecb(message, encryption.create_key(self.peers, self.port))
+            encrypted_message = encryption.encrypt_data_ecb(message, self.useful_key)
             response = requests.post("http://{}:{}/send_message".format(host_addr, self.port),
                           json={"addr": peer.addr, "port": peer.port, "message": encrypted_message})
             if response.status_code == 200 and not appended_message:
@@ -147,7 +229,7 @@ class Node:
             messages = ""
             if json_messages:
                 for message in json_messages:
-                    decrypted_message = encryption.decrypt_data_ecb(message["message"], encryption.create_key(self.peers, self.port))
+                    decrypted_message = encryption.decrypt_data_ecb(message["message"], self.useful_key)
                     messages += message["user"] + " (" + message["date"] + "): " + decrypted_message + "\n"
             return messages
         except Exception as e:
@@ -220,7 +302,7 @@ class Node:
 
 
 class Peer:
-    def __init__(self, address, port):
+    def __init__(self, address, port, PKString):
         """
         Creates connection with second device
         :param address: Second device's IP address
@@ -228,6 +310,10 @@ class Peer:
         """
         self.addr = address
         self.port = port
+        self.PKString = PKString
+        self.PKBytes = load_public_key_from_pem(PKString)
+        self.EncryptedKBytes = encrypt_with_public_key(self.PKBytes, os.urandom(32))
+        self.EncryptedKString = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
 
     def get_chain(self):
         """
