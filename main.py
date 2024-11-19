@@ -20,6 +20,7 @@ from cryptography.hazmat.primitives import hashes
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
+
 host = ip()
 port = get_port()
 

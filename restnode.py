@@ -20,7 +20,7 @@ from PySide6.QtCore import QObject, Signal, Slot, Property
 PEARSCOIN CHAIN TRANSFER PROTOCOL:
 
 MESSAGE TYPES:
- 
+
 Message     Description         Response
 /chain      Get current chain   JSON chain object
 
@@ -124,7 +124,7 @@ class Node(QObject):
         self.EncryptedKBytes = encrypt_with_public_key(self.public_key, self.random_key)
         self.EncryptedKString = encrypted_base64 = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
 
-        for peer in self.peers:
+        for peer in self._peers:
             peer.EncryptedKBytes = encrypt_with_public_key(peer.PKBytes, self.random_key)
             self.EncryptedKString = encrypted_base64 = base64.b64encode(peer.EncryptedKBytes).decode('utf-8')
 
@@ -134,7 +134,7 @@ class Node(QObject):
         """
         chains = []
 
-        for peer in self.peers:
+        for peer in self._peers:
             pass  # get that peer's chain
 
         for chain in chains:
@@ -353,7 +353,7 @@ class Peer(QObject):
         self.EncryptedKBytes = encrypt_with_public_key(self.PKBytes, os.urandom(32))
         self.EncryptedKString = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
 
-    @Property(str)
+    @Property(int)
     def port(self):
         return self._port
 
