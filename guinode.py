@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import threading
 from tkinter import *
 import base64
@@ -14,6 +15,15 @@ import traceback
 
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes
+
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtQml import QQmlApplicationEngine
+
+if __name__ == "__main__":
+    app = QGuiApplication(sys.argv)
+    engine = QQmlApplicationEngine()
+    engine.load("source_gui/main.qml")
+    #sys.exit(app.exec())
 
 master = Tk()
 if "TITLE" in os.environ:
