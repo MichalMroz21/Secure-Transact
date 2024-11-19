@@ -211,6 +211,12 @@ class Node(QObject):
 
         print("dodano")
 
+    # def delete_peer(self, addr, port):
+    #     for peer in self._peers:
+    #         if peer.port == port and peer.addr == addr:
+
+
+
     def sendEncryptedKeys(self):
         drawnPerson = self.drawPerson()
 
@@ -335,6 +341,7 @@ class Peer(QObject):
     portChanged = Signal()
     addrChanged = Signal()
     nicknameChanged = Signal()
+    PKStringChanged = Signal()
 
     def __init__(self, address, port, PKString):
         """
@@ -347,8 +354,8 @@ class Peer(QObject):
         self._nickname = "shit" #narazie stały zeby qml dzialal
         self._addr = address
         self._port = port
+        self._PKString = PKString
 
-        self.PKString = PKString
         self.PKBytes = load_public_key_from_pem(PKString)
         self.EncryptedKBytes = encrypt_with_public_key(self.PKBytes, os.urandom(32))
         self.EncryptedKString = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
@@ -364,6 +371,16 @@ class Peer(QObject):
     @Property(str)
     def nickname(self):
         return self._nickname
+
+    @Property(str)
+    def PKString(self):
+        return self._PKString
+
+    @PKString.setter
+    def PKString(self, new_val):
+        if self._PKString != new_val:
+            self._PKString = new_val
+            self.PKStringChanged.emit()
 
     @port.setter
     def port(self, new_val):

@@ -22,7 +22,8 @@ Page {
             userModel.append({
                 nickname: main_node.peers[i].nickname,
                 addr: main_node.peers[i].addr,
-                port: main_node.peers[i].port
+                port: main_node.peers[i].port,
+                PKString: main_node.peers[i].PKString
             });
         }
     }
@@ -187,6 +188,16 @@ Page {
                                 Button {
                                     height: user.height / 2
                                     text: "Get public key"
+                                    onClicked: {
+                                        textEdit.text = model.PKString
+                                        textEdit.selectAll()
+                                        textEdit.copy()
+                                    }
+                                }
+
+                                TextEdit{
+                                    id: textEdit
+                                    visible: false
                                 }
 
                                 Button {
