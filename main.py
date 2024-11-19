@@ -30,6 +30,17 @@ RawPublicKey = main_node.get_public_key()
 
 pk = main_node.public_key_to_pem()
 
+#Tk instantiation
+master = Tk()
+
+# TK VARS
+message = StringVar()
+myAddr = StringVar()
+peerHost = StringVar()
+publicKeyText = StringVar() #mozliwa zmiana
+peerPort = IntVar()
+peerPublicKey = StringVar()
+
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
@@ -40,15 +51,7 @@ if __name__ == "__main__":
     engine.load("source_gui/main.qml")
     #sys.exit(app.exec())
 
-master = Tk()
 
-# TK VARS
-message = StringVar()
-myAddr = StringVar()
-peerHost = StringVar()
-publicKeyText = StringVar() #mozliwa zmiana
-peerPort = IntVar()
-peerPublicKey = StringVar()
 
 if "TITLE" in os.environ:
     master.title("Klient {0}".format(os.environ["TITLE"]))
@@ -70,8 +73,8 @@ def peer():
     Connect to a second device
 
     """
-
     print("Peer with node")
+
     main_node.peer(peerHost.get(), peerPort.get(), peerPublicKey.get())
     peerHost.set("")
     peerPort.set("")
@@ -84,6 +87,7 @@ def generate_every_key():
 def copy_to_clipboard(text_box):
     # Pobierz tekst z pola tekstowego
     text = text_box.get("1.0", END).strip()  # Pobierz tekst od początku do końca, usuń nadmiarowe białe znaki
+
     if text:
         master.clipboard_clear()  # Wyczyść schowek
         master.clipboard_append(text)  # Dodaj tekst do schowka
@@ -94,6 +98,7 @@ def paste_from_clipboard(entry_box):
         text = master.clipboard_get() # Pobierz tekst ze schowka
         entry_box.delete(0, END) # Usuń aktualną zawartość pola Entry
         entry_box.insert(0, text) # Wstaw tekst ze schowka
+
     except TclError as e:
         print(f"Błąd schowka: {e}")
 
@@ -155,8 +160,6 @@ peerHost.set(host)
 
 myAddr.set("Peer: ({host}, {port})".format(host=host, port=port))
 
-
-
 messages = ""
 
 # which index has last message in the current block
@@ -186,6 +189,7 @@ def convert_key(base64keyEncypted):
             algorithm=hashes.SHA256(),
             label=None
         ))
+
     sessionKey = main_node.random_key
     privateKey = main_node.private_key
     pemPrivateKey = private_key_to_pem(privateKey)
@@ -193,26 +197,36 @@ def convert_key(base64keyEncypted):
     pemPublicKey = public_key_to_pem(publicKey)
     encryptedKey = main_node.EncryptedKBytes
     encryptedKString = main_node.EncryptedKString
+
     print("Konwersje")
+
     return decryptedSessionKey
 
 def parse_messages(restnode, messages):
     parsed_messages = ""
+
     for message in messages:
+
         print("Poczatek wiadomosci")
         print(message)
         print("Koniec wiadomosci")
+
         if message["message"].startswith("-----BEGIN ENCRYPTED KEY-----"):
             editedMessage = message["message"].replace("-----BEGIN ENCRYPTED KEY-----", "").replace("\n", "")
+
             print("Przed konwersja klucza")
+
             real_key = convert_key(editedMessage)
             main_node.useful_key = real_key
+
             print("Konwersja klucza")
+
             editedMessage += "\n"
             parsed_messages += base64.b64encode(real_key).decode('utf-8') + "\n" + main_node.drawString + "\n"
         else:
             decrypted_message = encryption.decrypt_data_ecb(message["message"], main_node.useful_key)
             parsed_messages += message["user"] + " (" + message["date"] + "): " + decrypted_message + "\n"
+
     return parsed_messages
 
 def updateChatbox():
@@ -226,7 +240,9 @@ def updateChatbox():
     global last_block_index
     global chat_history_from_blocks
     global new_block_in_progress
+
     data = ""
+
     if read_from_block:
         for block in main_node.chain.blocks:
             if block.index != 0:
@@ -236,11 +252,14 @@ def updateChatbox():
                 json_messages_array = decryptedBlock.split("}")
                 json_messages_array.pop()
                 json_list = []
+
                 for index, message in enumerate(json_messages_array):
                     json_messages_array[index] += "}"
                     json_list.append(json.loads(json_messages_array[index]))
+
                 parsed_messages = parse_messages(main_node, json_list)
                 data += parsed_messages
+
                 if block.index > last_block_index:
                     chat_history_from_blocks += "/\\/\\DEBUG/\\/\\ Block number {0}\n".format(block.index)
                     chat_history_from_blocks += parsed_messages
@@ -256,6 +275,7 @@ def updateChatbox():
     # this if statement prevents from updating chat all the time for no reason
     if len(json_messages) > last_message_index:
         update_chat = True
+
     if update_chat:
         # there is at least one new message to show. update chat
         messagesBlock.delete('1.0', END)
@@ -265,13 +285,16 @@ def updateChatbox():
 
     if len(json_messages) >= 20:
         data = ""
+
         for message in json_messages:
             data += json.dumps(message)
+
         main_node.add_data(data)
         main_node.remove_messages_block(host)
         # reset index of last message
         last_message_index = 0
         read_from_block = True
+
     master.after(500, updateChatbox)
 
 master.after(500, updateChatbox)
