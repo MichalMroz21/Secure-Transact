@@ -125,8 +125,9 @@ Page {
 
                 // ListView to display user names and IP addresses
                 ListView {
+                    id: userListView
                     width: parent.width
-                    height: parent.height - addButton.height  // Leave space for the Add button
+                    height: parent.height - addButton.height  // Adjust height to leave space for the Add button
                     model: userModel
 
                     delegate: Rectangle {
@@ -134,7 +135,7 @@ Page {
                         height: 40  // Fixed height for each user item
                         id: user
 
-                        MouseArea{
+                        MouseArea {
                             anchors.fill: parent
                             onClicked: popup.open()
                             hoverEnabled: true
@@ -165,7 +166,7 @@ Page {
                             id: popup
                             width: parent.width
 
-                            ColumnLayout{
+                            ColumnLayout {
                                 Button {
                                     height: user.height / 2
                                     text: "Chat"
@@ -185,19 +186,39 @@ Page {
                     }
                 }
 
+                // Add New User Button
                 Rectangle {
-                    id: addButton
+                    id: addUserButton
                     width: parent.width
-                    height: 100
+                    height: 50  // Fixed height for the button
                     color: "green"
+                    anchors.bottom: parent.bottom  // Position the button at the bottom of the parent
 
-                    MouseArea{
+                    MouseArea {
+                        id: addButton
                         anchors.fill: parent
-                        Text{
+                        onClicked: {
+                            stackView.push("add_user.qml");
+                        }
+                        hoverEnabled: true
+
+                        onEntered: {
+                            parent.color = "darkgreen";  // Change color on hover
+                        }
+                        onExited: {
+                            parent.color = "green";
+                        }
+
+                        Text {
+                            id: addUserButtonText
+                            anchors.centerIn: parent
                             text: "Add new user"
+                            color: "white"
+                            font.pixelSize: 16
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
                         }
                     }
-
                 }
             }
         }
