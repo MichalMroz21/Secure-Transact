@@ -126,24 +126,78 @@ Page {
                 // ListView to display user names and IP addresses
                 ListView {
                     width: parent.width
-                    height: parent.height
+                    height: parent.height - addButton.height  // Leave space for the Add button
                     model: userModel
 
-                    delegate: Item {
+                    delegate: Rectangle {
                         width: parent.width  // Set width explicitly for user list items
                         height: 40  // Fixed height for each user item
+                        id: user
 
-                        // Use a single Text element to concatenate the name and IP address
-                        Text {
-                            anchors.centerIn: parent  // Center the text within the parent
-                            text: '<font color="black">' + model.name + ' </font><font color="gray"><i>(' + model.ip + ')</i></font>'
-                            color: "#000"
-                            font.pixelSize: 12
-                            horizontalAlignment: Text.AlignHCenter  // Center horizontally
-                            verticalAlignment: Text.AlignVCenter  // Center vertically
-                            textFormat: Text.RichText  // Enable HTML formatting
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: popup.open()
+                            hoverEnabled: true
+                            id: mousearea
+
+                            onEntered: {
+                                parent.color = "lightgray"
+                                mousearea.cursorShape = Qt.PointingHandCursor
+                            }
+                            onExited: {
+                                parent.color = "white"
+                                mousearea.cursorShape = Qt.ArrowCursor
+                            }
+
+                            // Use a single Text element to concatenate the name and IP address
+                            Text {
+                                anchors.centerIn: parent  // Center the text within the parent
+                                text: '<font color="black">' + model.name + ' </font><font color="gray"><i>(' + model.ip + ')</i></font>'
+                                color: "#000"
+                                font.pixelSize: 12
+                                horizontalAlignment: Text.AlignHCenter  // Center horizontally
+                                verticalAlignment: Text.AlignVCenter  // Center vertically
+                                textFormat: Text.RichText  // Enable HTML formatting
+                            }
+                        }
+
+                        Popup {
+                            id: popup
+                            width: parent.width
+
+                            ColumnLayout{
+                                Button {
+                                    height: user.height / 2
+                                    text: "Chat"
+                                }
+
+                                Button {
+                                    height: user.height / 2
+                                    text: "Get public key"
+                                }
+
+                                Button {
+                                    height: user.height / 2
+                                    text: "Delete from list"
+                                }
+                            }
                         }
                     }
+                }
+
+                Rectangle {
+                    id: addButton
+                    width: parent.width
+                    height: 100
+                    color: "green"
+
+                    MouseArea{
+                        anchors.fill: parent
+                        Text{
+                            text: "Add new user"
+                        }
+                    }
+
                 }
             }
         }
