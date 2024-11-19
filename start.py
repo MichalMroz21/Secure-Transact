@@ -1,20 +1,17 @@
 import datetime
 import sys
 import threading
-
 import flask
 import requests
+
 from flask import jsonify, request
-
 from restnode import Node
-
 
 def start(node):
     """
     Starts application threads
     :param listen_port: Port to be listened to
     """
-
     # messages has information about which user sent which message.
     # ["user": "user_address"],["message", "message_content"]
     messages = []
@@ -53,6 +50,7 @@ def start(node):
                 return jsonify({"status": "Message was successfully sent"}), 200
             else:
                 return jsonify({"error": "Error occured!"}), response.status_code
+
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -62,8 +60,10 @@ def start(node):
         Endpoint do odbierania wiadomości od innego użytkownika
         """
         message = request.json
+
         print(message.get("message"))
         print(message)
+
         if message:
             messages.append(message)
             return jsonify({"status": "Message received!"}), 200
@@ -83,6 +83,7 @@ def start(node):
         Endpoint do odbierania wiadomości od innego użytkownika
         """
         messages.clear()
+
         if not messages:
             return jsonify({"status": "Messages removed!"}), 200
         else:
@@ -93,12 +94,12 @@ def start(node):
         """
         Endpoint do wyslania sygnalu by utworzyc nowy blok
         """
-
         # Check if the current last block's hash is equal to that sent in resquest
         # This checks if user who wants to notify about block creation has valid blockchain version with others
         hash = node.chain.blocks[-1].hash
         request_hash = request.json.get("hash")
         nonlocal new_block_creation
+
         if request_hash == hash:
             nonlocal block_time_creation
             block_time_creation = datetime.datetime.now()
@@ -119,7 +120,6 @@ def start(node):
         hash = request.json.get("hash")
         date = request.json.get("date")
         stake = request.json.get("stake")
-
         additional_seconds = 20
         time_delta = block_time_creation + datetime.timedelta(seconds=additional_seconds)
         time_from_request = datetime.datetime.fromisoformat(date)
@@ -145,7 +145,6 @@ def start(node):
     consensus_thread = threading.Thread(target=node.check_consensus, daemon=True)
     miner_thread = threading.Thread(target=node.add_blocks, daemon=True)
     #input_thread = threading.Thread(target=me.handle_input)
-
     threads = []
     threads.append(server_thread)
     threads.append(consensus_thread)
@@ -155,6 +154,7 @@ def start(node):
         server_thread.start()
         consensus_thread.start()
         miner_thread.start()
+
     except (KeyboardInterrupt, SystemExit):
         server_thread.join()
         consensus_thread.join()

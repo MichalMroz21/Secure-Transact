@@ -104,6 +104,7 @@ Page {
                         onAccepted: {
                             if (inputField.text.trim() !== "") {
                                 // Append new message to the model
+                                main_node.send_mes(host, inputField.text);
                                 messageModel.append({"text": inputField.text});
                                 // Clear the input field
                                 inputField.text = "";

@@ -1,6 +1,5 @@
 import hashlib
 import json
-
 import powlib
 
 class Block:
@@ -25,7 +24,6 @@ class Block:
             Does NOT include the current hash!
             (Intended to be called from the hasher function.)
         """
-        
         return json.dumps({"index": self.index,
                            "data": self.data,
                            "powval": self.powval,
@@ -38,6 +36,7 @@ class Block:
         """
         sha256 = hashlib.sha256()
         sha256.update(str(self).encode("utf-8"))
+
         return sha256.hexdigest()
 
     def dictrep(self):
@@ -82,12 +81,14 @@ class Blockchain:
         :return: bool
         """
         biggestPow = -1
+
         for i in range(1, len(self.blocks)):
             if self.blocks[i].lastHash != self.blocks[i-1].hash:
                 return False
             if self.blocks[i].powval <= biggestPow:
                 return False
             biggestPow = self.blocks[i].powval
+
         return True
 
     def consensus(self, other) -> bool:
@@ -106,6 +107,7 @@ class Blockchain:
         if len(other.blocks) > len(self.blocks):
             self.blocks = other.blocks
             return False # keep valid chain with most blocks
+
         return True
 
     def jsonrep(self):
@@ -122,8 +124,10 @@ class Blockchain:
         """
         jblocks = json.loads(message)
         chain = []
+
         for jblock in jblocks:
             chain.append(Block(jblock["index"], jblock["data"],
                                jblock["powval"], jblock["lastHash"],
                                jblock["hash"]))
+
         return Blockchain(chain)

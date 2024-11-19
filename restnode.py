@@ -2,13 +2,9 @@ import base64
 import hashlib
 import os
 import socket
-
 import time
-
 import requests
 import random
-
-
 import blockchain
 import encryption
 
@@ -30,7 +26,6 @@ Message     Description         Response
 
 """
 
-
 def ip():
     """
     Gets host machine IP address
@@ -41,7 +36,6 @@ def ip():
     ipa = s.getsockname()[0]
     s.close()
     return ipa
-
 
 def get_port():
     """
@@ -58,12 +52,12 @@ def private_key_to_pem(private_key):
     )
     return pem_private_key.decode('utf-8')
 
-
 def public_key_to_pem(public_key):
     pem = public_key.public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
+
     return pem.decode('utf-8')  # Konwersja do tekstu
 
 def load_public_key_from_pem(pem_data):
@@ -71,6 +65,7 @@ def load_public_key_from_pem(pem_data):
         pem_data.encode('utf-8'),  # Konwersja tekstu na bajty
         backend=default_backend()
     )
+
     return public_key
 
 def encrypt_with_public_key(public_key, key):
@@ -96,15 +91,18 @@ class Node(QObject):
         self.chain = blockchain.Blockchain()                # copy of blockchain
         self.chain.genesis()                                # initiating first block of blockchain
         self.staging = []                                   # staging data to add to block
+
         if "TITLE" in os.environ:
             self.stake = 10000 * int(os.environ["TITLE"])       # currency
         else:
             self.stake = 10000
+
         self.private_key = rsa.generate_private_key(
             public_exponent=65537,
             key_size=2048,
             backend=default_backend()
         )
+
         self.public_key = self.private_key.public_key()
         self.random_key = os.urandom(32)
         self.EncryptedKBytes = encrypt_with_public_key(self.public_key, self.random_key)
@@ -119,6 +117,7 @@ class Node(QObject):
         # Szyfrowanie klucza sesji dla każdego użytkownika w grupie
         self.EncryptedKBytes = encrypt_with_public_key(self.public_key, self.random_key)
         self.EncryptedKString = encrypted_base64 = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
+
         for peer in self.peers:
             peer.EncryptedKBytes = encrypt_with_public_key(peer.PKBytes, self.random_key)
             self.EncryptedKString = encrypted_base64 = base64.b64encode(peer.EncryptedKBytes).decode('utf-8')
@@ -128,8 +127,10 @@ class Node(QObject):
         Checks the correctness of peers and chains
         """
         chains = []
+
         for peer in self.peers:
             pass  # get that peer's chain
+
         for chain in chains:
             self.chain.consensus(chain)
 
@@ -156,20 +157,25 @@ class Node(QObject):
         """
         if data != "":
             data += ""
+
         data = encryption.encrypt_data_ecb(data, self.useful_key)
         self.staging.append(data)
 
     def drawPerson(self):
         keyList = []
+
         for peer in self.peers:
             keyList.append(peer.port)
+
         keyList.append(self.port)
         keyList.sort()  # wazne sortuj liste by taka sama byla
+
         keyRaw = " ".join(str(x) for x in keyList)
         self.drawString = keyRaw
         numeric_seed = int.from_bytes(hashlib.sha256(keyRaw.encode('utf-8')).digest())  # Konwersja stringa na liczbę
         random.seed(numeric_seed)
         chosen_port = random.choice(keyList)
+
         return chosen_port
 
     @Slot(str, str, str)
@@ -182,6 +188,7 @@ class Node(QObject):
         self.peers.append(Peer(addr, int(port), PKString))
         self.EncryptedKBytes = encrypt_with_public_key(self.public_key, self.random_key)
         self.EncryptedKString = encrypted_base64 = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
+
         for peer in self.peers:
             peer.EncryptedKBytes = encrypt_with_public_key(peer.PKBytes, self.random_key)
             peer.EncryptedKString = base64.b64encode(peer.EncryptedKBytes).decode('utf-8')
@@ -190,12 +197,15 @@ class Node(QObject):
 
         if self.port == self.drawPerson():
             print(self.public_key_to_pem())
+
             for peer in self.peers:
                 print(peer.PKString)
+
         print("dodano")
 
     def sendEncryptedKeys(self):
         drawnPerson = self.drawPerson()
+
         if self.port == self.drawPerson():
             requests.post("http://{}:{}/send_message".format(ip(), self.port),
                           json={"addr": ip(), "port": self.port,
@@ -217,9 +227,11 @@ class Node(QObject):
             encrypted_message = encryption.encrypt_data_ecb(message, self.useful_key)
             response = requests.post("http://{}:{}/send_message".format(host_addr, self.port),
                           json={"addr": peer.addr, "port": peer.port, "message": encrypted_message})
+
             if response.status_code == 200 and not appended_message:
                 response = requests.post("http://{}:{}/send_message".format(host_addr, self.port),
                                          json={"addr": host_addr, "port": self.port, "message": encrypted_message})
+
                 if response.status_code == 200:
                     appended_message = True
 
@@ -232,15 +244,17 @@ class Node(QObject):
         try:
             json_messages = requests.get("http://{}:{}/get_messages".format(host_addr, self.port)).json()
             messages = ""
+
             if json_messages:
                 for message in json_messages:
                     decrypted_message = encryption.decrypt_data_ecb(message["message"], self.useful_key)
                     messages += message["user"] + " (" + message["date"] + "): " + decrypted_message + "\n"
             return messages
+
         except Exception as e:
             return e
 
-    @slot(str, str)
+    @Slot(str, str)
     def get_messages_block(self, host_addr):
         """
         :param host_addr: sender IP address
@@ -299,6 +313,7 @@ class Node(QObject):
         """
         while True:
             cmd = input("> ").split(";")
+
             if cmd[0] == "peer":
                 self.peer(cmd[1], int(cmd[2]))
             if cmd[0] == "txion":
@@ -327,6 +342,8 @@ class Peer:
         :return: Blockchain
         """
         print("Fetching chain from {}".format((self.addr, self.port)))
+
         message = requests.get("http://{}:{}/chain".format(self.addr, self.port)).text
+
         return blockchain.Blockchain.fromjson(message)
 

@@ -2,16 +2,17 @@ import json
 import os
 import sys
 import threading
-from tkinter import *
 import base64
 import requests
-
 import encryption
 import stake
 import start
+import traceback
+
+from tkinter import *
+
 from restnode import Node, ip, get_port, private_key_to_pem, public_key_to_pem
 from encryption import decrypt_data_ecb, create_key, encrypt_data_ecb, encrypt_message_block
-import traceback
 
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes
@@ -48,10 +49,6 @@ peerHost = StringVar()
 publicKeyText = StringVar() #mozliwa zmiana
 peerPort = IntVar()
 peerPublicKey = StringVar()
-
-
-
-
 
 if "TITLE" in os.environ:
     master.title("Klient {0}".format(os.environ["TITLE"]))

@@ -1,9 +1,7 @@
 import datetime
 import json
 import random
-
 import requests
-
 
 def send_create_block_signal(host_addr, host_port, node):
     """
@@ -14,6 +12,7 @@ def send_create_block_signal(host_addr, host_port, node):
         for peer in node.peers:
             requests.post("http://{}:{}/block_notify".format(peer.addr, peer.port),
                           json={"addr": host_addr, "port": host_port, "hash": node.chain.blocks[-1].hash, "date": date})
+
     except Exception as e:
         print(e)
 
@@ -26,10 +25,12 @@ def receive_create_block_signal(host_addr, host_port):
     """
     try:
         response = requests.get("http://{}:{}/get_new_block_notification".format(host_addr, host_port))
+
         if response.status_code == 200:
             return response.json()
         else:
             return None
+
     except Exception as e:
         print(e)
         return None
@@ -69,6 +70,7 @@ def get_participants(host_addr, host_port):
             return response.json()
         else:
             return None
+
     except Exception as e:
         print(e)
         return None
@@ -90,6 +92,7 @@ def find_common_elemenets_in_dictionaries(list_of_dictionaries):
 
         # Konwertujemy wynikowy zbiór z powrotem na listę słowników
         return [dict(d) for d in common]
+
     except Exception as e:
         print(e)
 
@@ -105,9 +108,11 @@ def verify_participants_lists(host_addr, host_port, node):
     try:
         participants = get_participants(host_addr, host_port)
         participants_lists.append(participants["participants"])
+
         for peer in node.peers:
             participants = get_participants(peer.addr, peer.port)
             participants_lists.append(participants["participants"])
+
         return find_common_elemenets_in_dictionaries(participants_lists)
 
     except Exception as e:
@@ -127,6 +132,7 @@ def participants_raffle(host_addr, host_port, node):
     # prepare list of participants stakes and stakes sum
     stakes_list = []
     stake_sum = 0
+
     for participant in participants_list:
         stake = int(participant["stake"])
         stakes_list.append(stake)
@@ -135,6 +141,7 @@ def participants_raffle(host_addr, host_port, node):
     # calculated distributor so in the next step function could proceed to weighted raffle
     distributors_list = []
     distributor_sum = 0.0
+
     for stake in stakes_list:
         distributor_sum += float(stake / stake_sum)
         distributors_list.append(distributor_sum)
@@ -145,6 +152,7 @@ def participants_raffle(host_addr, host_port, node):
     # if the drawn number is less than distributor for given participant then return their index
     for i in range(10):
         drawn_number = random.uniform(0,1)
+
         for index, distributor in enumerate(distributors_list):
             if drawn_number < distributor:
                 drawn_indexes.append(index)
