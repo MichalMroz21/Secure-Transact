@@ -14,7 +14,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 
-from PySide6.QtCore import QObject, Signal, Slot
+from PySide6.QtCore import QObject, Signal, Slot, Property
 
 """
 PEARSCOIN CHAIN TRANSFER PROTOCOL:
@@ -80,6 +80,8 @@ def encrypt_with_public_key(public_key, key):
     )
 
 class Node(QObject):
+    peersChanged = Signal() #emit if peers are in any way changed
+
     def __init__(self, port):
         super().__init__()
         """
@@ -87,7 +89,7 @@ class Node(QObject):
         :param port: Host machine port
         """
 
-        self.peers = []                                     # connections with other devices
+        self._peers = []                                     # connections with other devices
         self.chain = blockchain.Blockchain()                # copy of blockchain
         self.chain.genesis()                                # initiating first block of blockchain
         self.staging = []                                   # staging data to add to block
@@ -112,6 +114,10 @@ class Node(QObject):
 
         # socket stuff
         self.port = port
+
+    @Property("QVariantList", notify=peersChanged)
+    def peers(self):
+        return self._peers
 
     def update_group_session_key(self):
         # Szyfrowanie klucza sesji dla każdego użytkownika w grupie
@@ -164,7 +170,7 @@ class Node(QObject):
     def drawPerson(self):
         keyList = []
 
-        for peer in self.peers:
+        for peer in self._peers:
             keyList.append(peer.port)
 
         keyList.append(self.port)
@@ -185,11 +191,13 @@ class Node(QObject):
         :param addr: Second's device IP address
         :param port: Second's device port
         """
-        self.peers.append(Peer(addr, int(port), PKString))
+        self._peers.append(Peer(addr, int(port), PKString))
+        self.peersChanged.emit() #notify QML
+
         self.EncryptedKBytes = encrypt_with_public_key(self.public_key, self.random_key)
         self.EncryptedKString = encrypted_base64 = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
 
-        for peer in self.peers:
+        for peer in self._peers:
             peer.EncryptedKBytes = encrypt_with_public_key(peer.PKBytes, self.random_key)
             peer.EncryptedKString = base64.b64encode(peer.EncryptedKBytes).decode('utf-8')
 
@@ -198,7 +206,7 @@ class Node(QObject):
         if self.port == self.drawPerson():
             print(self.public_key_to_pem())
 
-            for peer in self.peers:
+            for peer in self._peers:
                 print(peer.PKString)
 
         print("dodano")
@@ -210,7 +218,7 @@ class Node(QObject):
             requests.post("http://{}:{}/send_message".format(ip(), self.port),
                           json={"addr": ip(), "port": self.port,
                                 "message": "-----BEGIN ENCRYPTED KEY-----\n"+self.EncryptedKString+"\n"})
-            for peer in self.peers:
+            for peer in self._peers:
                 requests.post("http://{}:{}/send_message".format(peer.addr, peer.port),
                               json={"addr": peer.addr, "port": peer.port,
                                     "message": "-----BEGIN ENCRYPTED KEY-----\n"+peer.EncryptedKString+"\n"})
@@ -223,7 +231,8 @@ class Node(QObject):
         :param message: message to be sent
         """
         appended_message = False
-        for peer in self.peers:
+
+        for peer in self._peers:
             encrypted_message = encryption.encrypt_data_ecb(message, self.useful_key)
             response = requests.post("http://{}:{}/send_message".format(host_addr, self.port),
                           json={"addr": peer.addr, "port": peer.port, "message": encrypted_message})
@@ -283,7 +292,7 @@ class Node(QObject):
         Checks both blockchains (one from the host machine and other from the second device) which one is correct
         """
         while True:
-            for peer in self.peers:
+            for peer in self._peers:
                 chain = peer.get_chain()
                 if self.chain.consensus(chain):
                     print("Checked chain with {}, ours is right".format(
@@ -322,28 +331,66 @@ class Node(QObject):
                 print([block.data for block in self.chain.blocks])
 
 
-class Peer:
+class Peer(QObject):
+    portChanged = Signal()
+    addrChanged = Signal()
+    nicknameChanged = Signal()
+
     def __init__(self, address, port, PKString):
         """
         Creates connection with second device
         :param address: Second device's IP address
         :param port: Second device's port
         """
-        self.addr = address
-        self.port = port
+        super().__init__()
+
+        self._nickname = "shit" #narazie stały zeby qml dzialal
+        self._addr = address
+        self._port = port
+
         self.PKString = PKString
         self.PKBytes = load_public_key_from_pem(PKString)
         self.EncryptedKBytes = encrypt_with_public_key(self.PKBytes, os.urandom(32))
         self.EncryptedKString = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
+
+    @Property(str)
+    def port(self):
+        return self._port
+
+    @Property(str)
+    def addr(self):
+        return self._addr
+
+    @Property(str)
+    def nickname(self):
+        return self._nickname
+
+    @port.setter
+    def port(self, new_val):
+        if self._port != new_val:
+            self._port = new_val
+            self.portChanged.emit()
+
+    @addr.setter
+    def addr(self, new_val):
+        if self._addr != new_val:
+            self._addr = new_val
+            self.addrChanged.emit()
+
+    @nickname.setter
+    def nickname(self, new_val):
+        if self._nickname != new_val:
+            self._nickname = new_val
+            self.nicknameChanged.emit()
 
     def get_chain(self):
         """
         Gets blockchain from the second device
         :return: Blockchain
         """
-        print("Fetching chain from {}".format((self.addr, self.port)))
+        print("Fetching chain from {}".format((self._addr, self._port)))
 
-        message = requests.get("http://{}:{}/chain".format(self.addr, self.port)).text
+        message = requests.get("http://{}:{}/chain".format(self._addr, self._port)).text
 
         return blockchain.Blockchain.fromjson(message)
 

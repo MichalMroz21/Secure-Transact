@@ -13,12 +13,23 @@ Page {
         id: messageModel
     }
 
+    Component.onCompleted: {
+        // Clear the model to ensure no hardcoded elements are present
+        userModel.clear();
+
+        // Iterate over peers array passed from Python
+        for (let i = 0; i < main_node.peers.length; i++) {
+            userModel.append({
+                nickname: main_node.peers[i].nickname,
+                addr: main_node.peers[i].addr,
+                port: main_node.peers[i].port
+            });
+        }
+    }
+
     // Create a ListModel for the users (placeholders for now)
     ListModel {
         id: userModel
-        ListElement { name: "User 1"; ip: "192.168.1.1" }
-        ListElement { name: "User 2"; ip: "192.168.1.2" }
-        ListElement { name: "User 3"; ip: "192.168.1.3" }
     }
 
     // Rectangle for the main chat container, where chat and user list will be side by side
@@ -154,7 +165,7 @@ Page {
                             // Use a single Text element to concatenate the name and IP address
                             Text {
                                 anchors.centerIn: parent  // Center the text within the parent
-                                text: '<font color="black">' + model.name + ' </font><font color="gray"><i>(' + model.ip + ')</i></font>'
+                                text: '<font color="black">' + model.nickname + ' </font><font color="gray"><i>(' + model.addr + ":" + model.port + ')</i></font>'
                                 color: "#000"
                                 font.pixelSize: 12
                                 horizontalAlignment: Text.AlignHCenter  // Center horizontally
