@@ -44,14 +44,15 @@ peerPublicKey = StringVar()
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
+
+    #give variables to QML
     engine.rootContext().setContextProperty("main_node", main_node)
     engine.rootContext().setContextProperty("host", host)
     engine.rootContext().setContextProperty("port", port)
     engine.rootContext().setContextProperty("pk", pk)
+
     engine.load("source_gui/main.qml")
     #sys.exit(app.exec())
-
-
 
 if "TITLE" in os.environ:
     master.title("Klient {0}".format(os.environ["TITLE"]))
