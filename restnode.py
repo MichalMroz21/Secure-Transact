@@ -18,7 +18,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 
-import restnode
+from PySide6.QtCore import QObject, Signal, Slot
 
 """
 PEARSCOIN CHAIN TRANSFER PROTOCOL:
@@ -84,12 +84,14 @@ def encrypt_with_public_key(public_key, key):
         )
     )
 
-class Node:
+class Node(QObject):
     def __init__(self, port):
+        super().__init__()
         """
         Creates a node
         :param port: Host machine port
         """
+
         self.peers = []                                     # connections with other devices
         self.chain = blockchain.Blockchain()                # copy of blockchain
         self.chain.genesis()                                # initiating first block of blockchain
@@ -170,13 +172,14 @@ class Node:
         chosen_port = random.choice(keyList)
         return chosen_port
 
+    @Slot(str, str, str)
     def peer(self, addr, port, PKString):
         """
         Creates peer with second device
         :param addr: Second's device IP address
         :param port: Second's device port
         """
-        self.peers.append(Peer(addr, port, PKString))
+        self.peers.append(Peer(addr, int(port), PKString))
         self.EncryptedKBytes = encrypt_with_public_key(self.public_key, self.random_key)
         self.EncryptedKString = encrypted_base64 = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
         for peer in self.peers:
@@ -202,6 +205,7 @@ class Node:
                               json={"addr": peer.addr, "port": peer.port,
                                     "message": "-----BEGIN ENCRYPTED KEY-----\n"+peer.EncryptedKString+"\n"})
 
+    @Slot(str,str)
     def send_mes(self, host_addr, message):
         """
         Sends message to other device
@@ -219,6 +223,7 @@ class Node:
                 if response.status_code == 200:
                     appended_message = True
 
+
     def view_parsed_messages(self, host_addr):
         """
         :param host_addr: sender IP address
@@ -235,6 +240,7 @@ class Node:
         except Exception as e:
             return e
 
+    @slot(str, str)
     def get_messages_block(self, host_addr):
         """
         :param host_addr: sender IP address

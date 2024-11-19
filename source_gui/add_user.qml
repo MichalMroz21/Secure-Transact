@@ -51,6 +51,21 @@ Page {
             }
         }
 
+        // Public Key Input
+        TextField {
+            id: pkField
+            placeholderText: "Public Key"
+            font.pixelSize: 16
+            height: 40
+            Layout.fillWidth: true
+            Layout.maximumWidth: maxInputWidth  // Set a maximum width for the input
+            background: Rectangle {
+                color: "#ffffff"
+                border.color: "#ccc"
+                radius: 5
+            }
+        }
+
         // Buttons Row
         RowLayout {
             spacing: 20
@@ -71,6 +86,13 @@ Page {
                     color: "white"
                     font.pixelSize: 16
                     anchors.centerIn: parent
+                }
+                onClicked:{
+                    if(ipAddressField.text !== "" && portField.text !== ""){
+
+                        main_node.peer(ipAddressField.text, portField.text, pkField.text);
+                        stackView.pop();
+                    }
                 }
             }
 

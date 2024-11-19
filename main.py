@@ -9,7 +9,7 @@ import requests
 import encryption
 import stake
 import start
-import restnode
+from restnode import Node, ip, get_port, private_key_to_pem, public_key_to_pem
 from encryption import decrypt_data_ecb, create_key, encrypt_data_ecb, encrypt_message_block
 import traceback
 
@@ -19,17 +19,27 @@ from cryptography.hazmat.primitives import hashes
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
+host = ip()
+port = get_port()
+
+main_node = Node(port)
+threads = start.start(main_node)
+
+RawPublicKey = main_node.get_public_key()
+
+pk = main_node.public_key_to_pem()
+
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
+    engine.rootContext().setContextProperty("main_node", main_node)
+    engine.rootContext().setContextProperty("host", host)
+    engine.rootContext().setContextProperty("port", port)
+    engine.rootContext().setContextProperty("pk", pk)
     engine.load("source_gui/main.qml")
     #sys.exit(app.exec())
 
 master = Tk()
-if "TITLE" in os.environ:
-    master.title("Klient {0}".format(os.environ["TITLE"]))
-
-
 
 # TK VARS
 message = StringVar()
@@ -38,6 +48,13 @@ peerHost = StringVar()
 publicKeyText = StringVar() #mozliwa zmiana
 peerPort = IntVar()
 peerPublicKey = StringVar()
+
+
+
+
+
+if "TITLE" in os.environ:
+    master.title("Klient {0}".format(os.environ["TITLE"]))
 
 # CALLBACKS
 def send():
@@ -82,15 +99,6 @@ def paste_from_clipboard(entry_box):
         entry_box.insert(0, text) # Wstaw tekst ze schowka
     except TclError as e:
         print(f"Błąd schowka: {e}")
-
-
-host = restnode.ip()
-port = restnode.get_port()
-
-main_node = restnode.Node(port)
-threads = start.start(main_node)
-
-RawPublicKey = main_node.get_public_key()
 
 # UI ELEMENTS
 scrollbar = Scrollbar(master)
@@ -183,9 +191,9 @@ def convert_key(base64keyEncypted):
         ))
     sessionKey = main_node.random_key
     privateKey = main_node.private_key
-    pemPrivateKey = restnode.private_key_to_pem(privateKey)
+    pemPrivateKey = private_key_to_pem(privateKey)
     publicKey = main_node.public_key
-    pemPublicKey = restnode.public_key_to_pem(publicKey)
+    pemPublicKey = public_key_to_pem(publicKey)
     encryptedKey = main_node.EncryptedKBytes
     encryptedKString = main_node.EncryptedKString
     print("Konwersje")
