@@ -351,7 +351,7 @@ class Peer(QObject):
         """
         super().__init__()
 
-        self._nickname = "shit" #narazie stały zeby qml dzialal
+        self._nickname = "user" #narazie stały zeby qml dzialal
         self._addr = address
         self._port = port
         self._PKString = PKString
