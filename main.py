@@ -11,7 +11,7 @@ import traceback
 
 from tkinter import *
 
-from restnode import Node, ip, get_port, private_key_to_pem, public_key_to_pem
+from user import User
 from encryption import decrypt_data_ecb, create_key, encrypt_data_ecb, encrypt_message_block
 
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
@@ -21,15 +21,12 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
 
-host = ip()
-port = get_port()
+user = User()
+threads = start.start(user)
 
-main_node = Node(port)
-threads = start.start(main_node)
+RawPublicKey = user.get_public_key()
 
-RawPublicKey = main_node.get_public_key()
-
-pk = main_node.public_key_to_pem()
+pk = user.public_key_to_pem()
 
 #Tk instantiation
 master = Tk()
@@ -47,9 +44,7 @@ if __name__ == "__main__":
     engine = QQmlApplicationEngine()
 
     #give variables to QML
-    engine.rootContext().setContextProperty("main_node", main_node)
-    engine.rootContext().setContextProperty("host", host)
-    engine.rootContext().setContextProperty("port", port)
+    engine.rootContext().setContextProperty("user", user)
     engine.rootContext().setContextProperty("pk", pk)
 
     engine.load("source_gui/main.qml")
@@ -66,9 +61,8 @@ def send():
     """
     print("Send message")
     #me.add_data(message.get())
-    main_node.send_mes(host, message.get())
+    user.send_mes(user.host, message.get())
     message.set("")
-
 
 def peer():
     """
@@ -77,14 +71,14 @@ def peer():
     """
     print("Peer with node")
 
-    main_node.peer(peerHost.get(), peerPort.get(), peerPublicKey.get())
+    user.peer(peerHost.get(), peerPort.get(), peerPublicKey.get())
     peerHost.set("")
     peerPort.set("")
     peerPublicKey.set("")
 
 def generate_every_key():
     print("Generate every_key")
-    main_node.sendEncryptedKeys()
+    user.sendEncryptedKeys()
 
 def copy_to_clipboard(text_box):
     # Pobierz tekst z pola tekstowego
@@ -111,13 +105,13 @@ scrollbar.config(command=messagesBlock.yview)
 messageBox = Entry(master, textvariable=message)
 sendBtn = Button(master, text="Send", command=send)
 ipText = Text(master, height=1, width=50)
-ipText.insert("1.0", host)
+ipText.insert("1.0", user._host)
 portText = Text(master, height=1, width=50)
-portText.insert("1.0", port)
+portText.insert("1.0", user._port)
 # statusText = Text(master, height=2, width=50)
 # statusText.insert("1.0", "Peer: ({host}, {port})".format(host=host, port=port))
 publicKeyText = Text(master, height=16, width=50)
-publicKeyText.insert("1.0", main_node.public_key_to_pem())
+publicKeyText.insert("1.0", user.public_key_to_pem())
 copyIp = Button(master, text="kopiuj", command=lambda: copy_to_clipboard(ipText))
 copyPort = Button(master, text="kopiuj", command=lambda: copy_to_clipboard(portText))
 copyPublicKey = Button(master, text="kopiuj", command=lambda: copy_to_clipboard(publicKeyText))
@@ -158,9 +152,8 @@ messageBox.bind("<Return>", lambda event: send())
 ipBox.bind("<Return>", lambda event: peer())
 portBox.bind("<Return>", lambda event: peer())
 
-peerHost.set(host)
-
-myAddr.set("Peer: ({host}, {port})".format(host=host, port=port))
+#peerHost.set(user.host)
+#myAddr.set("Peer: ({host}, {port})".format(host=user.host, port=port))
 
 messages = ""
 
@@ -184,7 +177,7 @@ new_block_in_progress = False
 
 def convert_key(base64keyEncypted):
     byteKey = base64.b64decode(base64keyEncypted)
-    decryptedSessionKey = main_node.private_key.decrypt(
+    decryptedSessionKey = user.private_key.decrypt(
         byteKey,
         padding.OAEP(
             mgf=padding.MGF1(algorithm=hashes.SHA256()),
@@ -192,13 +185,13 @@ def convert_key(base64keyEncypted):
             label=None
         ))
 
-    sessionKey = main_node.random_key
-    privateKey = main_node.private_key
-    pemPrivateKey = private_key_to_pem(privateKey)
-    publicKey = main_node.public_key
-    pemPublicKey = public_key_to_pem(publicKey)
-    encryptedKey = main_node.EncryptedKBytes
-    encryptedKString = main_node.EncryptedKString
+    sessionKey = user.random_key
+    privateKey = user.private_key
+    pemPrivateKey = encryption.private_key_to_pem(privateKey)
+    publicKey = user.public_key
+    pemPublicKey = encryption.public_key_to_pem(publicKey)
+    encryptedKey = user.EncryptedKBytes
+    encryptedKString = user.EncryptedKString
 
     print("Konwersje")
 
@@ -219,14 +212,14 @@ def parse_messages(restnode, messages):
             print("Przed konwersja klucza")
 
             real_key = convert_key(editedMessage)
-            main_node.useful_key = real_key
+            user.useful_key = real_key
 
             print("Konwersja klucza")
 
             editedMessage += "\n"
-            parsed_messages += base64.b64encode(real_key).decode('utf-8') + "\n" + main_node.drawString + "\n"
+            parsed_messages += base64.b64encode(real_key).decode('utf-8') + "\n" + user.drawString + "\n"
         else:
-            decrypted_message = encryption.decrypt_data_ecb(message["message"], main_node.useful_key)
+            decrypted_message = encryption.decrypt_data_ecb(message["message"], user.useful_key)
             parsed_messages += message["user"] + " (" + message["date"] + "): " + decrypted_message + "\n"
 
     return parsed_messages
@@ -246,11 +239,11 @@ def updateChatbox():
     data = ""
 
     if read_from_block:
-        for block in main_node.chain.blocks:
+        for block in user.chain.blocks:
             if block.index != 0:
                 data += "/\\/\\DEBUG/\\/\\ Block number {0}\n".format(block.index)
                 flatedList = "".join(block.data)
-                decryptedBlock = decrypt_data_ecb(flatedList, main_node.useful_key)
+                decryptedBlock = decrypt_data_ecb(flatedList, user.useful_key)
                 json_messages_array = decryptedBlock.split("}")
                 json_messages_array.pop()
                 json_list = []
@@ -259,7 +252,7 @@ def updateChatbox():
                     json_messages_array[index] += "}"
                     json_list.append(json.loads(json_messages_array[index]))
 
-                parsed_messages = parse_messages(main_node, json_list)
+                parsed_messages = parse_messages(user, json_list)
                 data += parsed_messages
 
                 if block.index > last_block_index:
@@ -269,8 +262,8 @@ def updateChatbox():
                     read_from_block = False
                     update_chat = True
 
-    json_messages = main_node.get_messages_block(host)
-    messages = parse_messages(main_node, json_messages)
+    json_messages = user.get_messages_block(user._host)
+    messages = parse_messages(user, json_messages)
 
     data = chat_history_from_blocks + messages
 
@@ -291,8 +284,8 @@ def updateChatbox():
         for message in json_messages:
             data += json.dumps(message)
 
-        main_node.add_data(data)
-        main_node.remove_messages_block(host)
+        user.add_data(data)
+        user.remove_messages_block(user.host)
         # reset index of last message
         last_message_index = 0
         read_from_block = True

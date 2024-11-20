@@ -5,16 +5,18 @@ import flask
 import requests
 
 from flask import jsonify, request
-from restnode import Node
 
-def start(node):
+from user import User
+
+
+def start(user):
     """
     Starts application threads
     :param listen_port: Port to be listened to
     """
     # messages has information about which user sent which message.
     # ["user": "user_address"],["message", "message_content"]
-    messages = []
+    buffered_messages = []
     block_time_creation = datetime.datetime.now()
     new_block_creation = False
     participants = []
@@ -24,7 +26,7 @@ def start(node):
 
     @app.route("/chain")
     def chain():
-        return node.chain.jsonrep()
+        return user.chain.jsonrep()
 
     @app.route('/send_message', methods=['POST'])
     def send_message():
@@ -45,7 +47,7 @@ def start(node):
             # Wysyłamy wiadomość HTTP POST do endpointu odbiorcy
             date = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M:%S")
             response = requests.post("http://{}:{}/receive_message".format(addr, port),
-                          json={"user": request.host, "message": message, "date": date})
+                          json={"user": request.host, "message": message, "date": date, "group": user.group_to_string(user.group)})
             if response.status_code == 200:
                 return jsonify({"status": "Message was successfully sent"}), 200
             else:
@@ -60,31 +62,59 @@ def start(node):
         Endpoint do odbierania wiadomości od innego użytkownika
         """
         message = request.json
+        print("================")
+        print(message)
+        group = message["group"]
+        print(group)
+        print("==========================")
 
         print(message.get("message"))
         print(message)
 
         if message:
-            messages.append(message)
+            print(user.messages)
+            user.messages[group].append(message["message"])
+            user.messagesChanged.emit()
+
+            print(user.messages)
+
+            buffered_messages.append(message)
             return jsonify({"status": "Message received!"}), 200
         else:
             return jsonify({"error": "Got no message"}), 400
+
+    @app.route('/receive_pk', methods=['POST'])
+    def receive_pk():
+        """
+        Endpoint do odbierania wiadomości od innego użytkownika
+        """
+        public_key = request.json
+        editedMessage = public_key["message"].replace("-----BEGIN ENCRYPTED KEY-----", "").replace("\n", "")
+        user.useful_key = convert_key(editedMessage)
+
+        print(public_key.get("message"))
+        print(public_key)
+
+        if public_key:
+            return jsonify({"status": "Public key received!"}), 200
+        else:
+            return jsonify({"error": "Got no public key"}), 400
 
     @app.route('/get_messages', methods=['GET'])
     def get_messages():
         """
         Endpoint do pobierania wszystkich odebranych wiadomości
         """
-        return jsonify(messages)
+        return jsonify(buffered_messages)
 
     @app.route('/remove_messages', methods=['POST'])
     def remove_messages():
         """
         Endpoint do odbierania wiadomości od innego użytkownika
         """
-        messages.clear()
+        buffered_messages.clear()
 
-        if not messages:
+        if not buffered_messages:
             return jsonify({"status": "Messages removed!"}), 200
         else:
             return jsonify({"error": "Could not remove messages!"}), 400
@@ -96,7 +126,7 @@ def start(node):
         """
         # Check if the current last block's hash is equal to that sent in resquest
         # This checks if user who wants to notify about block creation has valid blockchain version with others
-        hash = node.chain.blocks[-1].hash
+        hash = user.chain.blocks[-1].hash
         request_hash = request.json.get("hash")
         nonlocal new_block_creation
 
@@ -141,9 +171,9 @@ def start(node):
         drawn_indexes.append(request.json.get("indexes"))
         return jsonify({"status": "Ok"}), 200
 
-    server_thread = threading.Thread(target=node.serve_chain, args=(app,), daemon=True)
-    consensus_thread = threading.Thread(target=node.check_consensus, daemon=True)
-    miner_thread = threading.Thread(target=node.add_blocks, daemon=True)
+    server_thread = threading.Thread(target=user.serve_chain, args=(app,), daemon=True)
+    consensus_thread = threading.Thread(target=user.check_consensus, daemon=True)
+    miner_thread = threading.Thread(target=user.add_blocks, daemon=True)
     #input_thread = threading.Thread(target=me.handle_input)
     threads = []
     threads.append(server_thread)
