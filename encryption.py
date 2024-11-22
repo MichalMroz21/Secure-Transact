@@ -3,6 +3,21 @@ import base64
 
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization
+
+"""
+PEARSCOIN CHAIN TRANSFER PROTOCOL:
+
+MESSAGE TYPES:
+
+Message     Description         Response
+/chain      Get current chain   JSON chain object
+
+"""
 
 # Używamy funkcji hashlib do stworzenia klucza o odpowiedniej długości
 # W tym przypadku użyjemy 'qwerty' i dopełnimy go do 16 znaków
@@ -81,3 +96,38 @@ def decrypt_message_block(block, block_key, messages_key):
     :param messages_key: key to be used in messages decryption
     :return:
     """
+
+def private_key_to_pem(private_key):
+    pem_private_key = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,  # Kodowanie PEM
+        format=serialization.PrivateFormat.TraditionalOpenSSL,  # Format klucza
+        encryption_algorithm=serialization.NoEncryption()  # Bez hasła
+    )
+    return pem_private_key.decode('utf-8')
+
+def public_key_to_pem(public_key):
+    pem = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+    return pem.decode('utf-8')  # Konwersja do tekstu
+
+def load_public_key_from_pem(pem_data):
+    public_key = serialization.load_pem_public_key(
+        pem_data.encode('utf-8'),  # Konwersja tekstu na bajty
+        backend=default_backend()
+    )
+
+    return public_key
+
+def encrypt_with_public_key(public_key, key):
+    """Szyfrowanie klucza AES przy użyciu klucza publicznego RSA."""
+    return public_key.encrypt(
+        key,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
