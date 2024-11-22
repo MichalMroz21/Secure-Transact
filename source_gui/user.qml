@@ -20,7 +20,7 @@ Page {
                     color: "black"
                 }
                 TextField {
-                    text: host
+                    text: user.host
                     Layout.alignment: Qt.AlignHCenter
                     font.pixelSize: 20
                     color: "black"
@@ -35,7 +35,7 @@ Page {
                     color: "black"
                 }
                 TextField {
-                    text: port
+                    text: user.port
                     Layout.alignment: Qt.AlignHCenter
                     font.pixelSize: 20
                     color: "black"

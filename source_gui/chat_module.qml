@@ -16,19 +16,40 @@ Page {
     Component.onCompleted: {
         // Clear the model to ensure no hardcoded elements are present
         userModel.clear();
+        messageModel.clear();
 
         // Iterate over peers array passed from Python
-        for (let i = 0; i < main_node.peers.length; i++) {
+        for (let i = 0; i < user.peers.length; i++) {
+            var isInGroup = false;
+            var addr = user.peers[i].addr;
+            var port = user.peers[i].port;
+
+            for(let j = 0; j < user.group.length; j++){
+                if(addr === user.group[j].addr && port === user.group[j].port){
+                    isInGroup = true;
+                    break;
+                }
+            }
+
             userModel.append({
-                nickname: main_node.peers[i].nickname,
-                addr: main_node.peers[i].addr,
-                port: main_node.peers[i].port,
-                PKString: main_node.peers[i].PKString
+                nickname: user.peers[i].nickname,
+                addr: addr,
+                port: port,
+                PKString: user.peers[i].PKString,
+                isInGroup: isInGroup
+            });
+        }
+
+        let messages = user.getConversation();
+
+        for(let i = 0; i < messages.length; i++){
+            messageModel.append({
+                messageText: messages[i]
             });
         }
     }
 
-    // Create a ListModel for the users (placeholders for now)
+    // Create a ListModel for the users
     ListModel {
         id: userModel
     }
@@ -79,7 +100,7 @@ Page {
 
                         Text {
                             width: parent.width  // Ensure the Text item takes full width of its parent
-                            text: model.text
+                            text: model.messageText
                             color: "#000"
                             font.pixelSize: 16
                             anchors.left: parent.left
@@ -116,7 +137,7 @@ Page {
                         onAccepted: {
                             if (inputField.text.trim() !== "") {
                                 // Append new message to the model
-                                main_node.send_mes(host, inputField.text);
+                                user.send_mes(inputField.text);
                                 messageModel.append({"text": inputField.text});
                                 // Clear the input field
                                 inputField.text = "";
@@ -146,7 +167,7 @@ Page {
                     delegate: Rectangle {
                         width: parent.width  // Set width explicitly for user list items
                         height: 40  // Fixed height for each user item
-                        id: user
+                        id: userRectangle
 
                         MouseArea {
                             anchors.fill: parent
@@ -181,17 +202,27 @@ Page {
 
                             ColumnLayout {
                                 Button {
-                                    height: user.height / 2
-                                    text: "Chat"
+                                    height: userRectangle.height / 2
+                                    text: model.isInGroup ? "Remove from group" : "Add to group"
+
+                                    onClicked:{
+                                        if(model.isInGroup == true){
+                                            user.removeFromGroup(model.addr, model.port);
+                                        }
+                                        else{
+                                            user.addToGroup(model.addr, model.port);
+                                        }
+                                        stackView.push("chat_module.qml");
+                                    }
                                 }
 
                                 Button {
-                                    height: user.height / 2
+                                    height: userRectangle.height / 2
                                     text: "Get public key"
                                     onClicked: {
-                                        textEdit.text = model.PKString
-                                        textEdit.selectAll()
-                                        textEdit.copy()
+                                        textEdit.text = model.PKString;
+                                        textEdit.selectAll();
+                                        textEdit.copy();
                                     }
                                 }
 
@@ -201,8 +232,14 @@ Page {
                                 }
 
                                 Button {
-                                    height: user.height / 2
+                                    height: userRectangle.height / 2
                                     text: "Delete from list"
+
+                                    onClicked:{
+                                        user.removeFromPeers(model.addr, model.port);
+                                        user.removeFromGroup(model.addr, model.port);
+                                        stackView.push("chat_module.qml");
+                                    }
                                 }
                             }
                         }
