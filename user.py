@@ -293,7 +293,6 @@ class User(QObject):
     def send_mes(self, message):
         """
         Sends message to other device
-        :param host_addr: Sender IP address
         :param message: message to be sent
         """
         appended_message = False
