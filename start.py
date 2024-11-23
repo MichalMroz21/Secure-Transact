@@ -74,7 +74,8 @@ def start(user):
         if message:
             print(user.messages)
             user.messages[group].append(message)
-            user.messagesChanged.emit()
+            msg_string = str(message["port"]) + " (" + message["date"] + "): " + message["message"]
+            user.messagesChanged.emit(msg_string)
 
             print(user.messages)
 

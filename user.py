@@ -21,7 +21,7 @@ class User(QObject):
     peersChanged = Signal() #emit if peers are in any way changed
     hostChanged = Signal()
     portChanged = Signal()
-    messagesChanged = Signal()
+    messagesChanged = Signal(str)
     groupChanged = Signal()
 
     def __init__(self):
@@ -73,11 +73,11 @@ class User(QObject):
     def peers(self):
         return self._peers
 
-    @Property(int)
+    @Property(int, notify=portChanged)
     def port(self):
         return self._port
 
-    @Property(str)
+    @Property(str, notify=hostChanged)
     def host(self):
         return self._host
 
@@ -111,14 +111,19 @@ class User(QObject):
         """
         return random.randint(1024, 65535)
 
-    @Slot()
-    def getConversation(self):
+    @Slot(result=list)
+    def get_conversation(self):
         group_str = self.group_to_string(self.group)
         if group_str is None:
-            return ""
-
+            return []
+        not_parsed_messages = self.messages[group_str]
         print(self.messages)
-        return self.messages[group_str]
+        if not_parsed_messages is None:
+            return []
+        messages_array = []
+        for message in not_parsed_messages:
+            messages_array.append(str(message["port"]) + " (" + message["date"] + "): " + message["message"])
+        return messages_array
 
     @Slot(str, int)
     def addToGroup(self, addr, port):
@@ -129,7 +134,7 @@ class User(QObject):
 
                 if self.group_to_string(self.group) not in self.messages.keys():
                     self.messages[self.group_to_string(self.group)] = []
-                    self.messagesChanged.emit()
+                    self.messagesChanged.emit("")
                 break
 
     @Slot(str, int)
@@ -314,6 +319,7 @@ class User(QObject):
 
                 if response.status_code == 200:
                     appended_message = True
+                    #self.messagesChanged.emit(message)
 
 
     def view_parsed_messages(self, host_addr):

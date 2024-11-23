@@ -40,13 +40,20 @@ Page {
             });
         }
 
-        let messages = user.getConversation();
+        let messages = user.get_conversation();
 
         for(let i = 0; i < messages.length; i++){
             messageModel.append({
                 messageText: messages[i]
             });
         }
+        user.messagesChanged.connect(function(newMessage) {
+            if (newMessage !== ""){
+                messageModel.append({
+                    messageText: newMessage
+                });
+            };
+        });
     }
 
     // Create a ListModel for the users
@@ -138,7 +145,7 @@ Page {
                             if (inputField.text.trim() !== "") {
                                 // Append new message to the model
                                 user.send_mes(inputField.text);
-                                messageModel.append({"text": inputField.text});
+                                //messageModel.append({"text": inputField.text});
                                 // Clear the input field
                                 inputField.text = "";
                             }
