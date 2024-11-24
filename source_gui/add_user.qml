@@ -51,21 +51,6 @@ Page {
             }
         }
 
-        // Public Key Input
-        TextField {
-            id: pkField
-            placeholderText: "Public Key"
-            font.pixelSize: 16
-            height: 40
-            Layout.fillWidth: true
-            Layout.maximumWidth: maxInputWidth  // Set a maximum width for the input
-            background: Rectangle {
-                color: "#ffffff"
-                border.color: "#ccc"
-                radius: 5
-            }
-        }
-
         // Buttons Row
         RowLayout {
             spacing: 20
@@ -89,7 +74,7 @@ Page {
                 }
                 onClicked:{
                     if(ipAddressField.text !== "" && portField.text !== ""){
-                        user.verify_peer_connection(ipAddressField.text, portField.text, pkField.text);
+                        user.verify_peer_connection(ipAddressField.text, portField.text);
                         stackView.push("chat_module.qml");
                     }
                 }
