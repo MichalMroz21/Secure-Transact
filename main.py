@@ -6,7 +6,7 @@ import base64
 from tkinter import *
 
 from user import User
-from powlib import Powlib
+from powlib import PowLib
 from networking import Networking
 from encryption import Encryption
 
@@ -18,7 +18,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 
 import global_constants
 
-powlib = Powlib()
+powlib = PowLib()
 encryption = Encryption()
 user = User(powlib, encryption)
 network = Networking(user)
