@@ -1,6 +1,7 @@
 import base64
 import datetime
 import hashlib
+import http
 import os
 import socket
 import time
@@ -321,6 +322,25 @@ class User(QObject):
                     appended_message = True
                     #self.messagesChanged.emit(message)
 
+    @Slot(str,str,str)
+    def verify_peer_connection(self, addr, port, PKString):
+        """
+        Verify if given peer is correct.
+        :param examined_peer: Peer which connection is tested for
+        :return: boolean, str
+        """
+        # send request to examined peer
+        response = requests.get("http://{}:{}/establish_a_connection".format(addr, port),
+                                         json={"addr": self.host, "port": self.port, "pk": self.public_key_to_pem()})
+        # check if examined peer responded with a correct status code
+        if response.status_code == http.HTTPStatus.OK:
+            # check if public key of examined peer corresponds to the one from the response
+            pk = response.json()["pk"]
+            if PKString != pk:
+                PKString = pk
+            # add new peer
+            self.peer(addr, int(port), PKString)
+            self.peersChanged.emit()  # notify QML
 
     def view_parsed_messages(self, host_addr):
         """

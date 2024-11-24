@@ -89,7 +89,7 @@ Page {
                 }
                 onClicked:{
                     if(ipAddressField.text !== "" && portField.text !== ""){
-                        user.peer(ipAddressField.text, portField.text, pkField.text);
+                        user.verify_peer_connection(ipAddressField.text, portField.text, pkField.text);
                         stackView.push("chat_module.qml");
                     }
                 }

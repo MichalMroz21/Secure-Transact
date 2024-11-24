@@ -1,12 +1,17 @@
+import base64
 import datetime
 import sys
 import threading
+from http import HTTPStatus
+
 import flask
 import requests
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
 
 from flask import jsonify, request
 
-from user import User
+import encryption
 
 
 def start(user):
@@ -74,7 +79,8 @@ def start(user):
         if message:
             print(user.messages)
             user.messages[group].append(message)
-            msg_string = str(message["port"]) + " (" + message["date"] + "): " + message["message"]
+            decrypted_message = encryption.decrypt_data_ecb(message["message"], user.useful_key)
+            msg_string = str(message["port"]) + " (" + message["date"] + "): " + decrypted_message
             user.messagesChanged.emit(msg_string)
 
             print(user.messages)
@@ -100,6 +106,19 @@ def start(user):
             return jsonify({"status": "Public key received!"}), 200
         else:
             return jsonify({"error": "Got no public key"}), 400
+
+    @app.route('/establish_a_connection', methods=['GET'])
+    def establish_a_connection():
+        json_array = request.json
+        addr = json_array.get("addr")
+        port = json_array.get("port")
+        pk = json_array.get("pk")
+        try:
+            user.peer(addr, int(port), pk)
+            return jsonify({"status": "Connection established", "pk": user.public_key_to_pem()}), HTTPStatus.OK
+        except Exception as e:
+            return jsonify({"error": str(e)}), HTTPStatus.SERVICE_UNAVAILABLE
+
 
     @app.route('/get_messages', methods=['GET'])
     def get_messages():

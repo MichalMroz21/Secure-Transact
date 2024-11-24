@@ -26,7 +26,7 @@ def encrypt_data_ecb(data, key):
     """
     Encrypt given data with specified key
     :param data: data to be encrypted
-    :param keyRaw:
+    :param key: Key to be used in encryption
     :return: Encrypted data
     """
     # Utwórz obiekt szyfrujący AES w trybie ECB z użyciem klucza
@@ -41,7 +41,7 @@ def decrypt_data_ecb(encrypted_base64, key):
     """
     Decrypt data from Base64
     :param encrypted_base64: Data encrypted in Base64 format
-    :param keyRaw: Key to be used in decryption
+    :param key: Key to be used in decryption
     :return: Decrypted data
     """
     encrypted_data = base64.b64decode(encrypted_base64)
