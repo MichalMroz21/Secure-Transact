@@ -1,160 +1,174 @@
 import datetime
-import json
 import random
 import requests
+import global_constants
 
-def send_create_block_signal(host_addr, host_port, node):
-    """
-    Sends signal to everyone in peer nodes that there is a new block to be created
-    """
-    try:
-        date = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M:%S")
-        for peer in node.peers:
-            requests.post("http://{}:{}/block_notify".format(peer.addr, peer.port),
-                          json={"addr": host_addr, "port": host_port, "hash": node.chain.blocks[-1].hash, "date": date})
+from http import HTTPStatus
 
-    except Exception as e:
-        print(e)
+from PySide6.QtCore import QObject
 
-def receive_create_block_signal(host_addr, host_port):
-    """
-    Receives signal that there is a new block to be created
-    :param node:
-    :param host_addr:
-    :return:
-    """
-    try:
-        response = requests.get("http://{}:{}/get_new_block_notification".format(host_addr, host_port))
+class Stake(QObject):
+    def __init__(self, user):
+        super().__init__()
 
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
+    def send_create_block_signal(self, host_addr, host_port, node):
+        """
+        Sends signal to everyone in peer nodes that there is a new block to be created
+        """
+        try:
+            date = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M:%S")
 
-    except Exception as e:
-        print(e)
-        return None
-
-
-def send_participation_signal(host_addr, host_port, node, stake):
-    """
-    Sends signal that user wants to take a part of block creation
-    :param node:
-    :param host_addr:
-    :return:
-    """
-    try:
-        date = datetime.datetime.now().isoformat()
-        # inform yourself about being a participant
-        response = requests.post("http://{}:{}/participation_signal".format(host_addr, host_port),
-                      json={"addr": host_addr, "port": host_port, "hash": node.chain.blocks[-1].hash, "stake": stake,"date": date})
-        # inform rest of peers if it could be added
-        if response.status_code == 200:
             for peer in node.peers:
-                requests.post("http://{}:{}/participation_signal".format(peer.addr, peer.port),
-                              json={"addr": host_addr, "port": host_port, "hash": node.chain.blocks[-1].hash, "stake": stake, "date": date})
+                requests.post("http://{}:{}/block_notify".format(peer.addr, peer.port),
+                              json={"addr": host_addr, "port": host_port, "hash": node.chain.blocks[-1].hash, "date": date})
 
-    except Exception as e:
-        print(e)
+        except Exception as e:
+            print(e)
 
-def get_participants(host_addr, host_port):
-    """
-    Gets all raffle participants
-    :param node:
-    :param host_addr:
-    :return:
-    """
-    try:
-        response = requests.get("http://{}:{}/get_participants".format(host_addr, host_port))
-        if response.status_code == 200:
-            return response.json()
-        else:
+    def receive_create_block_signal(self, host_addr, host_port):
+        """
+        Receives signal that there is a new block to be created
+        :param node:
+        :param host_addr:
+        :return:
+        """
+        try:
+            response = requests.get("http://{}:{}/get_new_block_notification".format(host_addr, host_port))
+
+            if response.status_code == HTTPStatus.OK:
+                return response.json()
+            else:
+                return None
+
+        except Exception as e:
+            print(e)
             return None
 
-    except Exception as e:
-        print(e)
-        return None
+
+    def send_participation_signal(self, host_addr, host_port, node, stake):
+        """
+        Sends signal that user wants to take a part of block creation
+        :param node:
+        :param host_addr:
+        :return:
+        """
+        try:
+            date = datetime.datetime.now().isoformat()
+
+            #Inform yourself about being a participant
+            response = requests.post("http://{}:{}/participation_signal".format(host_addr, host_port),
+                          json={"addr": host_addr, "port": host_port, "hash": node.chain.blocks[-1].hash, "stake": stake, "date": date})
+
+            #Inform rest of peers if it could be added
+            if response.status_code == HTTPStatus.OK:
+                for peer in node.peers:
+                    requests.post("http://{}:{}/participation_signal".format(peer.addr, peer.port),
+                                  json={"addr": host_addr, "port": host_port, "hash": node.chain.blocks[-1].hash, "stake": stake, "date": date})
+
+        except Exception as e:
+            print(e)
+
+    def get_participants(self, host_addr, host_port):
+        """
+        Gets all raffle participants
+        :param node:
+        :param host_addr:
+        :return:
+        """
+        try:
+            response = requests.get("http://{}:{}/get_participants".format(host_addr, host_port))
+
+            if response.status_code == HTTPStatus.OK:
+                return response.json()
+            else:
+                return None
+
+        except Exception as e:
+            print(e)
+            return None
 
 
-def find_common_elemenets_in_dictionaries(list_of_dictionaries):
-    """
-    Checks if all elemenets in the dictionary are common elemenets
-    :param list_of_dictionaries: list to be checked
-    :return: list of dictionaries wth common elemenets
-    """
-    try:
-        # Tworzymy zbiór z pierwszej listy, zamieniając słowniki na tuple (aby móc użyć z operatorem AND)
-        common = set(tuple(sorted(d.items())) for d in list_of_dictionaries[0])
+    def find_common_elements_in_dictionaries(self, list_of_dictionaries):
+        """
+        Checks if all elements in the dictionaries are common elements.
+        :param list_of_dictionaries: list of dictionaries to be checked
+        :return: list of dictionaries with common elements
+        """
+        try:
+            #Create a set from the first list, converting dictionaries to tuples (to allow using the AND operator)
+            common = set(tuple(sorted(d.items())) for d in list_of_dictionaries[0])
 
-        # Dla każdej kolejnej listy aktualizujemy zbiór, zostawiając tylko wspólne elementy
-        for list in list_of_dictionaries[1:]:
-            common &= set(tuple(sorted(d.items())) for d in list)
+            #For each subsequent list, update the set, keeping only common elements
+            for lst in list_of_dictionaries[1:]:
+                common &= set(tuple(sorted(d.items())) for d in lst)
 
-        # Konwertujemy wynikowy zbiór z powrotem na listę słowników
-        return [dict(d) for d in common]
+            #Convert the resulting set back to a list of dictionaries
+            return [dict(d) for d in common]
 
-    except Exception as e:
-        print(e)
+        except Exception as e:
+            print(e)
 
-def verify_participants_lists(host_addr, host_port, node):
-    """
 
-    :param host_addr: Host IP address
-    :param host_port: Host port number
-    :param node: node from which are taken peers
-    :return:
-    """
-    participants_lists = []
-    try:
-        participants = get_participants(host_addr, host_port)
-        participants_lists.append(participants["participants"])
+    def verify_participants_lists(self, host_addr, host_port, node):
+        """
+        :param host_addr: Host IP address
+        :param host_port: Host port number
+        :param node: node from which are taken peers
+        :return:
+        """
+        participants_lists = []
 
-        for peer in node.peers:
-            participants = get_participants(peer.addr, peer.port)
+        try:
+            participants = self.get_participants(host_addr, host_port)
             participants_lists.append(participants["participants"])
 
-        return find_common_elemenets_in_dictionaries(participants_lists)
+            for peer in node.peers:
+                participants = self.get_participants(peer.addr, peer.port)
+                participants_lists.append(participants["participants"])
 
-    except Exception as e:
-        print(e)
+            return self.find_common_elemenets_in_dictionaries(participants_lists)
 
-def participants_raffle(host_addr, host_port, node):
-    """
-    Raffle participants
-    :param node:
-    :param host_addr:
-    :return: participant who has to create a block
-    """
-    # get participants list
+        except Exception as e:
+            print(e)
 
-    participants_list = verify_participants_lists(host_addr, host_port, node)
-    #participants_list = get_participants(host_addr, host_port)
-    # prepare list of participants stakes and stakes sum
-    stakes_list = []
-    stake_sum = 0
+    def participants_raffle(self, host_addr, host_port, node):
+        """
+        Raffle participants
+        :param node:
+        :param host_addr:
+        :return: participant who has to create a block
+        """
+        #Get participants list
+        participants_list = self.verify_participants_lists(host_addr, host_port, node)
 
-    for participant in participants_list:
-        stake = int(participant["stake"])
-        stakes_list.append(stake)
-        stake_sum += stake
+        #participants_list = self.get_participants(host_addr, host_port)
+        #Prepare list of participants stakes and stakes sum
+        stakes_list = []
+        stake_sum = 0
 
-    # calculated distributor so in the next step function could proceed to weighted raffle
-    distributors_list = []
-    distributor_sum = 0.0
+        for participant in participants_list:
+            stake = int(participant["stake"])
+            stakes_list.append(stake)
+            stake_sum += stake
 
-    for stake in stakes_list:
-        distributor_sum += float(stake / stake_sum)
-        distributors_list.append(distributor_sum)
+        #Calculated distributor so in the next step function could proceed to weighted raffle
+        distributors_list = []
+        drawn_indexes = []
+        distributor_sum = 0.0
 
-    drawn_indexes = []
-    # draw 10 random numbers between 0 and 1, then check distributor list which paprticipant won raffle
-    # if the drawn number is greater than distributor for given participant then check next one
-    # if the drawn number is less than distributor for given participant then return their index
-    for i in range(10):
-        drawn_number = random.uniform(0,1)
+        for stake in stakes_list:
+            distributor_sum += float(stake / stake_sum)
+            distributors_list.append(distributor_sum)
 
-        for index, distributor in enumerate(distributors_list):
-            if drawn_number < distributor:
-                drawn_indexes.append(index)
-    # if somehow it wasn't possible to drawn participant then return the last one
-    return drawn_indexes
+        #Draw RANDOM_NUMBER_COUNT random numbers between 0 and 1, then check distributor list which paprticipant won raffle
+        #If the drawn number is greater than distributor for given participant then check next one
+        #If the drawn number is less than distributor for given participant then return their index
+        for i in range(global_constants.RANDOM_NUMBER_COUNT):
+            drawn_number = random.uniform(0, 1)
+
+            for index, distributor in enumerate(distributors_list):
+                if drawn_number < distributor:
+                    drawn_indexes.append(index)
+
+        #If somehow it wasn't possible to drawn participant then return the last one
+        return drawn_indexes

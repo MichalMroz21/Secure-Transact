@@ -5,42 +5,50 @@ import socket
 import time
 import requests
 import random
+import string
+
+import global_constants
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from http import HTTPStatus
 
-import blockchain
-import encryption
+from blockchain import Blockchain
 
 from PySide6.QtCore import QObject, Signal, Slot, Property
 
 
 class User(QObject):
-    peersChanged = Signal() #emit if peers are in any way changed
+    peersChanged = Signal() #Emit if peers are in any way changed
     hostChanged = Signal()
     portChanged = Signal()
     messagesChanged = Signal()
     groupChanged = Signal()
+    nicknameChanged = Signal()
 
-    def __init__(self):
+    def __init__(self, powlib, encryption):
         super().__init__()
         """
         Creates a user
         :param port: Host machine port
         """
         if "TITLE" in os.environ:
-            self.stake = 10000 * int(os.environ["TITLE"])       # currency
-        else: self.stake = 10000
+            self.stake = global_constants.INITIAL_CURRENCY * int(os.environ["TITLE"])       # currency
+        else:
+            self.stake = global_constants.INITIAL_CURRENCY
 
         self.private_key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=2048,
+            public_exponent=global_constants.PRIVATE_KEY_PUBLIC_EXPONENT,
+            key_size=global_constants.PRIVATE_KEY_SIZE,
             backend=default_backend()
         )
 
-        self._peers = []  # connections with other devices
-        self.chain = blockchain.Blockchain()  # copy of blockchain
+        self.powlib = powlib
+        self.encryption = encryption
+
+        #Connections with other devices
+        self.chain = Blockchain(self.powlib)  # copy of blockchain
         self.chain.genesis()  # initiating first block of blockchain
         self.staging = []  # staging data to add to block
 
@@ -48,37 +56,46 @@ class User(QObject):
         self._port = self.get_port()
         self._host = self.ip()
 
-        #Messages Variables
+        #User Variables
         self._messages = {}
         self.indexes = []
         self._group = []
+        self._peers = []
+        self._nickname = self.generate_random_string(global_constants.MAX_NICKNAME_LENGTH)
 
         self.public_key = self.private_key.public_key()
-        self.random_key = os.urandom(32)
-        self.EncryptedKBytes = encryption.encrypt_with_public_key(self.public_key, self.random_key)
-        self.EncryptedKString = encrypted_base64 = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
-        self.useful_key = os.urandom(32)
+        self.random_key = os.urandom(global_constants.RANDOM_KEY_SIZE)
+        self.useful_key = os.urandom(global_constants.USEFUL_KEY_SIZE)
+
+        self.update_encrypted_string(self.public_key, self.random_key)
+
         self.drawString = ""
 
-    @Property("QVariantList")
+    #QVariantMap is for Dictionaries and keys must be strings
+    @Property("QVariantMap", notify=messagesChanged)
     def messages(self):
         return self._messages
 
-    @Property("QVariantList")
+    #QVariantList is for Lists
+    @Property("QVariantList", notify=groupChanged)
     def group(self):
         return self._group
 
-    @Property("QVariantList")
+    @Property("QVariantList", notify=peersChanged)
     def peers(self):
         return self._peers
 
-    @Property(int)
+    @Property(int, notify=portChanged)
     def port(self):
         return self._port
 
-    @Property(str)
+    @Property(str, notify=hostChanged)
     def host(self):
         return self._host
+
+    @Property(str, notify=nicknameChanged)
+    def nickname(self):
+        return self._nickname
 
     @host.setter
     def host(self, new_val):
@@ -92,31 +109,19 @@ class User(QObject):
             self._port = new_val
             self.portChanged.emit()
 
-    def ip(self):
-        """
-        Gets host machine IP address
-        :return: str
-        """
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("40.114.26.190", 80))  # doesn't actually send traffic
-        ipa = s.getsockname()[0]
-        s.close()
-        return ipa
+    @nickname.setter
+    def nickname(self, new_val):
+        if self._nickname != new_val:
+            self._nickname = new_val
+            self.nicknameChanged.emit()
 
-    def get_port(self):
-        """
-        Gets host machine port value from config file
-        :return: int
-        """
-        return random.randint(1024, 65535)
-
-    @Slot()
+    @Slot(result=list)
     def getConversation(self):
         group_str = self.group_to_string(self.group)
-        if group_str is None:
-            return ""
 
-        print(self.messages)
+        if group_str is None or group_str not in self.messages:
+            return []
+
         return self.messages[group_str]
 
     @Slot(str, int)
@@ -129,6 +134,7 @@ class User(QObject):
                 if self.group_to_string(self.group) not in self.messages.keys():
                     self.messages[self.group_to_string(self.group)] = []
                     self.messagesChanged.emit()
+
                 break
 
     @Slot(str, int)
@@ -147,14 +153,101 @@ class User(QObject):
                 self.peersChanged.emit()
                 break
 
-    def update_group_session_key(self):
-        # Szyfrowanie klucza sesji dla każdego użytkownika w grupie
-        self.EncryptedKBytes = encryption.encrypt_with_public_key(self.public_key, self.random_key)
-        self.EncryptedKString = encrypted_base64 = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
+    @Slot(str, str, str)
+    def peer(self, addr, port, PKString):
+        """
+        Creates peer with second device
+        :param addr: Second's device IP address
+        :param port: Second's device port
+        """
+        self._peers.append(Peer(addr, int(port), PKString))
+        self.peersChanged.emit() #Notify QML
+
+        self.update_encrypted_string(self.public_key, self.random_key)
 
         for peer in self._peers:
-            peer.EncryptedKBytes = encryption.encrypt_with_public_key(peer.PKBytes, self.random_key)
-            self.EncryptedKString = encrypted_base64 = base64.b64encode(peer.EncryptedKBytes).decode('utf-8')
+            peer.update_encrypted_string(peer.public_key, self.random_key)
+
+        self.sendEncryptedKeys()
+
+        if self._port == self.drawPerson():
+            print(self.public_key_to_pem())
+
+            for peer in self._peers:
+                print(peer.PKString)
+
+    @Slot(str)
+    def send_mes(self, message):
+        """
+        Sends message to other device
+        :param host_addr: Sender IP address
+        :param message: message to be sent
+        """
+        appended_message = False
+
+        for peer in self.group:
+            encrypted_message = self.encryption.encrypt_data_ecb(message, self.useful_key)
+            group = self.group_to_string(self.group)
+
+            response = requests.post("http://{}:{}/receive_message".format(peer.addr, peer.port),
+                          json={"addr": peer.addr, "port": peer.port, "message": encrypted_message, "group": group})
+
+            if response.status_code == HTTPStatus.OK and not appended_message:
+                response = requests.post("http://{}:{}/receive_message".format(self.host, self.port),
+                                         json={"addr": self.host, "port": self.port, "message": encrypted_message, "group": group})
+
+                if response.status_code == HTTPStatus.OK:
+                    appended_message = True
+
+    @Slot(str, str)
+    def get_messages_block(self, host_addr):
+        """
+        :param host_addr: sender IP address
+        :return: messages
+        """
+        try:
+            return requests.get("http://{}:{}/get_messages".format(host_addr, self.port)).json()
+        except Exception as e:
+            return e
+
+    def generate_random_string(self, n):
+        """
+        Generates random string
+        :param n: length of string
+        :return: str
+        """
+        return ''.join(random.choices(string.ascii_letters + string.digits, k=n))
+
+    def ip(self):
+        """
+        Gets host machine IP address
+        :return: str
+        """
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect((global_constants.IP_ADDRESS, global_constants.PORT))  #Doesn't actually send traffic
+        ipa = s.getsockname()[0]
+        s.close()
+
+        return ipa
+
+    def get_port(self):
+        """
+        Gets host machine port value from config file
+        :return: int
+        """
+        return random.randint(global_constants.MIN_PORT_VAL, global_constants.MAX_PORT_VAL)
+
+    def update_encrypted_string(self, public_key, random_key):
+        self.EncryptedKBytes = self.encryption.encrypt_with_public_key(public_key, random_key)
+        self.EncryptedKString = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
+
+    def update_group_session_key(self):
+        #Encryption of session key for every user
+        self.update_encrypted_string(self.public_key, self.random_key)
+
+        for peer in self._peers:
+            peer.EncryptedKBytes = self.encryption.encrypt_with_public_key(peer.public_key, self.random_key)
+            self.EncryptedKString = base64.b64encode(peer.EncryptedKBytes).decode('utf-8')
 
     def consensus(self):
         """
@@ -163,7 +256,7 @@ class User(QObject):
         chains = []
 
         for peer in self._peers:
-            pass  # get that peer's chain
+            pass  #Get that peer's chain
 
         for chain in chains:
             self.chain.consensus(chain)
@@ -176,7 +269,7 @@ class User(QObject):
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         )
-        return pem.decode('utf-8')  # Konwersja do tekstu
+        return pem.decode('utf-8')  #Conversion to text
 
     def add_block(self):
         """
@@ -192,7 +285,7 @@ class User(QObject):
         if data != "":
             data += ""
 
-        data = encryption.encrypt_data_ecb(data, self.useful_key)
+        data = self.encryption.encrypt_data_ecb(data, self.useful_key)
         self.staging.append(data)
 
     def group_to_string(self, group):
@@ -213,6 +306,7 @@ class User(QObject):
     def string_to_group(self, string):
         if not string:
             return None
+
         group = []
         result = string.split(",")
 
@@ -235,46 +329,15 @@ class User(QObject):
             keyList.append(peer.port)
 
         keyList.append(self._port)
-        keyList.sort()  # wazne sortuj liste by taka sama byla
+        keyList.sort()  #Important sort list to make it the same
 
         keyRaw = " ".join(str(x) for x in keyList)
         self.drawString = keyRaw
-        numeric_seed = int.from_bytes(hashlib.sha256(keyRaw.encode('utf-8')).digest())  # Konwersja stringa na liczbę
+        numeric_seed = int.from_bytes(hashlib.sha256(keyRaw.encode('utf-8')).digest())  #String to int
         random.seed(numeric_seed)
         chosen_peer = random.choice(self._peers)
 
         return chosen_peer
-
-    @Slot(str, str, str)
-    def peer(self, addr, port, PKString):
-        """
-        Creates peer with second device
-        :param addr: Second's device IP address
-        :param port: Second's device port
-        """
-        self._peers.append(Peer(addr, int(port), PKString))
-        self.peersChanged.emit() #notify QML
-
-        self.EncryptedKBytes = encryption.encrypt_with_public_key(self.public_key, self.random_key)
-        self.EncryptedKString = encrypted_base64 = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
-
-        for peer in self._peers:
-            peer.EncryptedKBytes = encryption.encrypt_with_public_key(peer.PKBytes, self.random_key)
-            peer.EncryptedKString = base64.b64encode(peer.EncryptedKBytes).decode('utf-8')
-
-        self.sendEncryptedKeys()
-
-        if self._port == self.drawPerson():
-            print(self.public_key_to_pem())
-
-            for peer in self._peers:
-                print(peer.PKString)
-
-        print("dodano")
-
-    # def delete_peer(self, addr, port):
-    #     for peer in self._peers:
-    #         if peer.port == port and peer.addr == addr:
 
     def sendEncryptedKeys(self):
         drawn_peer = self.drawPerson()
@@ -282,36 +345,11 @@ class User(QObject):
         if self.host == drawn_peer.addr and self.port == drawn_peer.port:
             requests.post("http://{}:{}/receive_pk".format(self.host, self.port),
                           json={"addr": self.host, "port": self.port,
-                                "message": "-----BEGIN ENCRYPTED KEY-----\n"+self.EncryptedKString+"\n"})
+                                "message": global_constants.ENCRYPTED_KEY_BEGIN + "\n" + self.EncryptedKString + "\n"})
             for peer in self._peers:
                 requests.post("http://{}:{}/receive_pk".format(peer.addr, peer.port),
                               json={"addr": self.host, "port": self.port,
-                                    "message": "-----BEGIN ENCRYPTED KEY-----\n"+peer.EncryptedKString+"\n"})
-
-    @Slot(str)
-    def send_mes(self, message):
-        """
-        Sends message to other device
-        :param host_addr: Sender IP address
-        :param message: message to be sent
-        """
-        appended_message = False
-
-        for peer in self.group:
-            encrypted_message = encryption.encrypt_data_ecb(message, self.useful_key)
-            group = self.group_to_string(self.group)
-            print("======================")
-            print(group)
-            print("======================")
-            response = requests.post("http://{}:{}/receive_message".format(peer.addr, peer.port),
-                          json={"addr": peer.addr, "port": peer.port, "message": encrypted_message, "group": group})
-
-            if response.status_code == 200 and not appended_message:
-                response = requests.post("http://{}:{}/receive_message".format(self.host, self.port),
-                                         json={"addr": self.host, "port": self.port, "message": encrypted_message, "group": group})
-
-                if response.status_code == 200:
-                    appended_message = True
+                                    "message": global_constants.ENCRYPTED_KEY_BEGIN + "\n" + peer.EncryptedKString + "\n"})
 
 
     def view_parsed_messages(self, host_addr):
@@ -325,21 +363,11 @@ class User(QObject):
 
             if json_messages:
                 for message in json_messages:
-                    decrypted_message = encryption.decrypt_data_ecb(message["message"], self.useful_key)
+                    decrypted_message = self.encryption.decrypt_data_ecb(message["message"], self.useful_key)
                     messages += message["user"] + " (" + message["date"] + "): " + decrypted_message + "\n"
+
             return messages
 
-        except Exception as e:
-            return e
-
-    @Slot(str, str)
-    def get_messages_block(self, host_addr):
-        """
-        :param host_addr: sender IP address
-        :return: messages
-        """
-        try:
-            return requests.get("http://{}:{}/get_messages".format(host_addr, self.port)).json()
         except Exception as e:
             return e
 
@@ -354,7 +382,7 @@ class User(QObject):
 
 
     def serve_chain(self, app):
-        app.run("0.0.0.0", self.port)
+        app.run(global_constants.ZERO_ADDRESS, self.port)
 
     def check_consensus(self):
         """
@@ -363,27 +391,28 @@ class User(QObject):
         while True:
             for peer in self._peers:
                 chain = peer.get_chain()
+
                 if self.chain.consensus(chain):
                     print("Checked chain with {}, ours is right".format(
                         (peer.addr, peer.port)))
                 else:
                     print("Checked chain with {}, theirs is right".format(
                         (peer.addr, peer.port)))
-            time.sleep(5)
+
+            time.sleep(global_constants.CHECK_DELAY)
 
     def add_blocks(self):
         """
         Adds blocks to blockchain
         """
         while True:
-
-            if len(self.staging) > 0:
+            if self.staging:
                 print("Mining new block...")
                 self.add_block()
                 print("Added new block!")
                 self.staging = []
             else:
-                time.sleep(5)
+                time.sleep(global_constants.CHECK_DELAY)
 
     def handle_input(self):
         """
@@ -405,6 +434,7 @@ class Peer(QObject):
     addrChanged = Signal()
     nicknameChanged = Signal()
     PKStringChanged = Signal()
+    public_keyChanged = Signal()
 
     def __init__(self, address, port, PKString):
         """
@@ -414,14 +444,12 @@ class Peer(QObject):
         """
         super().__init__()
 
-        self._nickname = "user" #narazie stały zeby qml dzialal
         self._addr = address
         self._port = port
         self._PKString = PKString
+        self._public_key = self.encryption.load_public_key_from_pem(PKString)
 
-        self.PKBytes = encryption.load_public_key_from_pem(PKString)
-        self.EncryptedKBytes = encryption.encrypt_with_public_key(self.PKBytes, os.urandom(32))
-        self.EncryptedKString = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
+        self.update_encrypted_string(self.public_key, os.urandom(global_constants.KEY_SIZE))
 
     @Property(int, notify=portChanged)
     def port(self):
@@ -431,13 +459,19 @@ class Peer(QObject):
     def addr(self):
         return self._addr
 
-    @Property(str, notify=nicknameChanged)
-    def nickname(self):
-        return self._nickname
-
     @Property(str, notify=PKStringChanged)
     def PKString(self):
         return self._PKString
+
+    @Property(str, notify=public_keyChanged)
+    def public_key(self):
+        return self._public_key
+
+    @public_key.setter
+    def public_key(self, new_val):
+        if self._public_key != new_val:
+            self._public_key = new_val
+            self.public_keyChanged.emit()
 
     @PKString.setter
     def PKString(self, new_val):
@@ -457,12 +491,6 @@ class Peer(QObject):
             self._addr = new_val
             self.addrChanged.emit()
 
-    @nickname.setter
-    def nickname(self, new_val):
-        if self._nickname != new_val:
-            self._nickname = new_val
-            self.nicknameChanged.emit()
-
     def get_chain(self):
         """
         Gets blockchain from the second device
@@ -472,5 +500,9 @@ class Peer(QObject):
 
         message = requests.get("http://{}:{}/chain".format(self._addr, self._port)).text
 
-        return blockchain.Blockchain.fromjson(message)
+        return self.chain.fromjson(message)
+
+    def update_encrypted_string(self, public_key, random_key):
+        self.EncryptedKBytes = self.encryption.encrypt_with_public_key(public_key, random_key)
+        self.EncryptedKString = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
 
