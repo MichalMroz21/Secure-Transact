@@ -1,10 +1,10 @@
 import hashlib
 import json
-import powlib
 
-class Block:
+from PySide6.QtCore import QObject
 
-    def __init__(self, index, data, powval, lastHash, hash=None):
+class Block(QObject):
+    def __init__(self, index, data, powval, lastHash, powlib, hash=None):
         """
         Creates new Block object
         :param index: Which block in blockchain it is
@@ -13,10 +13,13 @@ class Block:
         :param lastHash: Hash value from previous block
         :param hash: Hash value in created block
         """
+        super().__init__()
+
         self.index = index
         self.data = data
         self.powval = powval
         self.lastHash = lastHash
+        self.powlib = powlib
         self.hash = hash or self.hashme()
 
     def __str__(self):
@@ -50,20 +53,23 @@ class Block:
                 "lastHash": self.lastHash,
                 "hash": self.hash}
 
-class Blockchain:
-    def __init__(self, blocks=[]):
+class Blockchain(QObject):
+    def __init__(self, powlib, blocks=[]):
         """
         Creates blockchain
         :param blocks: List of blocks in created blockchain
         """
+        super().__init__()
+
         self.blocks = blocks
+        self.powlib = powlib
 
     def genesis(self):
         """
         Sets first block in blockchain
         :return:
         """
-        self.blocks = [Block(0, ["Opening block"], 0, "0")]
+        self.blocks = [Block(0, ["Opening block"], 0, "0", self.powlib)]
 
     def add_block(self, data):
         """
@@ -71,8 +77,8 @@ class Blockchain:
         :param data: Data to be stored in the block
         """
         last = self.blocks[-1]
-        powval = powlib.compute(last.powval)
-        self.blocks.append(Block(last.index + 1, data, powval, last.hash))
+        powval = self.powlib.compute(last.powval)
+        self.blocks.append(Block(last.index + 1, data, powval, last.hash, self.powlib))
 
     def verify(self) -> bool:
         """
@@ -106,7 +112,7 @@ class Blockchain:
             return False
         if len(other.blocks) > len(self.blocks):
             self.blocks = other.blocks
-            return False # keep valid chain with most blocks
+            return False #Keep valid chain with most blocks
 
         return True
 
@@ -117,7 +123,7 @@ class Blockchain:
         """
         return json.dumps([block.dictrep() for block in self.blocks])
 
-    def fromjson(message):
+    def fromjson(self, message):
         """
         Converting a JSON string into a Blockchain class object
         :return: Blockchain
@@ -128,6 +134,6 @@ class Blockchain:
         for jblock in jblocks:
             chain.append(Block(jblock["index"], jblock["data"],
                                jblock["powval"], jblock["lastHash"],
-                               jblock["hash"]))
+                               self.powlib, jblock["hash"]))
 
         return Blockchain(chain)

@@ -32,7 +32,7 @@ Page {
             }
 
             userModel.append({
-                nickname: user.peers[i].nickname,
+                nickname: "placeholder",
                 addr: addr,
                 port: port,
                 PKString: user.peers[i].PKString,
