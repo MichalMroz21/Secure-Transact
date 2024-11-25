@@ -65,8 +65,10 @@ class Networking(QObject):
 
             group = message["group"]
             if message:
-                self.user.messages[group].append(message["message"])
-                self.user.messagesChanged.emit()
+                self.user.messages[group].append(message)
+                decrypted_message = self.user.encryption.decrypt_data_ecb(message["message"], self.user.useful_key)
+                msg_string = str(message["port"]) + " (" + message["date"] + "): " + decrypted_message
+                self.user.messagesChanged.emit(msg_string)
 
                 self.buffered_messages.append(message)
                 return jsonify({"status": "Message received!"}), HTTPStatus.OK
@@ -77,12 +79,24 @@ class Networking(QObject):
         def receive_pk():
             public_key = request.json
             editedMessage = public_key["message"].replace(global_constants.ENCRYPTED_KEY_BEGIN, "").replace("\n", "")
-            self.user.useful_key = User.convert_key(editedMessage)
+            self.user.useful_key = self.user.convert_key(editedMessage)
 
             if public_key:
                 return jsonify({"status": "Public key received!"}), HTTPStatus.OK
             else:
                 return jsonify({"error": "Got no public key"}), HTTPStatus.BAD_REQUEST
+
+        @self.app.route('/establish_a_connection', methods=['GET'])
+        def establish_a_connection():
+            json_array = request.json
+            addr = json_array.get("addr")
+            port = json_array.get("port")
+            pk = json_array.get("pk")
+            try:
+                self.user.peer(addr, int(port), pk)
+                return jsonify({"status": "Connection established", "pk": self.user.public_key_to_pem()}), HTTPStatus.OK
+            except Exception as e:
+                return jsonify({"error": str(e)}), HTTPStatus.SERVICE_UNAVAILABLE
 
         @self.app.route('/get_messages', methods=['GET'])
         def get_messages():
