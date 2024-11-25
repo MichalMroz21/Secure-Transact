@@ -15,38 +15,45 @@ Page {
 
     Component.onCompleted: {
         // Clear the model to ensure no hardcoded elements are present
-        userModel.clear();
         messageModel.clear();
 
-        // Iterate over peers array passed from Python
-        for (let i = 0; i < user.peers.length; i++) {
-            var isInGroup = false;
-            var addr = user.peers[i].addr;
-            var port = user.peers[i].port;
+        function updateUserModel() {
+            userModel.clear();
 
-            for(let j = 0; j < user.group.length; j++){
-                if(addr === user.group[j].addr && port === user.group[j].port){
-                    isInGroup = true;
-                    break;
+            // Iterate over peers array passed from Python
+            for (let i = 0; i < user.peers.length; i++) {
+                var isInGroup = false;
+                var addr = user.peers[i].addr;
+                var port = user.peers[i].port;
+
+                for (let j = 0; j < user.group.length; j++) {
+                    if (addr === user.group[j].addr && port === user.group[j].port) {
+                        isInGroup = true;
+                        break;
+                    }
                 }
+
+                userModel.append({
+                    nickname: user.peers[i].nickname,
+                    addr: addr,
+                    port: port,
+                    PKString: user.peers[i].PKString,
+                    isInGroup: isInGroup
+                });
             }
-
-            userModel.append({
-                nickname: "placeholder",
-                addr: addr,
-                port: port,
-                PKString: user.peers[i].PKString,
-                isInGroup: isInGroup
-            });
         }
+        updateUserModel();
+        user.peersChanged.connect(updateUserModel);
 
-        let messages = user.getConversation();
-
-        for(let i = 0; i < messages.length; i++){
-            messageModel.append({
-                messageText: messages[i]
-            });
-        }
+        user.messagesChanged.connect(function(newMessage) {
+            if (newMessage !== ""){
+                messageModel.append({
+                    messageText: newMessage
+                });
+                console.log("Dodaje wiadomosc")
+            };
+        });
+        user.load_conversation_history();
     }
 
     // Create a ListModel for the users
@@ -138,7 +145,7 @@ Page {
                             if (inputField.text.trim() !== "") {
                                 // Append new message to the model
                                 user.send_mes(inputField.text);
-                                messageModel.append({"text": inputField.text});
+                                //messageModel.append({"text": inputField.text});
                                 // Clear the input field
                                 inputField.text = "";
                             }

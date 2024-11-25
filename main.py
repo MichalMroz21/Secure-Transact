@@ -170,27 +170,7 @@ if tk_enabled:
     #Notification about new block
     new_block_in_progress = False
 
-    def convert_key(base64keyEncypted):
-        byteKey = base64.b64decode(base64keyEncypted)
-        decryptedSessionKey = user.private_key.decrypt(
-            byteKey,
-            padding.OAEP(
-                mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None
-            ))
 
-        #sessionKey = user.random_key
-        #privateKey = user.private_key
-        #pemPrivateKey = encryption.private_key_to_pem(privateKey)
-        #publicKey = user.public_key
-        #pemPublicKey = encryption.public_key_to_pem(publicKey)
-        #encryptedKey = user.EncryptedKBytes
-        #encryptedKString = user.EncryptedKString
-
-        print("Convertions")
-
-        return decryptedSessionKey
 
     def parse_messages(restnode, messages):
         parsed_messages = ""
