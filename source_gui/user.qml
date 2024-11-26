@@ -41,20 +41,5 @@ Page {
                     color: "black"
                 }
             }
-            RowLayout{
-                Text {
-                    id: pkText
-                    Layout.alignment: Qt.AlignHCenter
-                    text: "Public Key: "
-                    font.pixelSize: 20
-                    color: "black"
-                }
-                TextField {
-                    text: pk
-                    Layout.alignment: Qt.AlignHCenter
-                    font.pixelSize: 20
-                    color: "black"
-                }
-            }
     }
 }

@@ -51,21 +51,6 @@ Page {
             }
         }
 
-        // Public Key Input
-        TextField {
-            id: pkField
-            placeholderText: "Public Key"
-            font.pixelSize: 16
-            height: 40
-            Layout.fillWidth: true
-            Layout.maximumWidth: maxInputWidth  // Set a maximum width for the input
-            background: Rectangle {
-                color: "#ffffff"
-                border.color: "#ccc"
-                radius: 5
-            }
-        }
-
         // Buttons Row
         RowLayout {
             spacing: 20
