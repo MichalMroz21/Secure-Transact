@@ -9,6 +9,8 @@ import requests
 import random
 import string
 
+from flask_cors.core import ensure_iterable
+
 import global_constants
 
 from encryption import Encryption
@@ -27,9 +29,9 @@ class User(QObject):
     peersChanged = Signal() #Emit if peers are in any way changed
     hostChanged = Signal()
     portChanged = Signal()
-    messagesChanged = Signal(str)
+    messagesAppend = Signal(str)
     groupChanged = Signal()
-    nicknameChanged = Signal(str)
+    nicknameChanged = Signal()
 
     def __init__(self, powlib, encryption):
         super().__init__()
@@ -76,7 +78,7 @@ class User(QObject):
         self.drawString = ""
 
     #QVariantMap is for Dictionaries and keys must be strings
-    @Property("QVariantMap", notify=messagesChanged)
+    @Property("QVariantMap", notify=groupChanged)
     def messages(self):
         return self._messages
 
@@ -124,38 +126,42 @@ class User(QObject):
         for peer in self.peers:
             if peer.addr == addr and peer.port == int(port):
                 peer.nickname = new_val
-                self.nicknameChanged.emit(new_val)
+                self.peersChanged.emit()
 
-    @Slot()
-    def load_conversation_history(self):
+    @Slot(result=list)
+    def prepare_conversation_history(self):
         group_str = self.group_to_string(self.group)
 
         if group_str is None:
             return []
+        print(self.messages)
 
         not_parsed_messages = self.messages[group_str]
 
-        print(self.messages)
 
         if not_parsed_messages is (None or []):
             return []
 
+        messages = []
+
         for message in not_parsed_messages:
             decrypted_message = self.encryption.decrypt_data_ecb(message["message"], self.useful_key)
-            msg_string = (str(message["port"]) + " (" + message["date"] + "): " + decrypted_message)
-            self.messagesChanged.emit(msg_string)
+            messages += (str(message["port"]) + " (" + message["date"] + "): " + decrypted_message)
+
+        return messages
 
     @Slot(str, int)
     def addToGroup(self, addr, port):
         for peer in self.peers:
             if peer.addr == addr and peer.port == port:
                 self.group.append(peer)
+
+                group_str = self.group_to_string(self.group)
+
+                if group_str not in self.messages:
+                    self.messages[group_str] = []
+
                 self.groupChanged.emit()
-
-                if self.group_to_string(self.group) not in self.messages.keys():
-                    self.messages[self.group_to_string(self.group)] = []
-                    self.messagesChanged.emit("")
-
                 break
 
     @Slot(str, int)
