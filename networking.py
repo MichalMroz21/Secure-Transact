@@ -1,12 +1,10 @@
 import datetime
 import threading
 import flask
-import requests
 import global_constants
 
 from flask import jsonify, request
 from http import HTTPStatus
-from user import User
 from PySide6.QtCore import QObject
 
 class Networking(QObject):
@@ -32,32 +30,6 @@ class Networking(QObject):
         @self.app.route("/chain")
         def chain():
             return self.user.chain.jsonrep()
-
-        @self.app.route('/send_message', methods=['POST'])
-        def send_message():
-            port = request.json.get("port")
-            addr = request.json.get("addr")
-            message = request.json.get("message")
-
-            if not port or not addr or not message:
-                return jsonify({"error": "You need to provide address, port and message"}), HTTPStatus.BAD_REQUEST
-
-            try:
-                date = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M:%S")
-                response = requests.post(f"http://{addr}:{port}/receive_message", json={
-                    "user": request.host,
-                    "message": message,
-                    "date": date,
-                    "group": self.user.group_to_string(self.user.group)
-                })
-
-                if response.status_code == HTTPStatus.OK:
-                    return jsonify({"status": "Message was successfully sent"}), HTTPStatus.OK
-                else:
-                    return jsonify({"error": "Error occured!"}), response.status_code
-
-            except Exception as e:
-                return jsonify({"error": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
 
         @self.app.route('/receive_message', methods=['POST'])
         def receive_message():
@@ -102,14 +74,6 @@ class Networking(QObject):
         @self.app.route('/get_messages', methods=['GET'])
         def get_messages():
             return jsonify(self.buffered_messages)
-
-        @self.app.route('/remove_messages', methods=['POST'])
-        def remove_messages():
-            self.buffered_messages.clear()
-            if not self.buffered_messages:
-                return jsonify({"status": "Messages removed!"}), HTTPStatus.OK
-            else:
-                return jsonify({"error": "Could not remove messages!"}), HTTPStatus.BAD_REQUEST
 
         @self.app.route('/block_notify', methods=['POST'])
         def block_notify():
