@@ -92,9 +92,10 @@ class Networking(QObject):
             addr = json_array.get("addr")
             port = json_array.get("port")
             pk = json_array.get("pk")
+            nickname = json_array.get("nickname")
             try:
-                self.user.peer(addr, int(port), pk)
-                return jsonify({"status": "Connection established", "pk": self.user.public_key_to_pem()}), HTTPStatus.OK
+                self.user.peer(addr, int(port), pk, nickname)
+                return jsonify({"status": "Connection established", "pk": self.user.public_key_to_pem(), "nickname": self.user.nickname}), HTTPStatus.OK
             except Exception as e:
                 return jsonify({"error": str(e)}), HTTPStatus.SERVICE_UNAVAILABLE
 

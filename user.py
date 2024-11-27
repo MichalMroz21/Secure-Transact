@@ -29,7 +29,7 @@ class User(QObject):
     portChanged = Signal()
     messagesChanged = Signal(str)
     groupChanged = Signal()
-    nicknameChanged = Signal()
+    nicknameChanged = Signal(str)
 
     def __init__(self, powlib, encryption):
         super().__init__()
@@ -52,9 +52,9 @@ class User(QObject):
         self.encryption = encryption
 
         #Connections with other devices
-        self.chain = Blockchain(self.powlib)  # copy of blockchain
-        self.chain.genesis()  # initiating first block of blockchain
-        self.staging = []  # staging data to add to block
+        self.chain = Blockchain(self.powlib)    # copy of blockchain
+        self.chain.genesis()                    # initiating first block of blockchain
+        self.staging = []                       # staging data to add to block
 
         #Socket stuff
         self._port = self.get_port()
@@ -117,7 +117,14 @@ class User(QObject):
     def nickname(self, new_val):
         if self._nickname != new_val:
             self._nickname = new_val
-            self.nicknameChanged.emit()
+            self.nicknameChanged.emit(new_val)
+
+    @Slot(str, str, str)
+    def change_peers_nickname(self, addr, port, new_val):
+        for peer in self.peers:
+            if peer.addr == addr and peer.port == int(port):
+                peer.nickname = new_val
+                self.nicknameChanged.emit(new_val)
 
     @Slot()
     def load_conversation_history(self):
@@ -162,14 +169,14 @@ class User(QObject):
                 self.peersChanged.emit()
                 break
 
-    @Slot(str, str, str)
-    def peer(self, addr, port, PKString):
+    @Slot(str, str, str, str)
+    def peer(self, addr, port, PKString, nickname="User"):
         """
         Creates peer with second device
         :param addr: Second's device IP address
         :param port: Second's device port
         """
-        self._peers.append(Peer(addr, int(port), PKString))
+        self._peers.append(Peer(addr, int(port), PKString, nickname))
         self.peersChanged.emit() #Notify QML
 
         self.update_encrypted_string(self.public_key, self.random_key)
@@ -194,11 +201,11 @@ class User(QObject):
         """
         # send request to examined peer
         response = requests.get("http://{}:{}/establish_a_connection".format(addr, port),
-                                json={"addr": self.host, "port": self.port, "pk": self.public_key_to_pem()})
+                                json={"addr": self.host, "port": self.port, "pk": self.public_key_to_pem(), "nickname": self.nickname})
         # check if examined peer responded with a correct status code
         if response.status_code == http.HTTPStatus.OK:
             # add new peer
-            self.peer(addr, int(port), response.json()["pk"])
+            self.peer(addr, int(port), response.json()["pk"], response.json()["nickname"])
             self.peersChanged.emit()  # notify QML
 
     @Slot(str)
@@ -441,10 +448,25 @@ class User(QObject):
         """
         while True:
             for peer in self._peers:
-                print("Fetching chain from {}".format((peer.addr, peer.port)))
                 try:
+                    #If peer was not active for at least three times then try to get a chain only every 5th attempt
+                    inactive = False
+                    if peer.active < 1:
+                        if abs(peer.active) == global_constants.RECONNECTION_DELAY:
+                            print("Trying to connect with inactive peer {}:{}.".format(peer.addr, peer.port))
+                            inactive = True
+                            peer.active = 0
+                            pass
+                        else:
+                            peer.active -= 1
+                            continue
+                    print("Fetching chain from {}".format((peer.addr, peer.port)))
                     message = requests.get("http://{}:{}/chain".format(peer.addr, peer.port)).text
                     chain = self.chain.fromjson(message)
+                    #If the function continues running in this place then it was a successful connection so the peer is active
+                    if inactive:
+                        print("Inactive peer {}:{} changed its status to active".format(peer.addr, peer.port))
+                    peer.active = global_constants.CONNECTION_ATTEMPTS
 
                     if self.chain.consensus(chain):
                         print("Checked chain with {}, ours is right".format(
@@ -452,8 +474,14 @@ class User(QObject):
                     else:
                         print("Checked chain with {}, theirs is right".format(
                             (peer.addr, peer.port)))
-                except Exception as e:
-                    print(e)
+                except requests.exceptions.RequestException:
+                    if(peer.active == 1):
+                        print("That was the last attempt to connect with peer {}:{}. Changing its status to inactive.".format(peer.addr, peer.port))
+                    elif(peer.active == 0):
+                        print("Peer {}:{} is still inactive".format(peer.addr, peer.port))
+                    else:
+                        print("Could not receive information from {}:{} {} attempts until it is considered inactive.".format(peer.addr, peer.port, (peer.active-1)))
+                    peer.active -= 1
 
             time.sleep(global_constants.CHECK_DELAY)
 
@@ -488,12 +516,13 @@ class User(QObject):
 class Peer(QObject):
     portChanged = Signal()
     addrChanged = Signal()
-    nicknameChanged = Signal()
+    nicknameChanged = Signal(str)
     PKStringChanged = Signal()
     public_keyChanged = Signal()
     encryptionChanged = Signal()
+    activeChanged = Signal()
 
-    def __init__(self, address, port, PKString):
+    def __init__(self, address, port, PKString, nickname="User"):
         """
         Creates connection with second device
         :param address: Second device's IP address
@@ -501,11 +530,13 @@ class Peer(QObject):
         """
         super().__init__()
 
-        self._encryption = Encryption()
-        self._addr = address
-        self._port = port
-        self._PKString = PKString
-        self._public_key = self.encryption.load_public_key_from_pem(PKString)
+        self._nickname = nickname
+        self._active = global_constants.CONNECTION_ATTEMPTS                     #Three attempts until it is considered as an inactive peer
+        self._encryption = Encryption()                                         #Encryption object needed to use this class
+        self._addr = address                                                    #Peer's IP address
+        self._port = port                                                       #Peer's port number
+        self._PKString = PKString                                               #Peer's public key with its decorators
+        self._public_key = self.encryption.load_public_key_from_pem(PKString)   #Peer's public key
 
         self.update_encrypted_string(self.public_key, os.urandom(global_constants.KEY_SIZE))
 
@@ -528,6 +559,26 @@ class Peer(QObject):
     @Property(str, notify=encryptionChanged)
     def encryption(self):
         return self._encryption
+
+    @Property(int, notify=activeChanged)
+    def active(self):
+        return self._active
+
+    @Property(str, notify=nicknameChanged)
+    def nickname(self):
+        return self._nickname
+
+    @nickname.setter
+    def nickname(self, new_val):
+        if self._nickname != new_val:
+            self._nickname = new_val
+            self.nicknameChanged.emit(new_val)
+
+    @active.setter
+    def active(self, new_val):
+        if self._active != new_val:
+            self._active = new_val
+            self.activeChanged.emit()
 
     @encryption.setter
     def encryption(self, new_val):

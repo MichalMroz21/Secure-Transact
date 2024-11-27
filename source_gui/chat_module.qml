@@ -44,6 +44,7 @@ Page {
         }
         updateUserModel();
         user.peersChanged.connect(updateUserModel);
+        user.nicknameChanged.connect(updateUserModel);
 
         user.messagesChanged.connect(function(newMessage) {
             if (newMessage !== ""){
@@ -194,7 +195,7 @@ Page {
                             // Use a single Text element to concatenate the name and IP address
                             Text {
                                 anchors.centerIn: parent  // Center the text within the parent
-                                text: '<font color="black">' + model.nickname + ' </font><font color="gray"><i>(' + model.addr + ":" + model.port + ')</i></font>'
+                                text: '<span style="color: black; ">' + model.nickname + ' </span><span style="color: gray; "><i>(' + model.addr + ":" + model.port + ')</i></span>'
                                 color: "#000"
                                 font.pixelSize: 12
                                 horizontalAlignment: Text.AlignHCenter  // Center horizontally
@@ -206,6 +207,9 @@ Page {
                         Popup {
                             id: popup
                             width: parent.width
+                            modal: true
+                            focus: true
+                            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
                             ColumnLayout {
                                 Button {
@@ -222,7 +226,14 @@ Page {
                                         stackView.push("chat_module.qml");
                                     }
                                 }
-
+                                Button {
+                                    height: userRectangle.height / 2
+                                    text: "Change nickname"
+                                    onClicked: {
+                                        changeNicknamePopup.visible = true;
+                                        popup.visible = false;
+                                    }
+                                }
                                 Button {
                                     height: userRectangle.height / 2
                                     text: "Get public key"
@@ -250,6 +261,50 @@ Page {
                                 }
                             }
                         }
+
+                        Popup {
+                            id: changeNicknamePopup
+                            width: parent.width
+                            modal: true
+                            focus: true
+                            visible: false  // Początkowo ukryty
+                            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+                            ColumnLayout {
+                                anchors.fill: parent
+                                spacing: 10
+
+                                TextField {
+                                    id: newNicknameField
+                                    placeholderText: "Enter new nickname"
+                                    Layout.fillWidth: true
+                                }
+
+                                RowLayout {
+                                    Layout.alignment: Qt.AlignCenter
+                                    spacing: 10
+
+                                    Button {
+                                        text: "Cancel"
+                                        onClicked: {
+                                            changeNicknamePopup.visible = false; // Zamknij Popup
+                                        }
+                                    }
+
+                                    Button {
+                                        text: "Confirm"
+                                        onClicked: {
+                                            if (newNicknameField.text.trim() !== "") {
+                                                user.change_peers_nickname(model.addr, model.port, newNicknameField.text);
+                                                changeNicknamePopup.visible = false; // Zamknij Popup
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+
                     }
                 }
 
