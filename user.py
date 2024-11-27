@@ -129,12 +129,17 @@ class User(QObject):
     @Slot()
     def load_conversation_history(self):
         group_str = self.group_to_string(self.group)
+
         if group_str is None:
             return []
+
         not_parsed_messages = self.messages[group_str]
+
         print(self.messages)
+
         if not_parsed_messages is (None or []):
             return []
+
         for message in not_parsed_messages:
             decrypted_message = self.encryption.decrypt_data_ecb(message["message"], self.useful_key)
             msg_string = (str(message["port"]) + " (" + message["date"] + "): " + decrypted_message)
@@ -305,6 +310,7 @@ class User(QObject):
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         )
+
         return pem.decode('utf-8')  #Conversion to text
 
     def add_block(self):
@@ -335,8 +341,8 @@ class User(QObject):
             group_strings.append(str(peer_str.addr) + ":" + str(peer_str.port))
 
         group_strings.sort()
-
         group_string = ",".join(group_strings)
+
         return group_string
 
     def string_to_group(self, string):
@@ -409,26 +415,6 @@ class User(QObject):
                               json={"addr": self.host, "port": self.port,
                                     "message": global_constants.ENCRYPTED_KEY_BEGIN + "\n" + peer.EncryptedKString + "\n"})
 
-
-    def view_parsed_messages(self, host_addr):
-        """
-        :param host_addr: sender IP address
-        :return: messages string
-        """
-        try:
-            json_messages = requests.get("http://{}:{}/get_messages".format(host_addr, self.port)).json()
-            messages = ""
-
-            if json_messages:
-                for message in json_messages:
-                    decrypted_message = self.encryption.decrypt_data_ecb(message["message"], self.useful_key)
-                    messages += message["user"] + " (" + message["date"] + "): " + decrypted_message + "\n"
-
-            return messages
-
-        except Exception as e:
-            return e
-
     def remove_messages_block(self, host_addr):
         """
         :param host_addr: sender IP address
@@ -451,6 +437,7 @@ class User(QObject):
                 try:
                     #If peer was not active for at least three times then try to get a chain only every 5th attempt
                     inactive = False
+
                     if peer.active < 1:
                         if abs(peer.active) == global_constants.RECONNECTION_DELAY:
                             print("Trying to connect with inactive peer {}:{}.".format(peer.addr, peer.port))
@@ -460,12 +447,16 @@ class User(QObject):
                         else:
                             peer.active -= 1
                             continue
+
                     print("Fetching chain from {}".format((peer.addr, peer.port)))
+
                     message = requests.get("http://{}:{}/chain".format(peer.addr, peer.port)).text
                     chain = self.chain.fromjson(message)
+
                     #If the function continues running in this place then it was a successful connection so the peer is active
                     if inactive:
                         print("Inactive peer {}:{} changed its status to active".format(peer.addr, peer.port))
+
                     peer.active = global_constants.CONNECTION_ATTEMPTS
 
                     if self.chain.consensus(chain):
@@ -474,6 +465,7 @@ class User(QObject):
                     else:
                         print("Checked chain with {}, theirs is right".format(
                             (peer.addr, peer.port)))
+
                 except requests.exceptions.RequestException:
                     if(peer.active == 1):
                         print("That was the last attempt to connect with peer {}:{}. Changing its status to inactive.".format(peer.addr, peer.port))
@@ -497,20 +489,6 @@ class User(QObject):
                 self.staging = []
             else:
                 time.sleep(global_constants.CHECK_DELAY)
-
-    def handle_input(self):
-        """
-        Steering application in the console
-        """
-        while True:
-            cmd = input("> ").split(";")
-
-            if cmd[0] == "peer":
-                self.peer(cmd[1], int(cmd[2]))
-            if cmd[0] == "txion":
-                self.staging.append(cmd[1])
-            if cmd[0] == "chain":
-                print([block.data for block in self.chain.blocks])
 
 
 class Peer(QObject):
