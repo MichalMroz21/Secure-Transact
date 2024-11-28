@@ -141,6 +141,11 @@ class User(QObject):
                 peer.nickname = new_val
                 self.peersChanged.emit()
 
+    def decrypt_single_message(self, message_data):
+        decrypted_message = self.encryption.decrypt_data_ecb(message_data["message"], self.useful_key)
+        return str(message_data["port"]) + " (" + message_data["date"] + "): " + decrypted_message
+
+
     @Slot(result=list)
     def prepare_conversation_history(self):
         group_str = self.group_to_string(self.group)
@@ -157,8 +162,7 @@ class User(QObject):
         messages = []
 
         for message in not_parsed_messages:
-            decrypted_message = self.encryption.decrypt_data_ecb(message["message"], self.useful_key)
-            messages += (str(message["port"]) + " (" + message["date"] + "): " + decrypted_message)
+            messages.append(self.decrypt_single_message(message))
 
         return messages
 

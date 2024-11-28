@@ -38,9 +38,7 @@ class Networking(QObject):
             group = message["group"]
             if message:
                 self.user.messages[group].append(message)
-                decrypted_message = self.user.encryption.decrypt_data_ecb(message["message"], self.user.useful_key)
-                msg_string = str(message["port"]) + " (" + message["date"] + "): " + decrypted_message
-                self.user.messagesAppend.emit(msg_string)
+                self.user.messagesAppend.emit(self.user.decrypt_single_message(message))
 
                 self.buffered_messages.append(message)
                 return jsonify({"status": "Message received!"}), HTTPStatus.OK

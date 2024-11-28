@@ -15,7 +15,7 @@ Rectangle {
 
     property var customFunctions: new Array(0);
 
-    property var userClicked: function(addr, port, nickname, mouseArea) {
+    property var userClicked: function(addr, port, nickname, mouseArea, popup) {
         popup.open();
     }
 
@@ -80,7 +80,7 @@ Rectangle {
             MouseArea {
                 id: mousearea
                 anchors.fill: parent
-                onClicked: userClicked(model.addr, model.port, model.nickname, mousearea)
+                onClicked: userClicked(model.addr, model.port, model.nickname, mousearea, popup)
                 hoverEnabled: true
 
                 onEntered: {

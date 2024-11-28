@@ -135,14 +135,14 @@ Page {
                 customFunctions: [
                      {
                          text: "Add to group",
-                         action: function(addr, port, nickname, PKString, isInGroup) {
+                         action: function(addr, port, nickname, PKString, isInGroup, popup) {
                              user.addToGroup(addr, port);
                          },
                          isVisible: true
                      },
                     {
                         text: "Remove from group",
-                        action: function (addr, port, nickname, PKString, isInGroup) {
+                        action: function (addr, port, nickname, PKString, isInGroup, popup) {
                             user.removeFromGroup(addr, port);
                         },
                         isVisible: true
