@@ -29,10 +29,12 @@ Page {
                     selectedUsers.push(user.find_peer(host, port));
                     console.log(selectedUsers);
                     mouseArea.parent.color = "lightblue";
+                    mouseArea.hoverEnabled = false;
                 }
                 else {
                     selectedUsers.splice(index, 1);
                     mouseArea.parent.color = "white";
+                    mouseArea.hoverEnabled = true;
                 }
             }
         }

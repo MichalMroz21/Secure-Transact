@@ -51,7 +51,6 @@ Rectangle {
                 public_key: user.peers[i].public_key,
                 active: user.peers[i].active,
                 isInGroup: isInGroup,
-                isSelected: isSelected,
                 activeColor: activeColor
             });
         }

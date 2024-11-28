@@ -506,6 +506,9 @@ class User(QObject):
                 except requests.exceptions.RequestException:
                     if(peer.active == 1):
                         print("That was the last attempt to connect with peer {}:{}. Changing its status to inactive.".format(peer.host, peer.port))
+                        peer.active -= 1
+                        self.activeChanged.emit()
+                        peer.active += 1
                     elif(peer.active == 0):
                         print("Peer {}:{} is still inactive".format(peer.host, peer.port))
                     else:
