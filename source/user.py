@@ -14,6 +14,7 @@ from flask_cors.core import ensure_iterable
 import global_constants
 
 from encryption import Encryption
+from project import Project
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization, hashes
@@ -32,6 +33,7 @@ class User(QObject):
     messagesAppend = Signal(str)
     groupChanged = Signal()
     nicknameChanged = Signal()
+    projectsChanged = Signal()
 
     def __init__(self, powlib, encryption):
         super().__init__()
@@ -63,6 +65,7 @@ class User(QObject):
         self._host = self.ip()
 
         #User Variables
+        self._projects = [Project()]
         self._messages = {}
         self.indexes = []
         self._group = []
@@ -103,6 +106,16 @@ class User(QObject):
     def nickname(self):
         return self._nickname
 
+    @Property("QVariantList", notify=projectsChanged)
+    def projects(self):
+        return self._projects
+
+    @projects.setter
+    def projects(self, new_val):
+        if self._projects != new_val:
+            self._projects = new_val
+            self.projectsChanged.emit()
+
     @host.setter
     def host(self, new_val):
         if self._host != new_val:
@@ -137,7 +150,6 @@ class User(QObject):
         print(self.messages)
 
         not_parsed_messages = self.messages[group_str]
-
 
         if not_parsed_messages is (None or []):
             return []
@@ -369,6 +381,13 @@ class User(QObject):
                     break
 
         return group
+
+    @Slot(str, str, result=QObject)
+    def find_peer(self, addr, port):
+        for peer in self.peers:
+            if peer.addr == addr and int(peer.port) == int(port):
+                return peer
+        return None
 
     def drawPerson(self):
         keyList = []

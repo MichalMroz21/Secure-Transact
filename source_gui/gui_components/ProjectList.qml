@@ -2,6 +2,13 @@ import QtQuick 2.15
 import QtQuick.Controls 6.8
 import QtQuick.Layouts 1.15
 
+//1. Wyjebać Peery, ma byc tylko User
+//Historie friendów, projektów itd
+//polaczenie page user.qml + friends.qml, zeby bylo kontentu wiecej na jednej stronie
+//Dodanie w options.qml ostrzezenia, ze jak ktos nas dodaje to ze chcemy zaakceptowac
+//Dodanie wizualii bycia online (znaczek online (zielony, szary))
+//Zrobienie listy tasków obok listy Projektów w planning_module.qml
+
 //User (Peer) List Class Blueprint
 Rectangle {
     //Class Properties (override if needed)
@@ -14,47 +21,34 @@ Rectangle {
     property bool list_fill_height: true
 
     property var customFunctions: new Array(0);
-
-    property var userClicked: function(addr, port, nickname, mouseArea) {
+    property var userClicked: function(name, tasks, users, mouseArea, popup) {
         popup.open();
     }
 
     // Create a ListModel for the users
     ListModel {
-        id: userModel
+        id: projectModel
     }
 
-    function updateUserModel() {
-        userModel.clear();
+    function updateProjectModel() {
+        projectModel.clear();
+
+        var projects = user.projects;
 
         // Iterate over peers array passed from Python
-        for (let i = 0; i < user.peers.length; i++) {
-            var isInGroup = false;
-            var addr = user.peers[i].addr;
-            var port = user.peers[i].port;
-
-            for (let j = 0; j < user.group.length; j++) {
-                if (addr === user.group[j].addr && port === user.group[j].port) {
-                    isInGroup = true;
-                    break;
-                }
-            }
-
-            userModel.append({
-                nickname: user.peers[i].nickname,
-                addr: addr,
-                port: port,
-                PKString: user.peers[i].PKString,
-                isInGroup: isInGroup
+        for (let i = 0; i < projects.length; i++) {
+            projectModel.append({
+                name: projects[i].name,
+                tasks: projects[i].tasks,
+                users: projects[i].users,
+                index: i
             });
         }
     }
 
     Component.onCompleted: {
-        updateUserModel();
-
-        user.peersChanged.connect(updateUserModel);
-        user.nicknameChanged.connect(updateUserModel);
+        updateProjectModel();
+        user.projectsChanged.connect(updateProjectModel);
     }
 
     Layout.fillWidth: list_fill_width  // Make it scale horizontally
@@ -67,10 +61,10 @@ Rectangle {
 
     // ListView to display user names and IP addresses
     ListView {
-        id: friendListView
+        id: projectListView
         width: parent.width
         height: parent.height
-        model: userModel
+        model: projectModel
 
         delegate: Rectangle {
             width: parent.width  // Set width explicitly for user list items
@@ -78,10 +72,10 @@ Rectangle {
             id: userRectangle
 
             MouseArea {
-                id: mousearea
                 anchors.fill: parent
-                onClicked: userClicked(model.addr, model.port, model.nickname, mousearea)
+                onClicked: userClicked(model.name, model.tasks, model.users, mousearea, popup)
                 hoverEnabled: true
+                id: mousearea
 
                 onEntered: {
                     parent.color = "lightgray"
@@ -95,7 +89,7 @@ Rectangle {
                 // Use a single Text element to concatenate the name and IP address
                 Text {
                     anchors.centerIn: parent  // Center the text within the parent
-                    text: '<span style="color: black; ">' + model.nickname + ' </span><span style="color: gray; "><i>(' + model.addr + ":" + model.port + ')</i></span>'
+                    text: '<span style="color: black; ">' + model.name + '</span>'
                     color: "#000"
                     font.pixelSize: 12
                     horizontalAlignment: Text.AlignHCenter  // Center horizontally
@@ -111,11 +105,10 @@ Rectangle {
                 focus: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-                property var myaddr: model.addr
-                property var myport: model.port
-                property var mynickname: model.nickname
-                property var myPKString: model.PKString
-                property var myisInGroup: model.isInGroup
+                property var myname: model.name
+                property var mytasks: model.tasks
+                property var myusers: model.users
+                property var myindex: model.index
 
                 ColumnLayout {
                     Repeater {
@@ -130,8 +123,7 @@ Rectangle {
 
                                 onClicked: {
                                     if (typeof customFunctions[index].action === "function"){
-                                        customFunctions[index].action(popup.myaddr, popup.myport,
-                                            popup.mynickname, popup.myPKString, popup.myisInGroup);
+                                        customFunctions[index].action(popup.myname, popup.mytasks, popup.myusers, popup.myindex);
                                     }
                                 }
                             }
