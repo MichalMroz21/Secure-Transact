@@ -45,7 +45,6 @@ class Project(QObject):
     @Slot(QObject)
     def add_user(self, user):
         self.users.append(user)
-        print(self.users)
         self.usersChanged.emit()
 
     @Slot(QObject)

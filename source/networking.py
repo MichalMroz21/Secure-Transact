@@ -34,13 +34,13 @@ class Networking(QObject):
         @self.app.route('/receive_message', methods=['POST'])
         def receive_message():
             message = request.json
-
             group = message["group"]
+
             if message:
                 self.user.messages[group].append(message)
                 self.user.messagesAppend.emit(self.user.decrypt_single_message(message))
-
                 self.buffered_messages.append(message)
+
                 return jsonify({"status": "Message received!"}), HTTPStatus.OK
             else:
                 return jsonify({"error": "Got no message"}), HTTPStatus.BAD_REQUEST
@@ -49,6 +49,7 @@ class Networking(QObject):
         def receive_pk():
             public_key = request.json
             editedMessage = public_key["message"].replace(global_constants.ENCRYPTED_KEY_BEGIN, "").replace("\n", "")
+
             self.user.useful_key = self.user.convert_key(editedMessage)
 
             if public_key:
@@ -59,12 +60,13 @@ class Networking(QObject):
         @self.app.route('/establish_a_connection', methods=['GET'])
         def establish_a_connection():
             json_array = request.json
-            addr = json_array.get("addr")
+            host = json_array.get("host")
             port = json_array.get("port")
             pk = json_array.get("pk")
             nickname = json_array.get("nickname")
+
             try:
-                self.user.peer(addr, int(port), pk, nickname)
+                self.user.peer(host, int(port), pk, nickname)
                 return jsonify({"status": "Connection established", "pk": self.user.public_key_to_pem(), "nickname": self.user.nickname}), HTTPStatus.OK
             except Exception as e:
                 return jsonify({"error": str(e)}), HTTPStatus.SERVICE_UNAVAILABLE
@@ -96,7 +98,7 @@ class Networking(QObject):
         @self.app.route('/participation_signal', methods=['POST'])
         def participation_signal():
             port = request.json.get("port")
-            addr = request.json.get("addr")
+            host = request.json.get("host")
             hash = request.json.get("hash")
             date = request.json.get("date")
             stake = request.json.get("stake")
@@ -107,7 +109,7 @@ class Networking(QObject):
             if time_delta > time_from_request:
                 self.participants.append({
                     "port": port,
-                    "addr": addr,
+                    "host": host,
                     "hash": hash,
                     "date": date,
                     "stake": stake

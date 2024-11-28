@@ -78,6 +78,7 @@ class Blockchain(QObject):
         """
         last = self.blocks[-1]
         powval = self.powlib.compute(last.powval)
+
         self.blocks.append(Block(last.index + 1, data, powval, last.hash, self.powlib))
 
     def verify(self) -> bool:
@@ -107,9 +108,11 @@ class Blockchain(QObject):
         "Gets the current consensus. If it's our chain, returns True."
         if not Blockchain.verify(other):
             return True
+
         if not self.verify():
             self.blocks = other.blocks
             return False
+
         if len(other.blocks) > len(self.blocks):
             self.blocks = other.blocks
             return False #Keep valid chain with most blocks

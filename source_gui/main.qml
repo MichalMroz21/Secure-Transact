@@ -63,7 +63,6 @@ ApplicationWindow {
                     ListElement {}
                     ListElement {}
                     ListElement {}
-                    ListElement {}
                     ListElement { text: "Options"; }
                 }
 
@@ -147,14 +146,13 @@ ApplicationWindow {
         switch(index){
             case 0:
             case 1:
-            case 2:
-            case 3: {
+            case 2: {
                 scaleAnimator.target = image;
                 scaleAnimator.running = turnOn;
                 if(turnOn === false) image.scale = 1;
                 break;
             }
-            case 4: {
+            case 3: {
                 rotationAnimator.target = image;
                 rotationAnimator.running = turnOn;
                 break;
@@ -167,8 +165,7 @@ ApplicationWindow {
             case 0: return "../assets/user.png";
             case 1: return "../assets/chat.png";
             case 2: return "../assets/planner.png";
-            case 3: return "../assets/friends.png";
-            case 4: return "../assets/options.png";
+            case 3: return "../assets/options.png";
         }
     }
 
@@ -177,8 +174,7 @@ ApplicationWindow {
             case 0: return "lightgray";
             case 1: return "lightblue";
             case 2: return "lightgreen";
-            case 3: return "lightyellow";
-            case 4: return "orangered";
+            case 3: return "orangered";
             default: return "lightgray";
         }
     }
@@ -188,8 +184,7 @@ ApplicationWindow {
             case 0: return "gray"
             case 1: return "blue";
             case 2: return "green";
-            case 3: return "yellow";
-            case 4: return "orange";
+            case 3: return "orange";
             default: return "lightgray";
         }
     }
@@ -200,9 +195,8 @@ ApplicationWindow {
         switch (index) {
             case 0: pageSelected = "user.qml"; break;
             case 1: pageSelected = "chat_module.qml"; break;
-            case 2: pageSelected = "planning_module.qml"; break;    
-            case 3: pageSelected = "friends.qml"; break;
-            case 4: pageSelected = "options.qml"; break;
+            case 2: pageSelected = "planning_module.qml"; break;
+            case 3: pageSelected = "options.qml"; break;
         }
 
         stackView.push(pageSelected);

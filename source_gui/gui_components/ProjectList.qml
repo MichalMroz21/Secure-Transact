@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.15
 
 //1. Wyjebać Peery, ma byc tylko User
 //Historie friendów, projektów itd
-//polaczenie page user.qml + friends.qml, zeby bylo kontentu wiecej na jednej stronie
+//polaczenie page user.qml + friendss.qml, zeby bylo kontentu wiecej na jednej stronie
 //Dodanie w options.qml ostrzezenia, ze jak ktos nas dodaje to ze chcemy zaakceptowac
 //Dodanie wizualii bycia online (znaczek online (zielony, szary))
 //Zrobienie listy tasków obok listy Projektów w planning_module.qml

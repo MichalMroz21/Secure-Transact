@@ -11,7 +11,7 @@ class Stake(QObject):
     def __init__(self, user):
         super().__init__()
 
-    def send_create_block_signal(self, host_addr, host_port, node):
+    def send_create_block_signal(self, host, port, node):
         """
         Sends signal to everyone in peer nodes that there is a new block to be created
         """
@@ -19,21 +19,21 @@ class Stake(QObject):
             date = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M:%S")
 
             for peer in node.peers:
-                requests.post("http://{}:{}/block_notify".format(peer.addr, peer.port),
-                              json={"addr": host_addr, "port": host_port, "hash": node.chain.blocks[-1].hash, "date": date})
+                requests.post("http://{}:{}/block_notify".format(peer.host, peer.port),
+                              json={"host": host, "port": port, "hash": node.chain.blocks[-1].hash, "date": date})
 
         except Exception as e:
             print(e)
 
-    def receive_create_block_signal(self, host_addr, host_port):
+    def receive_create_block_signal(self, host, port):
         """
         Receives signal that there is a new block to be created
         :param node:
-        :param host_addr:
+        :param host:
         :return:
         """
         try:
-            response = requests.get("http://{}:{}/get_new_block_notification".format(host_addr, host_port))
+            response = requests.get("http://{}:{}/get_new_block_notification".format(host, port))
 
             if response.status_code == HTTPStatus.OK:
                 return response.json()
@@ -45,38 +45,38 @@ class Stake(QObject):
             return None
 
 
-    def send_participation_signal(self, host_addr, host_port, node, stake):
+    def send_participation_signal(self, host, port, node, stake):
         """
         Sends signal that user wants to take a part of block creation
         :param node:
-        :param host_addr:
+        :param host:
         :return:
         """
         try:
             date = datetime.datetime.now().isoformat()
 
             #Inform yourself about being a participant
-            response = requests.post("http://{}:{}/participation_signal".format(host_addr, host_port),
-                          json={"addr": host_addr, "port": host_port, "hash": node.chain.blocks[-1].hash, "stake": stake, "date": date})
+            response = requests.post("http://{}:{}/participation_signal".format(host, port),
+                                     json={"host": host, "port": port, "hash": node.chain.blocks[-1].hash, "stake": stake, "date": date})
 
             #Inform rest of peers if it could be added
             if response.status_code == HTTPStatus.OK:
                 for peer in node.peers:
-                    requests.post("http://{}:{}/participation_signal".format(peer.addr, peer.port),
-                                  json={"addr": host_addr, "port": host_port, "hash": node.chain.blocks[-1].hash, "stake": stake, "date": date})
+                    requests.post("http://{}:{}/participation_signal".format(peer.host, peer.port),
+                                  json={"host": host, "port": port, "hash": node.chain.blocks[-1].hash, "stake": stake, "date": date})
 
         except Exception as e:
             print(e)
 
-    def get_participants(self, host_addr, host_port):
+    def get_participants(self, host, port):
         """
         Gets all raffle participants
         :param node:
-        :param host_addr:
+        :param host:
         :return:
         """
         try:
-            response = requests.get("http://{}:{}/get_participants".format(host_addr, host_port))
+            response = requests.get("http://{}:{}/get_participants".format(host, port))
 
             if response.status_code == HTTPStatus.OK:
                 return response.json()
@@ -109,21 +109,21 @@ class Stake(QObject):
             print(e)
 
 
-    def verify_participants_lists(self, host_addr, host_port, node):
+    def verify_participants_lists(self, host, port, node):
         """
-        :param host_addr: Host IP address
-        :param host_port: Host port number
+        :param host: Host IP address
+        :param port: Host port number
         :param node: node from which are taken peers
         :return:
         """
         participants_lists = []
 
         try:
-            participants = self.get_participants(host_addr, host_port)
+            participants = self.get_participants(host, port)
             participants_lists.append(participants["participants"])
 
             for peer in node.peers:
-                participants = self.get_participants(peer.addr, peer.port)
+                participants = self.get_participants(peer.host, peer.port)
                 participants_lists.append(participants["participants"])
 
             return self.find_common_elemenets_in_dictionaries(participants_lists)
@@ -131,17 +131,17 @@ class Stake(QObject):
         except Exception as e:
             print(e)
 
-    def participants_raffle(self, host_addr, host_port, node):
+    def participants_raffle(self, host, port, node):
         """
         Raffle participants
         :param node:
-        :param host_addr:
+        :param host:
         :return: participant who has to create a block
         """
         #Get participants list
-        participants_list = self.verify_participants_lists(host_addr, host_port, node)
+        participants_list = self.verify_participants_lists(host, port, node)
 
-        #participants_list = self.get_participants(host_addr, host_port)
+        #participants_list = self.get_participants(host, host_port)
         #Prepare list of participants stakes and stakes sum
         stakes_list = []
         stake_sum = 0

@@ -129,8 +129,8 @@ class Encryption(QObject):
 
     def encrypt_with_public_key(self, public_key, key):
         """Encrypt the AES key using the RSA public key."""
-
-        return public_key.encrypt(
+        try:
+            a = public_key.encrypt(
             key,
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
@@ -138,3 +138,7 @@ class Encryption(QObject):
                 label=None
             )
         )
+            return a
+        except Exception as e:
+            print(e)
+

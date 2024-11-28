@@ -12,10 +12,11 @@ Rectangle {
     property int list_height: parent.height
     property bool list_fill_width: true
     property bool list_fill_height: true
+    property string active_color: "#00FF00"
 
     property var customFunctions: new Array(0);
 
-    property var userClicked: function(addr, port, nickname, mouseArea, popup) {
+    property var userClicked: function(host, port, nickname, mouseArea, popup) {
         popup.open();
     }
 
@@ -29,12 +30,13 @@ Rectangle {
 
         // Iterate over peers array passed from Python
         for (let i = 0; i < user.peers.length; i++) {
+            var activeColor = user.peers[i].active ? "#00FF00" : "#FF0000"
             var isInGroup = false;
-            var addr = user.peers[i].addr;
+            var host = user.peers[i].host;
             var port = user.peers[i].port;
 
             for (let j = 0; j < user.group.length; j++) {
-                if (addr === user.group[j].addr && port === user.group[j].port) {
+                if (host === user.group[j].host && port === user.group[j].port) {
                     isInGroup = true;
                     break;
                 }
@@ -42,10 +44,12 @@ Rectangle {
 
             userModel.append({
                 nickname: user.peers[i].nickname,
-                addr: addr,
+                host: host,
                 port: port,
-                PKString: user.peers[i].PKString,
-                isInGroup: isInGroup
+                public_key: user.peers[i].public_key,
+                active: user.peers[i].active,
+                isInGroup: isInGroup,
+                activeColor: activeColor
             });
         }
     }
@@ -55,6 +59,7 @@ Rectangle {
 
         user.peersChanged.connect(updateUserModel);
         user.nicknameChanged.connect(updateUserModel);
+        user.activeChanged.connect(updateUserModel);
     }
 
     Layout.fillWidth: list_fill_width  // Make it scale horizontally
@@ -80,7 +85,7 @@ Rectangle {
             MouseArea {
                 id: mousearea
                 anchors.fill: parent
-                onClicked: userClicked(model.addr, model.port, model.nickname, mousearea, popup)
+                onClicked: userClicked(model.host, model.port, model.nickname, mousearea, popup)
                 hoverEnabled: true
 
                 onEntered: {
@@ -95,7 +100,7 @@ Rectangle {
                 // Use a single Text element to concatenate the name and IP address
                 Text {
                     anchors.centerIn: parent  // Center the text within the parent
-                    text: '<span style="color: black; ">' + model.nickname + ' </span><span style="color: gray; "><i>(' + model.addr + ":" + model.port + ')</i></span>'
+                    text: '<span style="color: ' + model.activeColor + '; ">' + '▪ ' + ' </span><span style="color: black; ">' + model.nickname + ' </span><span style="color: gray; "><i>(' + model.addr + ":" + model.port + ')</i></span>'
                     color: "#000"
                     font.pixelSize: 12
                     horizontalAlignment: Text.AlignHCenter  // Center horizontally
@@ -111,11 +116,12 @@ Rectangle {
                 focus: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-                property var myaddr: model.addr
+                property var myhost: model.host
                 property var myport: model.port
                 property var mynickname: model.nickname
-                property var myPKString: model.PKString
+                property var mypublic_key: model.public_key
                 property var myisInGroup: model.isInGroup
+                property var myActive: model.active
 
                 ColumnLayout {
                     Repeater {
@@ -130,8 +136,8 @@ Rectangle {
 
                                 onClicked: {
                                     if (typeof customFunctions[index].action === "function"){
-                                        customFunctions[index].action(popup.myaddr, popup.myport,
-                                            popup.mynickname, popup.myPKString, popup.myisInGroup);
+                                        customFunctions[index].action(popup.myhost, popup.myport,
+                                            popup.mynickname, popup.mypublic_key, popup.myActive, popup.myisInGroup);
                                     }
                                 }
                             }

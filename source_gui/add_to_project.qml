@@ -19,14 +19,14 @@ Page {
             anchors.horizontalCenter: parent.horizontalCenter
 
             list_height: parent.height - addProjectButton.height
-            userClicked: function(addr, port, nickname, mouseArea, popup) {
-                let index = selectedUsers.findIndex(u => u.addr === addr && u.port === port);
+            userClicked: function(host, port, nickname, mouseArea, popup) {
+                let index = selectedUsers.findIndex(u => u.host === host && u.port === port);
 
                 if (index === -1) {
                     console.log("==================")
-                    console.log(addr);
+                    console.log(host);
                     console.log(port);
-                    selectedUsers.push(user.find_peer(addr, port));
+                    selectedUsers.push(user.find_peer(host, port));
                     console.log(selectedUsers);
                     mouseArea.parent.color = "lightblue";
                 }

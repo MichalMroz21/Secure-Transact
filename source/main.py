@@ -10,6 +10,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 
 import global_constants
 
+
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
@@ -27,4 +28,3 @@ if __name__ == "__main__":
 
     engine.load(global_constants.MAIN_QML_PATH)
     app.exec()
-    #sys.exit(app.exec())
