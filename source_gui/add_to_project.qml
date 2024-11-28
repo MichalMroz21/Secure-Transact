@@ -19,22 +19,20 @@ Page {
             anchors.horizontalCenter: parent.horizontalCenter
 
             list_height: parent.height - addProjectButton.height
-            userClicked: function(host, port, nickname, mouseArea, popup) {
-                let index = selectedUsers.findIndex(u => u.host === host && u.port === port);
+            userClicked: function(model, mouseArea, popup) {
+                let index = selectedUsers.findIndex(u => u.host === model.host && u.port === model.port);
 
                 if (index === -1) {
-                    console.log("==================")
-                    console.log(host);
-                    console.log(port);
-                    selectedUsers.push(user.find_peer(host, port));
+                    model.isSelected = true;
+                    selectedUsers.push(user.find_peer(model.host, model.port));
                     console.log(selectedUsers);
                     mouseArea.parent.color = "lightblue";
-                    mouseArea.hoverEnabled = false;
+
                 }
                 else {
                     selectedUsers.splice(index, 1);
+                    model.isSelected = false;
                     mouseArea.parent.color = "white";
-                    mouseArea.hoverEnabled = true;
                 }
             }
         }

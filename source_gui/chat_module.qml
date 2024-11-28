@@ -135,15 +135,15 @@ Page {
                 customFunctions: [
                      {
                          text: "Add to group",
-                         action: function(host, port, nickname, public_key, isInGroup, popup) {
-                             user.addToGroup(host, port);
+                         action: function(model, mouseArea, popup) {
+                             user.addToGroup(model.host, model.port);
                          },
                          isVisible: true
                      },
                     {
                         text: "Remove from group",
-                        action: function (host, port, nickname, public_key, isInGroup, popup) {
-                            user.removeFromGroup(host, port);
+                        action: function (model, mouseArea, popup) {
+                            user.removeFromGroup(model.host, model.port);
                         },
                         isVisible: true
                     }

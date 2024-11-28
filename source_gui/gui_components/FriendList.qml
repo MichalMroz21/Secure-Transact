@@ -16,7 +16,7 @@ Rectangle {
 
     property var customFunctions: new Array(0);
 
-    property var userClicked: function(host, port, nickname, mouseArea, popup) {
+    property var userClicked: function(model, mouseArea, popup) {
         popup.open();
     }
 
@@ -31,9 +31,8 @@ Rectangle {
         // Iterate over peers array passed from Python
         for (let i = 0; i < user.peers.length; i++) {
             var activeColor = user.peers[i].active > 0 ? "#00FF00" : "#FF0000"
-            console.log("=========================================")
-            console.log("Obecny kolor to: " + activeColor)
             var isInGroup = false;
+            var isSelected = false;
             var host = user.peers[i].host;
             var port = user.peers[i].port;
 
@@ -48,9 +47,9 @@ Rectangle {
                 nickname: user.peers[i].nickname,
                 host: host,
                 port: port,
-                public_key: user.peers[i].public_key,
                 active: user.peers[i].active,
                 isInGroup: isInGroup,
+                isSelected: isSelected,
                 activeColor: activeColor
             });
         }
@@ -87,22 +86,22 @@ Rectangle {
             MouseArea {
                 id: mousearea
                 anchors.fill: parent
-                onClicked: userClicked(model.host, model.port, model.nickname, mousearea, popup)
+                onClicked: userClicked(model, mousearea, popup)
                 hoverEnabled: true
 
                 onEntered: {
-                    parent.color = "lightgray"
-                    mousearea.cursorShape = Qt.PointingHandCursor
+                    model.isSelected === false ? parent.color = "lightgray" : null;
+                    mousearea.cursorShape = Qt.PointingHandCursor;
                 }
                 onExited: {
-                    parent.color = "white"
+                    model.isSelected === false ? parent.color = "white" : null;
                     mousearea.cursorShape = Qt.ArrowCursor
                 }
 
                 // Use a single Text element to concatenate the name and IP address
                 Text {
                     anchors.centerIn: parent  // Center the text within the parent
-                    text: '<span style="color: ' + model.activeColor + '; ">' + '▮ ' + ' </span><span style="color: black; ">' + model.nickname + ' </span><span style="color: gray; "><i>(' + model.addr + ":" + model.port + ')</i></span>'
+                    text: '<span style="color: ' + model.activeColor + '; ">' + '▮ ' + ' </span><span style="color: black; ">' + model.nickname + ' </span><span style="color: gray; "><i>(' + model.host + ":" + model.port + ')</i></span>'
                     color: "#000"
                     font.pixelSize: 12
                     horizontalAlignment: Text.AlignHCenter  // Center horizontally
@@ -118,10 +117,13 @@ Rectangle {
                 focus: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
+
+                property var myModel: model
+                property var myMouseArea: mousearea
+                property var myPopup: popup
                 property var myhost: model.host
                 property var myport: model.port
                 property var mynickname: model.nickname
-                property var mypublic_key: model.public_key
                 property var myisInGroup: model.isInGroup
                 property var myActive: model.active
 
@@ -138,8 +140,7 @@ Rectangle {
 
                                 onClicked: {
                                     if (typeof customFunctions[index].action === "function"){
-                                        customFunctions[index].action(popup.myhost, popup.myport,
-                                            popup.mynickname, popup.mypublic_key, popup.myActive, popup.myisInGroup);
+                                        customFunctions[index].action(popup.myModel, popup.mouseArea, popup.myPopup);
                                     }
                                 }
                             }
