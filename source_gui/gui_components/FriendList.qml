@@ -30,7 +30,9 @@ Rectangle {
 
         // Iterate over peers array passed from Python
         for (let i = 0; i < user.peers.length; i++) {
-            var activeColor = user.peers[i].active ? "#00FF00" : "#FF0000"
+            var activeColor = user.peers[i].active > 0 ? "#00FF00" : "#FF0000"
+            console.log("=========================================")
+            console.log("Obecny kolor to: " + activeColor)
             var isInGroup = false;
             var host = user.peers[i].host;
             var port = user.peers[i].port;
@@ -49,6 +51,7 @@ Rectangle {
                 public_key: user.peers[i].public_key,
                 active: user.peers[i].active,
                 isInGroup: isInGroup,
+                isSelected: isSelected,
                 activeColor: activeColor
             });
         }
@@ -100,7 +103,7 @@ Rectangle {
                 // Use a single Text element to concatenate the name and IP address
                 Text {
                     anchors.centerIn: parent  // Center the text within the parent
-                    text: '<span style="color: ' + model.activeColor + '; ">' + '▪ ' + ' </span><span style="color: black; ">' + model.nickname + ' </span><span style="color: gray; "><i>(' + model.addr + ":" + model.port + ')</i></span>'
+                    text: '<span style="color: ' + model.activeColor + '; ">' + '▮ ' + ' </span><span style="color: black; ">' + model.nickname + ' </span><span style="color: gray; "><i>(' + model.addr + ":" + model.port + ')</i></span>'
                     color: "#000"
                     font.pixelSize: 12
                     horizontalAlignment: Text.AlignHCenter  // Center horizontally

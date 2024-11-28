@@ -494,7 +494,7 @@ class User(QObject):
                     # If the function continues running in this place then it was a successful connection so the peer is active
                     if inactive:
                         print("Inactive peer {}:{} changed its status to active".format(peer.host, peer.port))
-                        self.peersChanged.emit()
+                        self.activeChanged.emit()
 
                     if self.chain.consensus(chain):
                         print("Checked chain with {}, ours is right".format(
