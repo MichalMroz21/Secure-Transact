@@ -6,7 +6,10 @@ import QtQuick.Layouts 6.3
 import "gui_components"
 
 Page {
-    Rectangle{
+    property int currentIndex
+    property var selectedUsers: new Array(0)
+
+    Rectangle {
         anchors.centerIn: parent
         width: parent.width
         height: parent.height
@@ -15,22 +18,28 @@ Page {
             id: friendList
             anchors.horizontalCenter: parent.horizontalCenter
 
-            list_height: parent.height - addUserButton.height
-            customFunctions: [
-                {
-                    text: "Delete from friends",
-                    action: function(addr, port, nickname, PKString, isInGroup) {
-                        user.removeFromPeers(addr, port);
-                        user.removeFromGroup(addr, port);
-                    },
-                    isVisible: true
+            list_height: parent.height - addProjectButton.height
+            userClicked: function(model, mouseArea, popup) {
+                let index = selectedUsers.findIndex(u => u.host === model.host && u.port === model.port);
+
+                if (index === -1) {
+                    model.isSelected = true;
+                    selectedUsers.push(user.find_peer(model.host, model.port));
+                    console.log(selectedUsers);
+                    mouseArea.parent.color = "lightblue";
+
                 }
-            ]
+                else {
+                    selectedUsers.splice(index, 1);
+                    model.isSelected = false;
+                    mouseArea.parent.color = "white";
+                }
+            }
         }
 
         // Add New User Button
         Rectangle {
-            id: addUserButton
+            id: addProjectButton
             width: friendList.width
 
             anchors.horizontalCenter: parent.horizontalCenter
@@ -43,7 +52,12 @@ Page {
                 id: addButton
                 anchors.fill: parent
                 onClicked: {
-                    stackView.push("add_user.qml");
+                    console.log(selectedUsers);
+                    for(let i = 0; i < selectedUsers.length; i++) {
+                        console.log(selectedUsers[i]);
+                        user.projects[currentIndex].add_user(selectedUsers[i]);
+                    }
+                    stackView.pop();
                 }
                 hoverEnabled: true
 
@@ -57,7 +71,7 @@ Page {
                 Text {
                     id: addUserButtonText
                     anchors.centerIn: parent
-                    text: "Add new user"
+                    text: "Add to project"
                     color: "white"
                     font.pixelSize: 16
                     horizontalAlignment: Text.AlignHCenter

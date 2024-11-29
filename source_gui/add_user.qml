@@ -1,5 +1,5 @@
 import QtQuick
-import QtQuick.Controls 6.3
+import QtQuick.Controls 6.8
 import QtCharts 6.3
 import QtQuick.Layouts 6.3
 
@@ -74,7 +74,8 @@ Page {
                 }
                 onClicked:{
                     if(ipAddressField.text !== "" && portField.text !== ""){
-                        user.verify_peer_connection(ipAddressField.text, portField.text);
+                        user.send_invitation(ipAddressField.text, portField.text);
+                        //user.verify_peer_connection(ipAddressField.text, portField.text);
                         stackView.push("chat_module.qml");
                     }
                 }

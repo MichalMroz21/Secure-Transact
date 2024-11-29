@@ -12,55 +12,36 @@ Rectangle {
     property int list_height: parent.height
     property bool list_fill_width: true
     property bool list_fill_height: true
-    property string active_color: "#00FF00"
 
     property var customFunctions: new Array(0);
-
-    property var userClicked: function(model, mouseArea, popup) {
+    property var userClicked: function(name, tasks, users, mouseArea, popup) {
         popup.open();
     }
 
-    // Create a ListModel for the users
+    // Create a ListModel for the projects
     ListModel {
-        id: userModel
+        id: projectModel
     }
 
-    function updateUserModel() {
-        userModel.clear();
+    function updateProjectModel() {
+        projectModel.clear();
+
+        var projects = user.projects;
 
         // Iterate over peers array passed from Python
-        for (let i = 0; i < user.peers.length; i++) {
-            var activeColor = user.peers[i].active > 0 ? "#00FF00" : "#FF0000"
-            var isInGroup = false;
-            var isSelected = false;
-            var host = user.peers[i].host;
-            var port = user.peers[i].port;
-
-            for (let j = 0; j < user.group.length; j++) {
-                if (host === user.group[j].host && port === user.group[j].port) {
-                    isInGroup = true;
-                    break;
-                }
-            }
-
-            userModel.append({
-                nickname: user.peers[i].nickname,
-                host: host,
-                port: port,
-                active: user.peers[i].active,
-                isInGroup: isInGroup,
-                isSelected: isSelected,
-                activeColor: activeColor
+        for (let i = 0; i < projects.length; i++) {
+            projectModel.append({
+                name: projects[i].name,
+                tasks: projects[i].tasks,
+                users: projects[i].users,
+                index: i
             });
         }
     }
 
     Component.onCompleted: {
-        updateUserModel();
-
-        user.peersChanged.connect(updateUserModel);
-        user.nicknameChanged.connect(updateUserModel);
-        user.activeChanged.connect(updateUserModel);
+        updateProjectModel();
+        user.projectsChanged.connect(updateProjectModel);
     }
 
     Layout.fillWidth: list_fill_width  // Make it scale horizontally
@@ -73,10 +54,10 @@ Rectangle {
 
     // ListView to display user names and IP addresses
     ListView {
-        id: friendListView
+        id: projectListView
         width: parent.width
         height: parent.height
-        model: userModel
+        model: projectModel
 
         delegate: Rectangle {
             width: parent.width  // Set width explicitly for user list items
@@ -84,24 +65,24 @@ Rectangle {
             id: userRectangle
 
             MouseArea {
-                id: mousearea
                 anchors.fill: parent
-                onClicked: userClicked(model, mousearea, popup)
+                onClicked: userClicked(model.name, model.tasks, model.users, mousearea, popup)
                 hoverEnabled: true
+                id: mousearea
 
                 onEntered: {
-                    model.isSelected === false ? parent.color = "lightgray" : null;
-                    mousearea.cursorShape = Qt.PointingHandCursor;
+                    parent.color = "lightgray"
+                    mousearea.cursorShape = Qt.PointingHandCursor
                 }
                 onExited: {
-                    model.isSelected === false ? parent.color = "white" : null;
+                    parent.color = "white"
                     mousearea.cursorShape = Qt.ArrowCursor
                 }
 
                 // Use a single Text element to concatenate the name and IP address
                 Text {
                     anchors.centerIn: parent  // Center the text within the parent
-                    text: '<span style="color: ' + model.activeColor + '; ">' + '▮ ' + ' </span><span style="color: black; ">' + model.nickname + ' </span><span style="color: gray; "><i>(' + model.host + ":" + model.port + ')</i></span>'
+                    text: '<span style="color: black; ">' + model.name + '</span>'
                     color: "#000"
                     font.pixelSize: 12
                     horizontalAlignment: Text.AlignHCenter  // Center horizontally
@@ -117,15 +98,10 @@ Rectangle {
                 focus: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-
-                property var myModel: model
-                property var myMouseArea: mousearea
-                property var myPopup: popup
-                property var myhost: model.host
-                property var myport: model.port
-                property var mynickname: model.nickname
-                property var myisInGroup: model.isInGroup
-                property var myActive: model.active
+                property var myname: model.name
+                property var mytasks: model.tasks
+                property var myusers: model.users
+                property var myindex: model.index
 
                 ColumnLayout {
                     Repeater {
@@ -140,7 +116,7 @@ Rectangle {
 
                                 onClicked: {
                                     if (typeof customFunctions[index].action === "function"){
-                                        customFunctions[index].action(popup.myModel, popup.mouseArea, popup.myPopup);
+                                        customFunctions[index].action(popup.myname, popup.mytasks, popup.myusers, popup.myindex);
                                     }
                                 }
                             }
