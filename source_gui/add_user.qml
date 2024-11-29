@@ -74,7 +74,8 @@ Page {
                 }
                 onClicked:{
                     if(ipAddressField.text !== "" && portField.text !== ""){
-                        user.verify_peer_connection(ipAddressField.text, portField.text);
+                        user.send_invitation(ipAddressField.text, portField.text);
+                        //user.verify_peer_connection(ipAddressField.text, portField.text);
                         stackView.push("chat_module.qml");
                     }
                 }

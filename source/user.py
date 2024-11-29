@@ -5,6 +5,8 @@ import http
 import os
 import socket
 import time
+from enum import verify
+
 import requests
 import random
 import string
@@ -35,8 +37,9 @@ class User(QObject):
     nicknameChanged = Signal()
     projectsChanged = Signal()
     activeChanged = Signal()
+    invitesChanged = Signal()
 
-    def __init__(self, powlib, encryption, host=None, port=None, active=True, public_key=None, nickname=None):
+    def __init__(self, powlib, encryption, settings, host=None, port=None, active=True, public_key=None, nickname=None):
         super().__init__()
         """
         Creates a user
@@ -55,6 +58,7 @@ class User(QObject):
 
         self.powlib = powlib
         self.encryption = encryption
+        self.settings = settings
 
         #Connections with other devices
         self.chain = Blockchain(self.powlib)    #Copy of blockchain
@@ -72,6 +76,7 @@ class User(QObject):
         self._group = []
         self._peers = []
         self._active = active
+        self._invites = []
 
         self._nickname = self.generate_random_string(global_constants.MAX_NICKNAME_LENGTH) if nickname is None else nickname
 
@@ -116,6 +121,16 @@ class User(QObject):
     @Property(bool, notify=activeChanged)
     def active(self):
         return self._active
+
+    @Property("QVariantList", notify=invitesChanged)
+    def invites(self):
+        return self._invites
+
+    @invites.setter
+    def invites(self, new_val):
+        if self._invites != new_val:
+            self._invites = new_val
+            self.activeChanged.emit()
 
     @active.setter
     def active(self, new_val):
@@ -210,10 +225,10 @@ class User(QObject):
         Creates peer with second device
         :param host: Second's device IP address
         :param port: Second's device port
-        :param public_key: Second's device public key'
-        :param nickname: Second's device nickname'
+        :param public_key: Second's device public key
+        :param nickname: Second's device nickname
         """
-        self._peers.append(User(self.powlib, self.encryption, host, int(port), True, public_key, nickname))
+        self._peers.append(User(self.powlib, self.encryption, self.settings, host, int(port), True, public_key, nickname))
         self.peersChanged.emit() #Notify QML
 
         self.update_encrypted_string(self.public_key, self.random_key)
@@ -222,6 +237,61 @@ class User(QObject):
             peer.update_encrypted_string(peer.public_key, self.random_key)
 
         self.sendEncryptedKeys()
+
+    @Slot(str, str)
+    def send_invitation(self, host, port):
+        """
+        Sends invitation to user
+        :param host: User's IP address
+        :param port: User's port
+        :return:
+        """
+        for invite in self.invites:
+            if invite["host"] == host and int(invite["port"]) == int(port):
+                #Invitation has been already sent to that person
+                return None
+        # send request to examined peer
+        try:
+            response = requests.post("http://{}:{}/invite_me".format(host, port),
+                                    json={"host": self.host, "port": self.port, "pk": self.public_key_to_pem(),
+                                          "nickname": self.nickname})
+            if response.status_code == http.HTTPStatus.OK:
+                #Remember the user which was invited
+                self.invites.append({"host": host, "port": port, "received": False})
+                print(self.invites)
+        except Exception as e:
+            print(e)
+
+    @Slot(str, str)
+    def accept_invitation(self, host, port):
+        """
+        Accepts invitation from the user
+        :param host: User's IP address
+        :param port: User's port
+        :return:
+        """
+        for invite in self.invites:
+            if invite["host"] == host and int(invite["port"]) == int(port):
+                self.verify_peer_connection(host, port)
+                self.invites.remove(invite)
+                self.invitesChanged.emit()
+                break
+
+    @Slot(str, str)
+    def reject_invitation(self, host, port):
+        """
+        Rejects invitation from the user
+        :param host: User's IP address'
+        :param port: User's port'
+        :return:
+        """
+        for invite in self.invites:
+            if invite["host"] == host and int(invite["port"]) == int(port):
+                requests.get("http://{}:{}/reject_me".format(host, port),
+                                         json={"host": self.host, "port": self.port})
+                self.invites.remove(invite)
+                self.invitesChanged.emit()
+                break
 
     @Slot(str, str)
     def verify_peer_connection(self, host, port):

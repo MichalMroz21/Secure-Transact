@@ -2,13 +2,6 @@ import QtQuick 2.15
 import QtQuick.Controls 6.8
 import QtQuick.Layouts 1.15
 
-//1. Wyjebać Peery, ma byc tylko User
-//Historie friendów, projektów itd
-//polaczenie page user.qml + friendss.qml, zeby bylo kontentu wiecej na jednej stronie
-//Dodanie w options.qml ostrzezenia, ze jak ktos nas dodaje to ze chcemy zaakceptowac
-//Dodanie wizualii bycia online (znaczek online (zielony, szary))
-//Zrobienie listy tasków obok listy Projektów w planning_module.qml
-
 //User (Peer) List Class Blueprint
 Rectangle {
     //Class Properties (override if needed)
@@ -25,7 +18,7 @@ Rectangle {
         popup.open();
     }
 
-    // Create a ListModel for the users
+    // Create a ListModel for the projects
     ListModel {
         id: projectModel
     }

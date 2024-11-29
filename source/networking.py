@@ -57,6 +57,43 @@ class Networking(QObject):
             else:
                 return jsonify({"error": "Got no public key"}), HTTPStatus.BAD_REQUEST
 
+        @self.app.route('/reject_me', methods=['GET'])
+        def reject_me():
+            """
+            Reject an invite
+            :return: HTTPStatus.OK | HTTPStatus.BAD_REQUEST
+            """
+            json_array = request.json
+            host = json_array.get("host")
+            port = json_array.get("port")
+            for invite in self.user.invites:
+                print(invite)
+                if invite["host"] == host and int(invite["port"]) == int(port):
+                    print("Usuwam danego uzytkownika z listy zaproszen")
+                    self.user.invites.remove(invite)
+                    self.user.invitesChanged.emit()
+                    break
+            return jsonify({"status": "Invitation rejected successfully"}), HTTPStatus.OK
+
+        @self.app.route('/invite_me', methods=['POST'])
+        def invite_me():
+            """
+            Add a new invite
+            :return: HTTPStatus.OK | HTTPStatus.BAD_REQUEST
+            """
+            json_array = request.json
+            host = json_array.get("host")
+            port = json_array.get("port")
+            for invite in self.user.invites:
+                if invite["host"] == host and int(invite["port"]) == int(port):
+                    return jsonify({"status": "Invitation has been already sent in the past!"}), HTTPStatus.BAD_REQUEST
+            #It is a new invitation. Append it to the invites section
+            self.user.invites.append({"host": host, "port": port, "received": True})
+            self.user.invitesChanged.emit()
+            if self.user.settings.auto_connection:
+                self.user.accept_invitation(host, port)
+            return jsonify({"status": "Invitation sent successfully"}), HTTPStatus.OK
+
         @self.app.route('/establish_a_connection', methods=['GET'])
         def establish_a_connection():
             json_array = request.json
@@ -66,6 +103,7 @@ class Networking(QObject):
             nickname = json_array.get("nickname")
 
             try:
+                # TODO: coś w stylu get_pk
                 self.user.peer(host, int(port), pk, nickname)
                 return jsonify({"status": "Connection established", "pk": self.user.public_key_to_pem(), "nickname": self.user.nickname}), HTTPStatus.OK
             except Exception as e:
