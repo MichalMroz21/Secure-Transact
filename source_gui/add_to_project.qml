@@ -11,6 +11,10 @@ Page {
     property var selectedUsers: new Array(0)
     property var onReturn
 
+    Component.onCompleted: {
+        root.pageTitleText = "Add users to the project";
+    }
+
     Rectangle {
         anchors.centerIn: parent
         width: parent.width

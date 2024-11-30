@@ -29,6 +29,7 @@ Page {
     }
 
     Component.onCompleted: {
+        root.pageTitleText = "User profile";
         updateInvitesModel();
         user.invitesChanged.connect(updateInvitesModel);
     }

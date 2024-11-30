@@ -12,6 +12,7 @@ Page {
     }
 
     Component.onCompleted: {
+        root.pageTitleText = "Options";
         updateCheckbox();
         settings.autoConnectionChanged.connect(updateCheckbox);
     }

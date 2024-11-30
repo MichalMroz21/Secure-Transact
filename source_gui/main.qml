@@ -1,9 +1,10 @@
 import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick.Controls.Basic
 import QtQuick.Layouts 2.15
 import Qt5Compat.GraphicalEffects
 
 import "gui_components"
+import "app_style"
 
 ApplicationWindow {
     width: 600
@@ -11,6 +12,11 @@ ApplicationWindow {
     visible: true
     id: root
     title: qsTr("Secure Transact")
+    background: Rectangle {
+        color: "#101010"
+    }
+    FontStyle { id: fontStyle }
+    property alias pageTitleText: pageTitle.text
 
     StackView {
        id: stackView
@@ -37,6 +43,18 @@ ApplicationWindow {
             font.pixelSize: getDrawerEntrySize(root.width, root.height);
             onClicked: drawer.open();
         }
+    }
+
+    Text{
+        id: pageTitle
+        anchors.left: menuToolbar.right
+        anchors.leftMargin: root.width * 1 / 6 - menuToolbar.width
+        anchors.top: menuToolbar.top
+        anchors.topMargin: menuToolbar.height / 4
+        font.pixelSize: getDrawerEntrySize(root.width, root.height);
+        font.family: fontStyle.getLatoRegular.name
+        font.pointSize: 9
+        text: "Test"
     }
 
     RotationAnimator {

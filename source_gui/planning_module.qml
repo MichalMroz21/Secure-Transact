@@ -9,6 +9,10 @@ import "small_gui_components"
 Page {
     property var usersInProject: new Array(0)
 
+    Component.onCompleted: {
+        root.pageTitleText = "Planning";
+    }
+
     RowLayout {
         Layout.preferredHeight: -1
         Layout.preferredWidth: -1
@@ -53,6 +57,7 @@ Page {
                             stackView.push("add_to_project.qml", {
                                        currentIndex: projectModel.index,
                                        onReturn: function(returnedUsers) {
+                                           root.pageTitleText = "Planning";
                                             usersInProject = returnedUsers;
                                             console.log("Returned users:", returnedUsers);
                                            user.update_project_users(projectModel.index, returnedUsers);

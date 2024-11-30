@@ -7,6 +7,10 @@ Page {
     id: formPage
     property int maxInputWidth: 300
 
+    Component.onCompleted: {
+        root.pageTitleText = "Add new user";
+    }
+
     ColumnLayout {
         id: formContainer
         anchors.centerIn: parent
@@ -98,6 +102,7 @@ Page {
                     anchors.centerIn: parent
                 }
                 onClicked: {
+                    root.pageTitleText = "User profile";
                     stackView.pop();
                 }
             }

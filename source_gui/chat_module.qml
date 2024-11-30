@@ -8,6 +8,10 @@ Page {
     id: chatPage
     width: parent.width
     height: parent.height
+    background: Rectangle {
+        color: "#101010"
+    }
+
 
     // Create a ListModel to hold the messages
     ListModel {
@@ -15,6 +19,7 @@ Page {
     }
 
     Component.onCompleted: {
+        root.pageTitleText = "Chat";
         function loadChat(){
             var messages = user.prepare_conversation_history();
 
