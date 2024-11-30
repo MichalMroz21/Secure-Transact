@@ -21,7 +21,6 @@ Rectangle {
         popup.open();
     }
 
-    // Create a ListModel for the projects
     ListModel {
         id: projectModel
     }
@@ -31,12 +30,11 @@ Rectangle {
 
         var projects = user.projects;
 
-        // Iterate over peers array passed from Python
         for (let i = 0; i < projects.length; i++) {
             projectModel.append({
                 name: projects[i].name,
-                tasks: projects[i].tasks,
-                users: projects[i].users,
+                //tasks: projects[i].tasks,
+                //users: projects[i].users,
                 index: i
             });
         }
@@ -47,15 +45,14 @@ Rectangle {
         user.projectsChanged.connect(updateProjectModel);
     }
 
-    Layout.fillWidth: list_fill_width  // Make it scale horizontally
-    Layout.fillHeight: list_fill_height  // Make it scale vertically
+    Layout.fillWidth: list_fill_width
+    Layout.fillHeight: list_fill_height
     implicitWidth: list_width
     implicitHeight: list_height
     color: list_color
     border.color: border_color
     radius: border_radius
 
-    // ListView to display user names and IP addresses
     ListView {
         id: projectListView
         width: parent.width
@@ -63,9 +60,9 @@ Rectangle {
         model: projectModel
 
         delegate: Rectangle {
-            width: parent.width  // Set width explicitly for user list items
-            height: 40  // Fixed height for each user item
-            id: userRectangle
+            width: parent.width
+            height: 40
+            id: projectRectangle
 
             MouseArea {
                 anchors.fill: parent
@@ -82,15 +79,14 @@ Rectangle {
                     mousearea.cursorShape = Qt.ArrowCursor
                 }
 
-                // Use a single Text element to concatenate the name and IP address
                 Text {
-                    anchors.centerIn: parent  // Center the text within the parent
+                    anchors.centerIn: parent
                     text: '<span style="color: black; ">' + model.name + '</span>'
                     color: "#000"
                     font.pixelSize: 12
-                    horizontalAlignment: Text.AlignHCenter  // Center horizontally
-                    verticalAlignment: Text.AlignVCenter  // Center vertically
-                    textFormat: Text.RichText  // Enable HTML formatting
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    textFormat: Text.RichText
                 }
             }
 
@@ -101,10 +97,7 @@ Rectangle {
                 focus: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-                property var myname: model.name
-                property var mytasks: model.tasks
-                property var myusers: model.users
-                property var myindex: model.index
+                property var projectModel: model
 
                 padding: 0
 
@@ -124,7 +117,7 @@ Rectangle {
 
                                 onClicked: {
                                     if (typeof customFunctions[index].action === "function") {
-                                        customFunctions[index].action(popup.myname, popup.mytasks, popup.myusers, popup.myindex);
+                                        customFunctions[index].action(popup.projectModel);
                                     }
                                 }
                             }

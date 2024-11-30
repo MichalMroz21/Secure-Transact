@@ -7,7 +7,7 @@ import "gui_components"
 import "small_gui_components"
 
 Page {
-
+    property var usersInProject: new Array(0)
 
     RowLayout {
         Layout.preferredHeight: -1
@@ -49,8 +49,16 @@ Page {
                 customFunctions: [
                     {
                         text: "Add user to project",
-                        action: function (name, tasks, users, index) {
-                            stackView.push("add_to_project.qml", {currentIndex: index});
+                        action: function (projectModel) {
+                            stackView.push("add_to_project.qml", {
+                                       currentIndex: projectModel.index,
+                                       onReturn: function(returnedUsers) {
+                                            usersInProject = returnedUsers;
+                                            console.log("Returned users:", returnedUsers);
+                                           user.update_project_users(projectModel.index, returnedUsers);
+                                        }
+                                   });
+
                         },
                         isVisible: true
                     }
