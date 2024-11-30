@@ -31,7 +31,7 @@ Page {
                 text: "Create a new project"
 
                 onClicked: {
-                    stackView.push("add_user.qml");
+                    stackView.push("add_project.qml");
                 }
             }
         }

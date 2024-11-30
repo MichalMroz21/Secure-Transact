@@ -9,6 +9,7 @@ import "small_gui_components"
 Page {
     property int currentIndex
     property var selectedUsers: new Array(0)
+    property var onReturn
 
     Rectangle {
         anchors.centerIn: parent
@@ -19,7 +20,7 @@ Page {
             id: friendList
             anchors.horizontalCenter: parent.horizontalCenter
 
-            list_height: parent.height - addProjectButton.height
+            list_height: parent.height - addUserButton.height
             userClicked: function(model, mouseArea, popup) {
                 let index = selectedUsers.findIndex(u => u.host === model.host && u.port === model.port);
 
@@ -48,10 +49,8 @@ Page {
             text: "Add to project"
 
             onClicked: {
-                console.log(selectedUsers);
-                for(let i = 0; i < selectedUsers.length; i++) {
-                    console.log(selectedUsers[i]);
-                    user.projects[currentIndex].add_user(selectedUsers[i]);
+                if (onReturn) {
+                    onReturn(selectedUsers);
                 }
                 stackView.pop();
             }

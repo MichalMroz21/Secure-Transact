@@ -5,12 +5,12 @@ class Project(QObject):
     nameChanged = Signal()
     usersChanged = Signal()
 
-    def __init__(self, name="Project"):
+    def __init__(self, name="Project", users = []):
         super().__init__()
 
         self._tasks = []
         self._name = name
-        self._users = []
+        self._users = users
 
     @Property("QVariantList", notify=tasksChanged)
     def tasks(self):

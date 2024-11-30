@@ -315,6 +315,16 @@ class User(QObject):
             print(e)
             return False
 
+    @Slot(str, "QVariantList")
+    def add_new_project_from_FE(self, name, users):
+        print(self.projects)
+        self.projects.append(Project(name, users))
+        print(self.projects)
+        print("=============")
+        print(self.projects[-1])
+        print(self.projects[-1].name)
+        print(self.projects[-1].users)
+
     @Slot(str)
     def send_mes(self, message):
         """
