@@ -2,14 +2,31 @@ import QtQuick 2.15
 import QtQuick.Controls 2.5
 
 QtObject {
-    readonly property int       h1 : 32
-    readonly property int       h2 : 24
-    readonly property double    h3 : 18.72
-    readonly property int       h4 : 16
-    readonly property double    h5 : 13.28
-    readonly property double    h6 : 10.72
+    readonly property int display_large: 52
+    readonly property int display_small: 44
+    readonly property int display_h1: 40
+    readonly property int display_h2: 36
+    readonly property int display_h3: 32
+    readonly property int display_h4: 28
+    readonly property int display_h5: 24
+    readonly property int display_h6: 20
 
-    readonly property int content : 14
+    readonly property int mobile_h1: 36
+    readonly property int mobile_h2: 32
+    readonly property int mobile_h3: 28
+    readonly property int mobile_h4: 24
+    readonly property int mobile_h5: 20
+    readonly property int mobile_h6: 18
+
+    readonly property int paragraph_large: 18
+    readonly property int paragraph_medium: 16
+    readonly property int paragraph_small: 14
+    readonly property int paragraph_xsmall: 12
+
+    readonly property int label_large: 16
+    readonly property int label_medium: 14
+    readonly property int label_small: 12
+    readonly property int label_xsmall: 10
 
     readonly property var getLatoBlack: fontLatoBlack
     readonly property var getLatoBlackItalic: fontLatoBlackItalic
