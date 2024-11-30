@@ -49,8 +49,8 @@ Rectangle {
 
     Layout.fillWidth: list_fill_width  // Make it scale horizontally
     Layout.fillHeight: list_fill_height  // Make it scale vertically
-    width: list_width
-    height: list_height
+    implicitWidth: list_width
+    implicitHeight: list_height
     color: list_color
     border.color: border_color
     radius: border_radius

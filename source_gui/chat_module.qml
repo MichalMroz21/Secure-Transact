@@ -41,22 +41,20 @@ Page {
         user.messagesAppend.connect(appendToChat);
     }
 
-    // Rectangle for the main chat container
-    Rectangle {
-        width: parent.width / 1.5
-        height: parent.height / 1.5
-        color: "#f0f0f0"
-        radius: 10
-        anchors.centerIn: parent
 
         RowLayout {
-            anchors.fill: parent
+            width: parent.width / 1.5
+            height: parent.height / 1.5
+            anchors.centerIn: parent
 
-            // Chat Window (left side)
-            Rectangle {
+            ColumnLayout{
+                Layout.preferredWidth: parent.width * 2 / 3
+                Layout.preferredHeight: parent.height
+                // Chat Window (left side)
+                Rectangle {
                 Layout.fillWidth: true  // Make it scale horizontally
                 Layout.fillHeight: true  // Make it scale vertically
-                width: parent.width * 2 / 3  // 2/3 for chat window (2x space)
+                width: parent.width  // 2/3 for chat window (2x space)
                 height: parent.height
                 color: "#f0f0f0"
                 border.color: "#ddd"
@@ -130,25 +128,31 @@ Page {
                     }
                 }
             }
+            }
 
-            FriendList{
-                customFunctions: [
-                     {
-                         text: "Add to group",
-                         action: function(model, mouseArea, popup) {
-                             user.addToGroup(model.host, model.port);
+            ColumnLayout{
+                Layout.preferredWidth: parent.width * 1 / 3
+                Layout.preferredHeight: parent.height
+                FriendList{
+
+                    customFunctions: [
+                         {
+                             text: "Add to group",
+                             action: function(model, mouseArea, popup) {
+                                 user.addToGroup(model.host, model.port);
+                             },
+                             isVisible: true
                          },
-                         isVisible: true
-                     },
-                    {
-                        text: "Remove from group",
-                        action: function (model, mouseArea, popup) {
-                            user.removeFromGroup(model.host, model.port);
-                        },
-                        isVisible: true
-                    }
-                ]
+                        {
+                            text: "Remove from group",
+                            action: function (model, mouseArea, popup) {
+                                user.removeFromGroup(model.host, model.port);
+                            },
+                            isVisible: true
+                        }
+                    ]
+                }
             }
         }
-    }
+
 }

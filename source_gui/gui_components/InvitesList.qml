@@ -120,7 +120,7 @@ Item {
 
                         Text {
                             anchors.centerIn: parent
-                            text: "Od: " + model.host + ":" + model.port
+                            text: "From: " + model.host + ":" + model.port
                             color: "#000"
                             font.pixelSize: 14
                             horizontalAlignment: Text.AlignHCenter

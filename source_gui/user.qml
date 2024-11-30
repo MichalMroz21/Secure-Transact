@@ -33,27 +33,27 @@ Page {
         user.invitesChanged.connect(updateInvitesModel);
     }
 
-    Rectangle {
-        width: parent.width / 1.5
-        height: parent.height / 1.5
-        color: "#f0f0f0"
-        radius: 10
-        anchors.centerIn: parent
 
         RowLayout {
-            id: rowLayout
-            anchors.fill: parent
-            spacing: 10
+            Layout.preferredHeight: -1
+            Layout.preferredWidth: -1
+            implicitWidth: parent.width * 2 / 3
+            implicitHeight: parent.height * 2 / 3
+            anchors.centerIn: parent
+
+            spacing: 0
 
             ColumnLayout {
                 id: formContainer
                 Layout.fillWidth: true  // Make it scale horizontally
                 Layout.fillHeight: true  // Make it scale vertically
-                Layout.preferredWidth: 1 / 2
+                Layout.preferredWidth: 1 / 2 * parent.width
+                Layout.preferredHeight: parent.height * 0.2
+                spacing: 0
 
                 RowLayout{
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.minimumWidth: parent.width * 1 / 2
+                    Layout.minimumWidth: parent.width * 1 / 4
 
                     Text {
                         id: ipAddress
@@ -69,7 +69,7 @@ Page {
                 }
                 RowLayout{
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.minimumWidth: parent.width * 1 / 2
+                    Layout.minimumWidth: parent.width * 1 / 4
 
                     Text {
                         id: portAddress
@@ -83,12 +83,14 @@ Page {
                         color: "black"
                     }
                 }
+
             }
 
             ColumnLayout {
                 Layout.fillWidth: true  // Make it scale horizontally
                 Layout.fillHeight: true  // Make it scale vertically
-                Layout.preferredWidth: 1 / 2
+                Layout.preferredWidth: 1 / 2 * parent.width
+                Layout.preferredHeight: parent.height
 
 
                 FriendList {
@@ -111,7 +113,7 @@ Page {
                 MyButton {
                     id: addUserButton
                     buttonHeight: 50  // Fixed height for the button
-                    buttonWidth: friendList.width
+                    buttonWidth: Math.min(parent.width, 400)
                     Layout.alignment: Qt.AlignBottom
                     backgroundColor: "green"
                     text: "Add new user"
@@ -120,7 +122,8 @@ Page {
                         stackView.push("add_user.qml");
                     }
                 }
+
             }
-        }
+
     }
 }
