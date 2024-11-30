@@ -89,6 +89,7 @@ class Networking(QObject):
                     return jsonify({"status": "Invitation has been already sent in the past!"}), HTTPStatus.BAD_REQUEST
             #It is a new invitation. Append it to the invites section
             self.user.invites.append({"host": host, "port": port, "received": True})
+            print(self.user.invites)
             self.user.invitesChanged.emit()
             if self.user.settings.auto_connection:
                 self.user.accept_invitation(host, port)
