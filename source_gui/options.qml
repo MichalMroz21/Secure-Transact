@@ -22,11 +22,11 @@ Page {
 
         CheckBox {
             id: autoConnectionCheckbox
-            text: "Automatycznie akceptuj prośby o połączenie się z użytkownikiem"
+            text: "Automatically accept friend invites"
         }
 
         Button {
-            text: "Zapisz ustawienia"
+            text: "Save settings"
             onClicked: {
                 settings.auto_connection = autoConnectionCheckbox.checked;
             }

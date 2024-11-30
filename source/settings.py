@@ -8,7 +8,7 @@ class Settings(QObject):
     def __init__(self):
         super().__init__()
         self.settings = QSettings("Secure-Transact", "Application")
-        self._auto_connection = bool(self.get_option(global_constants.AUTO_CONNECTION_STRING))
+        self._auto_connection = True if self.get_option(global_constants.AUTO_CONNECTION_STRING) == "True" else False
 
     @Slot(str, str)
     def set_option(self, key, value):

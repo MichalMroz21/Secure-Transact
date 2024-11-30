@@ -3,6 +3,8 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
 import Qt5Compat.GraphicalEffects
 
+import "gui_components"
+
 ApplicationWindow {
     width: 600
     height: 400
@@ -10,7 +12,7 @@ ApplicationWindow {
     id: root
     title: qsTr("Secure Transact")
 
-    StackView{
+    StackView {
        id: stackView
        initialItem: "user.qml"
        anchors.fill: parent
@@ -21,6 +23,7 @@ ApplicationWindow {
     }
 
     ToolBar {
+        id: menuToolbar
         contentHeight: 40
         z: 1
 
@@ -29,6 +32,7 @@ ApplicationWindow {
         }
 
         ToolButton {
+            id: menuToolbarText
             text: "☰"
             font.pixelSize: getDrawerEntrySize(root.width, root.height);
             onClicked: drawer.open();
@@ -48,6 +52,30 @@ ApplicationWindow {
         from: 1
         to: 1.15
         duration: 450
+    }
+
+    InvitesList {
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.rightMargin: menuToolbar.contentHeight * 1.2 + getDrawerEntrySize(root.width, root.height)
+        customFunctions: [
+            {
+                text: "Accept",
+                action: function(host, port, index, model) {
+                    user.accept_invitation(host, port);
+                    //model.remove(index);
+                },
+                isVisible: true
+            },
+            {
+                text: "Reject",
+                action: function(host, port, index, model) {
+                    user.reject_invitation(host, port);
+                    //model.remove(index);
+                },
+                isVisible: true
+            }
+        ]
     }
 
     Drawer {

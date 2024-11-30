@@ -2,6 +2,8 @@ import QtQuick 2.15
 import QtQuick.Controls 6.8
 import QtQuick.Layouts 1.15
 
+import "../small_gui_components"
+
 //User (Peer) List Class Blueprint
 Rectangle {
     //Class Properties (override if needed)
@@ -9,7 +11,7 @@ Rectangle {
     property string border_color: "#dddddd"
     property int border_radius: 10
     property int list_width: parent.width / 3
-    property int list_height: parent.height
+    property int list_height: parent.height / 2 * 3
     property bool list_fill_width: true
     property bool list_fill_height: true
     property string active_color: "#00FF00"
@@ -113,10 +115,10 @@ Rectangle {
             Popup {
                 id: popup
                 width: parent.width
-                modal: true
                 focus: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
+                padding: 0
 
                 property var myModel: model
                 property var myMouseArea: mousearea
@@ -128,18 +130,22 @@ Rectangle {
                 property var myActive: model.active
 
                 ColumnLayout {
+
                     Repeater {
                         model: customFunctions.length
 
                         Loader {
                             active: customFunctions[index].isVisible
 
-                            sourceComponent: Button {
-                                height: 40
+                            sourceComponent: MyButton {
                                 text: customFunctions[index].text
+                                buttonHeight: 40
+                                buttonWidth: popup.width
+
+                                backgroundColor: "green"
 
                                 onClicked: {
-                                    if (typeof customFunctions[index].action === "function"){
+                                    if (typeof customFunctions[index].action === "function") {
                                         customFunctions[index].action(popup.myModel, popup.mouseArea, popup.myPopup);
                                     }
                                 }
