@@ -8,7 +8,7 @@ Page {
     id: mainPage
 
     background: Rectangle {
-        color: colorPalette.background900
+        color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
     }
 
     Component.onCompleted: {

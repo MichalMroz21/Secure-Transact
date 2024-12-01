@@ -19,7 +19,7 @@ ApplicationWindow {
     SpacingObjects { id: spacingObjects }
 
     background: Rectangle {
-        color: colorPalette.background900
+        color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
     }
 
     property alias pageTitleText: pageTitle.text
@@ -41,7 +41,7 @@ ApplicationWindow {
 
         ToolButton {
             id: menuToolbarText
-            text: "<font color=\""+ colorPalette.primary50 + "\">☰</font>"
+            text: "<font color=\""+ colorPalette.primary500 + "\">☰</font>"
             font.pixelSize: getDrawerEntrySize(root.width, root.height);
             onClicked: drawer.open();
         }

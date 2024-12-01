@@ -9,18 +9,23 @@ import QtQuick.Controls 2.15
 import "small_gui_components"
 
 Page {
+    id: optionsPage
     function updateCheckbox() {
         autoConnectionCheckbox.isToggled = settings.auto_connection;
         lightModeCheckbox.isToggled = settings.light_mode;
     }
+    function changeColor() {
+        optionsPage.background.color = settings.light_mode ? colorPalette.background50 : colorPalette.background900
+    }
 
     background: Rectangle {
-        color: colorPalette.background900
+        color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
     }
 
     Component.onCompleted: {
         root.pageTitleText = "Options";
         updateCheckbox();
+        settings.lightModeChanged.connect(changeColor);
     }
 
     ColumnLayout {
