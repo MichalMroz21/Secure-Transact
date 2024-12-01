@@ -37,7 +37,6 @@ Page {
         MyTextFieldLabel {
             id: addressTextField
             upText: "IP Address"
-            downText: user.port
             parentWidth: parent.width
             parentHeight: 50
         }
@@ -46,7 +45,6 @@ Page {
         MyTextFieldLabel {
             id: portTextField
             upText: "Port"
-            downText: user.port
             parentWidth: parent.width
             parentHeight: 50
         }
@@ -73,8 +71,10 @@ Page {
                     anchors.centerIn: parent
                 }
                 onClicked:{
-                    if(addressTextField.text !== "" && portTextField.text !== ""){
-                        user.send_invitation(addressTextField.text, portTextField.text);
+                    console.log(addressTextField.downText)
+                    console.log(portTextField.downText)
+                    if(addressTextField.downText !== "" && portTextField.downText !== ""){
+                        user.send_invitation(addressTextField.downText, portTextField.downText);
                         //user.verify_peer_connection(addressTextField.text, portTextField.text);
                         stackView.push("chat_module.qml");
                     }

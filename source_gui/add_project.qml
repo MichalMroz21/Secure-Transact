@@ -4,12 +4,17 @@ import QtCharts 6.3
 import QtQuick.Layouts 6.3
 
 import "small_gui_components"
+import "app_style"
 
 Page {
     id: formPage
     property int maxInputWidth: 300
     property var usersInProject: new Array(0)
     property int index: 0
+
+    ColorPalette { id: colorPalette }
+    FontStyle { id: fontStyle }
+    SpacingObjects { id: spacingObjects }
 
     background: Rectangle {
         color: colorPalette.background900
@@ -28,24 +33,15 @@ Page {
 
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "New project info"
+            text: "<font color=\""+ colorPalette.primary300 +"\">New project info</font>"
             font.pixelSize: 20
             color: "black"
         }
 
-        // Project name Input
-        TextField {
+        MyTextFieldLabel{
             id: projectNameField
-            placeholderText: "Project name"
-            font.pixelSize: 16
-            height: 40
-            Layout.fillWidth: true
-            Layout.maximumWidth: maxInputWidth  // Set a maximum width for the input
-            background: Rectangle {
-                color: "#ffffff"
-                border.color: "#ccc"
-                radius: 5
-            }
+            upText: "Project name"
+            parentWidth: parent.width - spacingObjects.spacing_x_big
         }
 
         RowLayout{
@@ -63,7 +59,6 @@ Page {
                 buttonHeight: 50  // Fixed height for the button
                 buttonWidth: 100
                 Layout.alignment: Qt.AlignBottom
-                backgroundColor: "green"
                 text: "Add new user"
 
                 onClicked: {

@@ -35,7 +35,6 @@ Page {
                 buttonHeight: 50  // Fixed height for the button
                 buttonWidth: 150
                 Layout.alignment: Qt.AlignHCenter ^ Qt.AlignVCenter
-                backgroundColor: "green"
                 text: "Create a new project"
 
                 onClicked: {

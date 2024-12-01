@@ -104,7 +104,7 @@ ApplicationWindow {
         width: parent.width * 0.15
         height: parent.height
         background: Rectangle {
-            color: colorPalette.background900
+            color: colorPalette.background800
         }
 
         ListView {

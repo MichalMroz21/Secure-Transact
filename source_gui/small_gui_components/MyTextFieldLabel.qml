@@ -6,18 +6,20 @@ import Qt5Compat.GraphicalEffects
 import "../app_style"
 
 Item {
+    id: textField
     ColorPalette { id: colorPalette }
     FontStyle { id: fontStyle }
 
     property string upText: ""
-    property string downText: ""
+    property alias downText: downTextField.text
 
     property int parentWidth
     property int parentHeight
 
+    implicitWidth: parentWidth
+    implicitHeight: parentHeight
+
     ColumnLayout {
-        Layout.minimumWidth: parentWidth * 1 / 4
-        Layout.minimumHeight: parentHeight
         implicitWidth: parentWidth
         implicitHeight: parentHeight
 
@@ -30,7 +32,7 @@ Item {
         }
 
         TextField {
-            text: downText
+            id: downTextField
             font.pixelSize: fontStyle.paragraph_large
             color: colorPalette.primary300
 

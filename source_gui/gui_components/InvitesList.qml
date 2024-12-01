@@ -4,11 +4,17 @@ import QtCharts 6.3
 import QtQuick.Layouts 6.3
 
 import "../small_gui_components"
+import "../app_style"
 
 Item {
     id: invitesList
 
-    property string list_color: "#ffffff"
+    ColorPalette { id: colorPalette }
+    FontStyle { id: fontStyle }
+    SpacingObjects { id: spacingObjects }
+
+    property string list_color: colorPalette.background800
+    property color title_color: colorPalette.primary300
     property string border_color: "#dddddd"
     property int border_radius: 10
     property int list_width: parent.width * 0.6
@@ -85,7 +91,7 @@ Item {
             property int drawerHeight: list_height
 
             Text {
-                text: "Friend invites"
+                text: "<font color=\""+ invitesList.title_color +"\">Friend invites</font>"
                 font.pixelSize: 18
                 font.bold: true
                 horizontalAlignment: Text.AlignHCenter

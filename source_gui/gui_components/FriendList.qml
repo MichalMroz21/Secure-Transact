@@ -8,7 +8,12 @@ import "../app_style"
 //User (Peer) List Class Blueprint
 Rectangle {
     //Class Properties (override if needed)
-    property string list_color: "#ffffff"
+    ColorPalette { id: colorPalette }
+    FontStyle { id: fontStyle }
+    SpacingObjects { id: spacingObjects }
+
+    property string list_color: colorPalette.background800
+    property color title_color: colorPalette.primary300
     property string border_color: "#dddddd"
     property int border_radius: 10
     property int list_width: parent.width / 3
@@ -22,8 +27,6 @@ Rectangle {
     property var userClicked: function(model, mouseArea, popup) {
         popup.open();
     }
-
-    ColorPalette { id: colorPalette }
 
 
     // Create a ListModel for the users

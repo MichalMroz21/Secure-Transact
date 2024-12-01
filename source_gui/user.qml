@@ -108,7 +108,6 @@ Page {
                     buttonHeight: 50  // Fixed height for the button
                     buttonWidth: Math.min(parent.width, 400)
                     Layout.alignment: Qt.AlignBottom
-                    backgroundColor: "green"
                     text: "Add new user"
 
                     onClicked: {

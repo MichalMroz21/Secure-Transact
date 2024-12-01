@@ -13,12 +13,12 @@ Button {
 
     property var buttonWidth: 46
     property var buttonHeight: 46
-    property real radius: 0
+    property real radius: 5
     property real borderWidth: 0
     property color borderColor: "transparent"
-    property color backgroundColor: "#14A44D"
+    property color backgroundColor: colorPalette.primary300
     property string setIcon: ""
-    property color textColor: "#FFFFFF"
+    property color textColor: colorPalette.background800
 
     implicitWidth: buttonWidth
     implicitHeight: buttonHeight
