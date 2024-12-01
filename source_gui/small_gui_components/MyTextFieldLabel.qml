@@ -11,7 +11,14 @@ Item {
     FontStyle { id: fontStyle }
 
     property string upText: ""
+    property bool visibleUpText: true
     property alias downText: downTextField.text
+    property alias placeholder: downTextField.placeholderText
+    property alias placeholderColor: downTextField.placeholderTextColor
+    property color borderColor: colorPalette.primary300
+    property color textColor: colorPalette.primary300
+    property bool enablePlaceholderWhenTyping: false
+    property int borderWidth: 1
 
     property int parentWidth
     property int parentHeight
@@ -29,19 +36,20 @@ Item {
             text: upText
             font.pixelSize: fontStyle.paragraph_large
             color: colorPalette.primary300
+            visible: visibleUpText
         }
 
         TextField {
             id: downTextField
             font.pixelSize: fontStyle.paragraph_large
-            color: colorPalette.primary300
+            color: textField.textColor
 
             implicitWidth: parent.width
 
             background: Rectangle {
                 color: "transparent"
-                border.color: colorPalette.primary300
-                border.width: 1
+                border.color: textField.borderColor
+                border.width: textField.borderWidth
                 radius: 2
 
                 width: parent.width

@@ -60,7 +60,7 @@ Item {
         }
 
         ToolButton {
-            text: "🔔"
+            text: "<font color=\""+ colorPalette.primary50 + "\">🔔</font>"
             font.pixelSize: getDrawerEntrySize(root.width, root.height);
             onClicked: invitesDrawer.open();
         }
@@ -108,6 +108,7 @@ Item {
                     width: parent.width
                     height: 40
                     id: inviteRectangle
+                    color: colorPalette.background800
 
                     MouseArea {
                         anchors.fill: parent
@@ -116,17 +117,17 @@ Item {
                         id: inviteMouseArea
 
                         onEntered: {
-                            parent.color = "lightgray"
+                            parent.color = colorPalette.background700
                             inviteMouseArea.cursorShape = Qt.PointingHandCursor
                         }
                         onExited: {
-                            parent.color = "white"
+                            parent.color = colorPalette.background800
                             inviteMouseArea.cursorShape = Qt.ArrowCursor
                         }
 
                         Text {
                             anchors.centerIn: parent
-                            text: "From: " + model.host + ":" + model.port
+                            text: "<font color=\""+ colorPalette.primary400 +"\">From: </font><font color=\""+ colorPalette.primary300 +"\">" + model.host + ":" + model.port + " </font>"
                             color: "#000"
                             font.pixelSize: 14
                             horizontalAlignment: Text.AlignHCenter
@@ -139,6 +140,9 @@ Item {
                         width: parent.width
                         modal: true
                         focus: true
+                        background: Rectangle{
+                            color: colorPalette.background800
+                        }
                         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
                         property string inviteHost: model.host
@@ -160,7 +164,6 @@ Item {
                                         buttonHeight: 40
                                         buttonWidth: invitePopup.width
 
-                                        backgroundColor: "green"
 
                                         onClicked: {
                                             if (typeof customFunctions[index].action === "function") {

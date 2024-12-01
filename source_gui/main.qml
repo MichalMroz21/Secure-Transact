@@ -41,7 +41,7 @@ ApplicationWindow {
 
         ToolButton {
             id: menuToolbarText
-            text: "☰"
+            text: "<font color=\""+ colorPalette.primary50 + "\">☰</font>"
             font.pixelSize: getDrawerEntrySize(root.width, root.height);
             onClicked: drawer.open();
         }

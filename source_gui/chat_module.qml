@@ -3,6 +3,8 @@ import QtQuick.Controls 6.8
 import QtQuick.Layouts 1.15
 
 import "gui_components"
+import "small_gui_components"
+import "app_style"
 
 
 Page {
@@ -107,28 +109,40 @@ Page {
                     width: parent.width
                     height: 50
                     color: colorPalette.background800
-                    border.color: "#ccc"
+                    border.color: colorPalette.accent400
                     anchors.bottom: parent.bottom
 
-                    TextField {
+                    MyTextFieldLabel{
                         id: inputField
-                        width: parent.width - 20
-                        height: parent.height - 10
+                        parentWidth: parent.width - 20
+                        parentHeight: parent.height - 10
                         anchors.centerIn: parent
-                        padding: 5
-                        placeholderText: "Type a message..."
-                        color: colorPalette.background800
-
-                        // When the user presses Enter, append the message to the ListView
-                        onAccepted: {
-                            if (inputField.text.trim() !== "") {
-                                // Append new message to the model
-                                user.send_mes(inputField.text);
-                                // Clear the input field
-                                inputField.text = "";
-                            }
-                        }
+                        placeholder: "Type a message..."
+                        placeholderColor: colorPalette.accent400
+                        borderWidth: 0
+                        textColor: colorPalette.accent400
+                        visibleUpText: false
                     }
+
+                    // TextField {
+                    //     id: inputField
+                    //     width: parent.width - 20
+                    //     height: parent.height - 10
+                    //     anchors.centerIn: parent
+                    //     padding: 5
+                    //     placeholderText: "Type a message..."
+                    //     color: colorPalette.background800
+
+                    //     // When the user presses Enter, append the message to the ListView
+                    //     onAccepted: {
+                    //         if (inputField.text.trim() !== "") {
+                    //             // Append new message to the model
+                    //             user.send_mes(inputField.text);
+                    //             // Clear the input field
+                    //             inputField.text = "";
+                    //         }
+                    //     }
+                    // }
                 }
             }
             }

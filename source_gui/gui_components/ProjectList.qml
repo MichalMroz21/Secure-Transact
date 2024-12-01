@@ -20,6 +20,8 @@ Rectangle {
     property int list_height: parent.height / 2 * 3
     property bool list_fill_width: true
     property bool list_fill_height: true
+    property int widthPadding: 6
+    property int heightPadding: 6
 
     property var customFunctions: new Array(0)
 
@@ -61,8 +63,9 @@ Rectangle {
 
     ListView {
         id: projectListView
-        width: parent.width
-        height: parent.height
+        width: parent.width - widthPadding
+        height: parent.height - heightPadding
+        anchors.centerIn: parent
         model: projectModel
 
         delegate: Rectangle {
@@ -104,6 +107,10 @@ Rectangle {
                 focus: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
+                background: Rectangle{
+                    color: "transparent"
+                }
+
                 property var projectModel: model
 
                 padding: 0
@@ -119,8 +126,6 @@ Rectangle {
                                 text: customFunctions[index].text
                                 buttonHeight: 40
                                 buttonWidth: popup.width
-
-                                backgroundColor: "green"
 
                                 onClicked: {
                                     if (typeof customFunctions[index].action === "function") {
