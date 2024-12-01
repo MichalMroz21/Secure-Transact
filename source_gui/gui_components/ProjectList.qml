@@ -7,8 +7,13 @@ import "../app_style"
 
 //User (Peer) List Class Blueprint
 Rectangle {
+
+    ColorPalette { id: colorPalette }
+    FontStyle { id: fontStyle }
+    SpacingObjects { id: spacingObjects }
+
     //Class Properties (override if needed)
-    property string list_color: "#ffffff"
+    property string list_color: colorPalette.primary300
     property string border_color: "#dddddd"
     property int border_radius: 10
     property int list_width: parent.width / 3
@@ -73,7 +78,7 @@ Rectangle {
                 id: mousearea
 
                 onEntered: {
-                    parent.color = "lightgray"
+                    parent.color = colorPalette.background700
                     mousearea.cursorShape = Qt.PointingHandCursor
                 }
                 onExited: {
@@ -82,8 +87,8 @@ Rectangle {
                 }
 
                 Text {
-                    anchors.centerIn: parent
-                    text: '<span style="color: black; ">' + model.name + '</span>'
+                    anchors.centerIn: parent                 
+                    text: '<span style="color: ' + colorPalette.primary300 + '; ">' + model.name + '</span>'
                     color: "#000"
                     font.pixelSize: 12
                     horizontalAlignment: Text.AlignHCenter

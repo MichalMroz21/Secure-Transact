@@ -6,9 +6,11 @@ import QtQuick.Layouts 6.3
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 
+import "small_gui_components"
+
 Page {
     function updateCheckbox() {
-        autoConnectionCheckbox.checked = settings.auto_connection;
+        autoConnectionCheckbox.isToggled = settings.auto_connection;
     }
 
     background: Rectangle {
@@ -25,10 +27,15 @@ Page {
         anchors.centerIn: parent
         spacing: 20
 
-        CheckBox {
+        MyCheckButton{
             id: autoConnectionCheckbox
-            text: "<font color=\""+ colorPalette.primary400 +"\">Automatically accept friend invites</font>"
+            text: "Automatically accept friend invites"
         }
+
+        // CheckBox {
+        //     id: autoConnectionCheckbox
+        //     text: "<font color=\""+ colorPalette.primary400 +"\">Automatically accept friend invites</font>"
+        // }
 
         Button {
             text: "Save settings"

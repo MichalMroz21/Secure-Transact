@@ -5,6 +5,7 @@ import Qt5Compat.GraphicalEffects
 
 import "gui_components"
 import "app_style"
+import "small_gui_components"
 
 ApplicationWindow {
     width: 600
