@@ -4,18 +4,19 @@ import QtQuick.Layouts 1.15
 
 import "gui_components"
 
+
 Page {
     id: chatPage
     width: parent.width
     height: parent.height
-    background: Rectangle {
-        color: "#101010"
-    }
-
 
     // Create a ListModel to hold the messages
     ListModel {
         id: messageModel
+    }
+
+    background: Rectangle {
+        color: colorPalette.background900
     }
 
     Component.onCompleted: {
@@ -61,8 +62,8 @@ Page {
                 Layout.fillHeight: true  // Make it scale vertically
                 width: parent.width  // 2/3 for chat window (2x space)
                 height: parent.height
-                color: "#f0f0f0"
-                border.color: "#ddd"
+                color: colorPalette.background800
+                border.color: colorPalette.accent400
                 radius: 10
 
                 // Scrollable ListView to display messages
@@ -75,6 +76,7 @@ Page {
                     anchors.bottom: inputArea.top
                     anchors.left: parent.left
                     anchors.right: parent.right
+
 
                     // Enable automatic scrolling when new messages are added
                     onContentYChanged: {
@@ -104,7 +106,7 @@ Page {
                     id: inputArea
                     width: parent.width
                     height: 50
-                    color: "#ffffff"
+                    color: colorPalette.background800
                     border.color: "#ccc"
                     anchors.bottom: parent.bottom
 
@@ -115,11 +117,7 @@ Page {
                         anchors.centerIn: parent
                         padding: 5
                         placeholderText: "Type a message..."
-
-                        background: Rectangle {
-                            border.width: 0
-                            border.color: "transparent"
-                        }
+                        color: colorPalette.background800
 
                         // When the user presses Enter, append the message to the ListView
                         onAccepted: {

@@ -11,6 +11,10 @@ Page {
         autoConnectionCheckbox.checked = settings.auto_connection;
     }
 
+    background: Rectangle {
+        color: colorPalette.background900
+    }
+
     Component.onCompleted: {
         root.pageTitleText = "Options";
         updateCheckbox();
@@ -23,7 +27,7 @@ Page {
 
         CheckBox {
             id: autoConnectionCheckbox
-            text: "Automatically accept friend invites"
+            text: "<font color=\""+ colorPalette.primary400 +"\">Automatically accept friend invites</font>"
         }
 
         Button {

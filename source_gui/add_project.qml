@@ -11,6 +11,10 @@ Page {
     property var usersInProject: new Array(0)
     property int index: 0
 
+    background: Rectangle {
+        color: colorPalette.background900
+    }
+
     Component.onCompleted: {
         root.pageTitleText = "Create a new project";
     }
@@ -43,6 +47,7 @@ Page {
                 radius: 5
             }
         }
+
         RowLayout{
             Text{
                 id: usersText
@@ -52,6 +57,7 @@ Page {
                 Layout.fillWidth: true
                 Layout.maximumWidth: maxInputWidth  // Set a maximum width for the input
             }
+
             MyButton {
                 id: addUserButton
                 buttonHeight: 50  // Fixed height for the button
@@ -63,13 +69,13 @@ Page {
                 onClicked: {
                     index = user.projects.length
                     stackView.push("add_to_project.qml", {
-                                       currentIndex: index,
-                                       onReturn: function(returnedUsers) {
-                                           root.pageTitleText = "Create a new project";
-                                            usersInProject = returnedUsers;
-                                            console.log("Returned users:", returnedUsers);
-                                        }
-                                   });
+                       currentIndex: index,
+                       onReturn: function(returnedUsers) {
+                           root.pageTitleText = "Create a new project";
+                            usersInProject = returnedUsers;
+                            console.log("Returned users:", returnedUsers);
+                        }
+                   });
                 }
             }
 

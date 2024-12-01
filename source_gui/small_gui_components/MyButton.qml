@@ -8,8 +8,8 @@ import "../app_style"
 Button {
     id: control
 
+    ColorPalette { id: colorPalette }
     FontStyle { id: fontStyle }
-    AppStyle { id: appStyle }
 
     property var buttonWidth: 46
     property var buttonHeight: 46
@@ -23,7 +23,7 @@ Button {
     implicitWidth: buttonWidth
     implicitHeight: buttonHeight
 
-    font.pixelSize: fontStyle.h6
+    font.pixelSize: fontStyle.display_h6
     font.family: fontStyle.getLatoRegular.name
 
     contentItem:ColumnLayout{
@@ -104,7 +104,7 @@ Button {
             target: indicator
             properties: 'width'
             from: 0
-            to:control.width * 2.5
+            to: control.width * 2.5
             duration: 200
         }
 

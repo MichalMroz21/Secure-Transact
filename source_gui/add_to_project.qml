@@ -11,6 +11,10 @@ Page {
     property var selectedUsers: new Array(0)
     property var onReturn
 
+    background: Rectangle {
+        color: colorPalette.background900
+    }
+
     Component.onCompleted: {
         root.pageTitleText = "Add users to the project";
     }

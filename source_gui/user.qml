@@ -5,8 +5,14 @@ import QtQuick.Layouts 6.3
 
 import "gui_components"
 import "small_gui_components"
+import "app_style"
 
 Page {
+    SpacingObjects { id: spacingObjects }
+
+    background: Rectangle {
+        color: colorPalette.background900
+    }
 
     ListModel {
         id: inviteModel
@@ -34,7 +40,6 @@ Page {
         user.invitesChanged.connect(updateInvitesModel);
     }
 
-
         RowLayout {
             Layout.preferredHeight: -1
             Layout.preferredWidth: -1
@@ -46,45 +51,33 @@ Page {
 
             ColumnLayout {
                 id: formContainer
-                Layout.fillWidth: true  // Make it scale horizontally
-                Layout.fillHeight: true  // Make it scale vertically
+                Layout.fillWidth: false  // Make it scale horizontally
+                Layout.fillHeight: false  // Make it scale vertically
                 Layout.preferredWidth: 1 / 2 * parent.width
-                Layout.preferredHeight: parent.height * 0.2
+                Layout.preferredHeight: 256
+                Layout.alignment: Qt.AlignTop ^ Qt.AlignHCenter
                 spacing: 0
 
-                RowLayout{
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.minimumWidth: parent.width * 1 / 4
-
-                    Text {
-                        id: ipAddress
-                        text: "IP Address: "
-                        font.pixelSize: 20
-                        color: "black"
-                    }
-                    TextField {
-                        text: user.host
-                        font.pixelSize: 20
-                        color: "black"
-                    }
-                }
-                RowLayout{
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.minimumWidth: parent.width * 1 / 4
-
-                    Text {
-                        id: portAddress
-                        text: "Port: "
-                        font.pixelSize: 20
-                        color: "black"
-                    }
-                    TextField {
-                        text: user.port
-                        font.pixelSize: 20
-                        color: "black"
-                    }
+                MyTextFieldLabel {
+                    id: usernameTextField
+                    upText: "Username"
+                    downText: user.nickname
+                    parentWidth: parent.width - spacingObjects.spacing_x_big
                 }
 
+                MyTextFieldLabel {
+                    id: addressTextField
+                    upText: "Address"
+                    downText: user.host
+                    parentWidth: parent.width - spacingObjects.spacing_x_big
+                }
+
+                MyTextFieldLabel {
+                    id: portTextField
+                    upText: "Port"
+                    downText: user.port
+                    parentWidth: parent.width - spacingObjects.spacing_x_big
+                }
             }
 
             ColumnLayout {
@@ -92,7 +85,6 @@ Page {
                 Layout.fillHeight: true  // Make it scale vertically
                 Layout.preferredWidth: 1 / 2 * parent.width
                 Layout.preferredHeight: parent.height
-
 
                 FriendList {
                     id: friendList

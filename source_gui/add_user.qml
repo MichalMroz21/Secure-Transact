@@ -3,9 +3,15 @@ import QtQuick.Controls 6.8
 import QtCharts 6.3
 import QtQuick.Layouts 6.3
 
+import "small_gui_components"
+
 Page {
     id: formPage
     property int maxInputWidth: 300
+
+    background: Rectangle {
+        color: colorPalette.background900
+    }
 
     Component.onCompleted: {
         root.pageTitleText = "Add new user";
@@ -17,42 +23,32 @@ Page {
         spacing: 15
         width: Math.min(parent.width / 3, maxInputWidth)  // Set a maximum width for the form
         height: implicitHeight
+        Layout.preferredHeight: 256
 
         Text {
+
             Layout.alignment: Qt.AlignHCenter
             text: "Connect to User"
             font.pixelSize: 20
-            color: "black"
+            color: colorPalette.primary300
         }
 
         // IP Address Input
-        TextField {
-            id: ipAddressField
-            placeholderText: "IP Address"
-            font.pixelSize: 16
-            height: 40
-            Layout.fillWidth: true
-            Layout.maximumWidth: maxInputWidth  // Set a maximum width for the input
-            background: Rectangle {
-                color: "#ffffff"
-                border.color: "#ccc"
-                radius: 5
-            }
+        MyTextFieldLabel {
+            id: addressTextField
+            upText: "IP Address"
+            downText: user.port
+            parentWidth: parent.width
+            parentHeight: 50
         }
 
         // Port Input
-        TextField {
-            id: portField
-            placeholderText: "Port"
-            font.pixelSize: 16
-            height: 40
-            Layout.fillWidth: true
-            Layout.maximumWidth: maxInputWidth  // Set a maximum width for the input
-            background: Rectangle {
-                color: "#ffffff"
-                border.color: "#ccc"
-                radius: 5
-            }
+        MyTextFieldLabel {
+            id: portTextField
+            upText: "Port"
+            downText: user.port
+            parentWidth: parent.width
+            parentHeight: 50
         }
 
         // Buttons Row
@@ -77,9 +73,9 @@ Page {
                     anchors.centerIn: parent
                 }
                 onClicked:{
-                    if(ipAddressField.text !== "" && portField.text !== ""){
-                        user.send_invitation(ipAddressField.text, portField.text);
-                        //user.verify_peer_connection(ipAddressField.text, portField.text);
+                    if(addressTextField.text !== "" && portTextField.text !== ""){
+                        user.send_invitation(addressTextField.text, portTextField.text);
+                        //user.verify_peer_connection(addressTextField.text, portTextField.text);
                         stackView.push("chat_module.qml");
                     }
                 }

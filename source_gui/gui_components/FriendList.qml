@@ -3,6 +3,7 @@ import QtQuick.Controls 6.8
 import QtQuick.Layouts 1.15
 
 import "../small_gui_components"
+import "../app_style"
 
 //User (Peer) List Class Blueprint
 Rectangle {
@@ -21,6 +22,9 @@ Rectangle {
     property var userClicked: function(model, mouseArea, popup) {
         popup.open();
     }
+
+    ColorPalette { id: colorPalette }
+
 
     // Create a ListModel for the users
     ListModel {
@@ -69,9 +73,10 @@ Rectangle {
     Layout.fillHeight: list_fill_height  // Make it scale vertically
     implicitWidth: list_width
     implicitHeight: list_height
-    color: list_color
-    border.color: border_color
+    color: colorPalette.background800
+    border.color: colorPalette.primary400
     radius: border_radius
+
 
     // ListView to display user names and IP addresses
     ListView {
@@ -80,10 +85,12 @@ Rectangle {
         height: parent.height
         model: userModel
 
+
         delegate: Rectangle {
             width: parent.width  // Set width explicitly for user list items
             height: 40  // Fixed height for each user item
             id: userRectangle
+            color: colorPalette.background800
 
             MouseArea {
                 id: mousearea

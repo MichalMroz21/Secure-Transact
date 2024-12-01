@@ -1,5 +1,5 @@
 import QtQuick 2.15
-import QtQuick.Controls.Basic
+import QtQuick.Controls.Material
 import QtQuick.Layouts 2.15
 import Qt5Compat.GraphicalEffects
 
@@ -12,20 +12,21 @@ ApplicationWindow {
     visible: true
     id: root
     title: qsTr("Secure Transact")
-    background: Rectangle {
-        color: "#101010"
-    }
+
+    ColorPalette { id: colorPalette }
     FontStyle { id: fontStyle }
+    SpacingObjects { id: spacingObjects }
+
+    background: Rectangle {
+        color: colorPalette.background900
+    }
+
     property alias pageTitleText: pageTitle.text
 
     StackView {
        id: stackView
-       initialItem: "user.qml"
+       initialItem: "initial_page.qml"
        anchors.fill: parent
-    }
-
-    Component.onCompleted: {
-        stackView.push("chat_module.qml");
     }
 
     ToolBar {
@@ -54,6 +55,7 @@ ApplicationWindow {
         font.pixelSize: getDrawerEntrySize(root.width, root.height);
         font.family: fontStyle.getLatoRegular.name
         font.pointSize: 9
+        color: colorPalette.primary400
         text: "Test"
     }
 
@@ -100,6 +102,9 @@ ApplicationWindow {
         id: drawer
         width: parent.width * 0.15
         height: parent.height
+        background: Rectangle {
+            color: colorPalette.background900
+        }
 
         ListView {
             id: listView
@@ -153,7 +158,7 @@ ApplicationWindow {
                     Text {
                         anchors.centerIn: parent
                         text: model.text
-                        font.pixelSize: getFontSize(parent.width, parent.height);
+                        font.pixelSize: fontStyle.getFontSize(parent.width, parent.height);
                         opacity: 0
                     }
 
@@ -250,9 +255,5 @@ ApplicationWindow {
 
     function getDrawerEntrySize(width, height){
         return (width + height) * 0.02;
-    }
-
-    function getFontSize(width, height){
-        return (width + height) * 0.1;
     }
 }

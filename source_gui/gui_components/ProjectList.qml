@@ -3,6 +3,7 @@ import QtQuick.Controls 6.8
 import QtQuick.Layouts 1.15
 
 import "../small_gui_components"
+import "../app_style"
 
 //User (Peer) List Class Blueprint
 Rectangle {
@@ -49,8 +50,8 @@ Rectangle {
     Layout.fillHeight: list_fill_height
     implicitWidth: list_width
     implicitHeight: list_height
-    color: list_color
-    border.color: border_color
+    color: colorPalette.background800
+    border.color: colorPalette.primary400
     radius: border_radius
 
     ListView {
@@ -63,6 +64,7 @@ Rectangle {
             width: parent.width
             height: 40
             id: projectRectangle
+            color: colorPalette.background800
 
             MouseArea {
                 anchors.fill: parent
@@ -75,7 +77,7 @@ Rectangle {
                     mousearea.cursorShape = Qt.PointingHandCursor
                 }
                 onExited: {
-                    parent.color = "white"
+                    parent.color = colorPalette.background800
                     mousearea.cursorShape = Qt.ArrowCursor
                 }
 

@@ -43,7 +43,7 @@ QtObject {
     readonly property color background600: "#666666"
     readonly property color background700: "#4D4D4D"
     readonly property color background800: "#333333"
-    readonly property color background900: "#000000"
+    readonly property color background900: "#101010"
 
     readonly property color success50: "#F0FDF4"
     readonly property color success100: "#DCFCE7"
@@ -78,8 +78,8 @@ QtObject {
     readonly property color destructive800: "#991B1B"
     readonly property color destructive900: "#7F1D1D"
 
-    readonly property generic00: "#FFFFFF"
-    readonly property generic100: "#000000"
+    readonly property color generic00: "#FFFFFF"
+    readonly property color generic100: "#000000"
 
     readonly property color gradient_01_1: "#2CCC00"
     readonly property color gradient_01_2: "#37FF00"

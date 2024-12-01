@@ -13,6 +13,10 @@ Page {
         root.pageTitleText = "Planning";
     }
 
+    background: Rectangle {
+        color: colorPalette.background900
+    }
+
     RowLayout {
         Layout.preferredHeight: -1
         Layout.preferredWidth: -1
