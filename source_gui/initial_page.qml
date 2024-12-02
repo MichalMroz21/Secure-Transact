@@ -2,7 +2,14 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
+import Qt3D.Core 2.0
+import Qt3D.Render 2.0
+import Qt3D.Extras 2.7
+import Qt3D.Input 2.7
+import QtQuick3D
+
 import "small_gui_components"
+import "../assets/Bitcoin"
 
 Page {
     id: mainPage
@@ -72,13 +79,53 @@ Page {
             Layout.alignment: Qt.AlignRight
 
             spacing: spacingObjects.spacing_x_big
-            Rectangle {
-                Layout.preferredHeight: 150
-                Layout.preferredWidth: 150
-                Layout.alignment: Qt.AlignRight
 
-                color: colorPalette.primary100
-                anchors.horizontalCenter: parent.horizontalCenter
+            View3D {
+                id: view3D
+                y: -15
+                width: 150
+                height: 333
+                environment: sceneEnvironment
+
+                SceneEnvironment {
+                    id: sceneEnvironment
+                    antialiasingQuality: SceneEnvironment.High
+                    antialiasingMode: SceneEnvironment.MSAA
+                }
+
+                Node {
+                    id: scene
+                    DirectionalLight {
+                        id: directionalLight
+                    }
+
+                    PerspectiveCamera {
+                        id: sceneCamera
+                        x: -286.671
+                        y: 27.51
+                        z: 368.9527
+                    }
+
+                    Bitcoin {
+                        id: bitcoin
+                        x: -304.35
+                        y: -402.641
+                        scale.z: 200
+                        scale.x: 200
+                        scale.y: 200
+                        z: -530.37915
+                    }
+                }
+
+                NumberAnimation {
+                    target: bitcoin
+                    property: "eulerRotation.y"
+                    loops: Animation.Infinite
+                    running: true
+                    from: 360
+                    to: 0
+                    duration: 10000
+                }
             }
         }
     }
