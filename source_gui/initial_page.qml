@@ -51,7 +51,7 @@ Page {
 
             Text {
                 id: smallerText
-                text: "Experience unparalleled security and transparency with our blockchain-powered application, designed to protect Your transactions with cutting-edge technlology."
+                text: "Experience unparalleled security and\ntransparency with our blockchain-powered\napplication, designed to protect Your\ntransactions with cutting-edge technlology."
                 font.pixelSize: fontStyle.getFontSize(root.width, root.height)
                 color: colorPalette.primary200
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
