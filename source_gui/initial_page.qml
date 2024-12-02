@@ -28,8 +28,8 @@ Page {
         Layout.preferredWidth: root.width
 
         ColumnLayout {
-            Layout.leftMargin: root.width * 11/190 + 320/19 //Yes.
-            //explaination: for original resolution width (400) it was best to have spacingObjects.spacing_x_lg = 48 margin and for full hd width (1920) spacingObjects.spacing_x_huge = 128
+            Layout.leftMargin: root.width * 8/165 + 384/11 //Yes.
+            //explaination: for original resolution width (600) it was best to have spacingObjects.spacing_Xx_lg = 64 margin and for full hd width (1920) spacingObjects.spacing_x_huge = 128
 
             Layout.preferredHeight: -1
             Layout.preferredWidth: parent.width / 2 - Layout.leftMargin
@@ -61,10 +61,10 @@ Page {
 
             MyButton {
                 text: "Enter"
-                buttonWidth: 125
-                buttonHeight: 40
-                //buttonWidth: 250
-                //buttonHeight: 80
+                //buttonWidth: 125
+                //buttonHeight: 40
+                buttonWidth: 250
+                buttonHeight: 80
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
                 onClicked: {

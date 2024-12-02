@@ -41,7 +41,7 @@ Rectangle {
         for (let i = 0; i < projects.length; i++) {
             let inProgressTasksNumber = 0;
             for(let j = 0; j < projects[i].tasks.length; j++){
-                if (projects[i].tasks[j].status === 0){
+                if (projects[i].tasks[j].status === 1){
                     inProgressTasksNumber++;
                 }
             }

@@ -20,9 +20,10 @@ class Task(QObject):
         URGENT = 4
 
     class TaskStatus(Enum):
-        IN_PROGRESS = 0
-        COMPLETED = 1
-        FAILED = 2
+        TO_DO = 0
+        IN_PROGRESS = 1
+        COMPLETED = 2
+        FAILED = 3
 
     def __init__(self):
         super().__init__()
@@ -30,7 +31,7 @@ class Task(QObject):
         self._assignees = [] #Users list
         self._due_date = datetime.today().isoformat()
         self._priority = self.TaskPriority.MEDIUM
-        self._status = self.TaskStatus.IN_PROGRESS
+        self._status = self.TaskStatus.TO_DO
         self._comments = [] #string list
         self._name = ""
         self._tags = [] #string list
