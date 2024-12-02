@@ -39,10 +39,19 @@ Rectangle {
         var projects = user.projects;
 
         for (let i = 0; i < projects.length; i++) {
+            let inProgressTasksNumber = 0;
+            for(let j = 0; j < projects[i].tasks.length; j++){
+                if (projects[i].tasks[j].status === 0){
+                    inProgressTasksNumber++;
+                }
+            }
             projectModel.append({
                 name: projects[i].name,
                 //tasks: projects[i].tasks,
                 //users: projects[i].users,
+                usersNumber: projects[i].users.length,
+                totalTasksNumber: projects[i].tasks.length,
+                inProgressTasksNumber: inProgressTasksNumber,
                 index: i
             });
         }
@@ -88,15 +97,47 @@ Rectangle {
                     parent.color = colorPalette.background800
                     mousearea.cursorShape = Qt.ArrowCursor
                 }
+                RowLayout{
+                    width: parent.width
+                    anchors.centerIn: parent
+                    spacing: 0
+                    ColumnLayout{
+                        Layout.alignment: Qt.AlignLeft
+                        Layout.minimumWidth: parent.width/2
+                        Layout.maximumWidth: parent.width/2
+                        Text {
+                            Layout.alignment: Qt.AlignLeft
+                            id: projectName
+                            text: '<span style="color: ' + colorPalette.primary300 + '; ">' + model.name + '</span>'
+                            font.pixelSize: 12
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            textFormat: Text.RichText
+                        }
+                    }
+                    ColumnLayout{
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.minimumWidth: parent.width/4
+                        Layout.maximumWidth: parent.width/4
+                        Text {
+                            Layout.alignment: Qt.AlignRight
+                            id: usersNumberName
+                            text: '<span style="color: ' + colorPalette.primary300 + '; ">' + model.usersNumber + '</span>'
+                            textFormat: Text.RichText
+                        }
+                    }
+                    ColumnLayout{
+                        Layout.minimumWidth: parent.width/4
+                        Layout.maximumWidth: parent.width/4
+                        Text{
+                            Layout.alignment: Qt.AlignRight
+                            id: tasksNumberName
+                            text: '<span style="color: ' + colorPalette.primary300 + '; ">' + model.inProgressTasksNumber + "/" + model.totalTasksNumber + '</span>'
+                            textFormat: Text.RichText
+                        }
+                    }
 
-                Text {
-                    anchors.centerIn: parent                 
-                    text: '<span style="color: ' + colorPalette.primary300 + '; ">' + model.name + '</span>'
-                    color: "#000"
-                    font.pixelSize: 12
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    textFormat: Text.RichText
+
                 }
             }
 

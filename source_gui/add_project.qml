@@ -99,7 +99,7 @@ Page {
                 }
                 onClicked:{
                     if(projectNameField.text !== ""){
-                        user.add_new_project_from_FE(projectNameField.text, usersInProject);
+                        user.add_new_project_from_FE(projectNameField.downText, usersInProject);
                         stackView.push("chat_module.qml");
                     }
                 }

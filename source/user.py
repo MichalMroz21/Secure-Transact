@@ -317,7 +317,11 @@ class User(QObject):
 
     @Slot(str, "QVariantList")
     def add_new_project_from_FE(self, name, users):
-        self.projects.append(Project(name, users))
+        #We need to add ourselves to be in the project's users list because in FE we don't need to add ourselves
+        new_users_list = [self]
+        for user in users:
+            new_users_list.append(user)
+        self.projects.append(Project(name, new_users_list))
 
     @Slot(int, "QVariantList")
     def update_project_users(self, index, users):
