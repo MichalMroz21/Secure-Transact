@@ -28,50 +28,50 @@ Page {
         Layout.preferredWidth: root.width
 
         ColumnLayout {
-                    Layout.preferredHeight: parent.height
-                    Layout.preferredWidth: parent.width / 2 - spacingObjects.spacing_xx_lg
-                    Layout.leftMargin: spacingObjects.spacing_x_lg
-                    Layout.alignment: Qt.AlignLeft
+            Layout.leftMargin: root.width * 11/190 + 320/19 //Yes.
+            //explaination: for original resolution width (400) it was best to have spacingObjects.spacing_x_lg = 48 margin and for full hd width (1920) spacingObjects.spacing_x_huge = 128
 
-                    spacing: spacingObjects.spacing_sm
+            Layout.preferredHeight: -1
+            Layout.preferredWidth: parent.width / 2 - Layout.leftMargin
 
-                    Text {
-                        id: bigText
-                        text: "Secure\nTransactions\nwith Blockchain\nPrecision."
-                        font.pixelSize: fontStyle.getFontSize(root.width, root.height) * 3
-                        color: colorPalette.primary300
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.topMargin: 50
-                        lineHeight: 1
-                        wrapMode: Text.WordWrap
-                        Layout.preferredWidth: parent.width
-                    }
+            Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
-                    Text {
-                        id: smallerText
-                        text: "Experience unparalleled security and transparency with our blockchain-powered application, designed to protect Your transactions with cutting-edge technlology."
-                        font.pixelSize: fontStyle.getFontSize(root.width, root.height)
-                        color: colorPalette.primary200
-                        anchors.left: parent.left
-                        anchors.top: bigText.bottom
-                        anchors.topMargin: 12
-                        wrapMode: Text.WordWrap
-                        Layout.preferredWidth: parent.width
-                    }
+            spacing: spacingObjects.spacing_sm
 
-                    MyButton {
-                        text: "Enter"
-                        anchors.left: parent.left
-                        anchors.top: smallerText.bottom
-                        anchors.topMargin: 12
-                        buttonWidth: 125
+            Text {
+                id: bigText
+                text: "Secure\nTransactions\nwith Blockchain\nPrecision."
+                font.pixelSize: fontStyle.getFontSize(root.width, root.height) * 3
+                color: colorPalette.primary300
+                Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                lineHeight: 1
+                wrapMode: Text.WordWrap
+                Layout.preferredWidth: parent.width
+            }
 
-                        onClicked: {
-                            stackView.push("user.qml")
-                        }
-                    }
+            Text {
+                id: smallerText
+                text: "Experience unparalleled security and transparency with our blockchain-powered application, designed to protect Your transactions with cutting-edge technlology."
+                font.pixelSize: fontStyle.getFontSize(root.width, root.height)
+                color: colorPalette.primary200
+                Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                wrapMode: Text.WordWrap
+                Layout.preferredWidth: parent.width
+            }
+
+            MyButton {
+                text: "Enter"
+                buttonWidth: 125
+                buttonHeight: 40
+                //buttonWidth: 250
+                //buttonHeight: 80
+                Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+
+                onClicked: {
+                    stackView.push("user.qml")
                 }
+            }
+        }
 
         ColumnLayout{
             Layout.preferredHeight: parent.height

@@ -11,24 +11,25 @@ Button {
     ColorPalette { id: colorPalette }
     FontStyle { id: fontStyle }
 
-    property var buttonWidth: 46
-    property var buttonHeight: 46
+    property int buttonWidth: 46
+    property int buttonHeight: 46
     property real radius: 5
     property real borderWidth: 0
     property color borderColor: "transparent"
     property color backgroundColor: colorPalette.primary300
     property string setIcon: ""
     property color textColor: colorPalette.background800
+    property int fontSize: fontStyle.display_h6
 
     implicitWidth: buttonWidth
     implicitHeight: buttonHeight
 
-    font.pixelSize: fontStyle.display_h6
+    font.pixelSize: fontSize
     font.family: fontStyle.getLatoRegular.name
 
     contentItem:ColumnLayout{
-        width: parent.width
-        height: parent.height
+        height: control.implicitHeight
+        width: control.implicitWidth
         anchors.horizontalCenter: parent.horizontalCenter
 
         Label {
@@ -48,8 +49,8 @@ Button {
     }
 
     background: Rectangle {
-        implicitHeight: control.implicitHeight
-        implicitWidth: control.implicitWidth
+        height: control.implicitHeight
+        width: control.implicitWidth
         radius: control.radius
         color: control.backgroundColor
         border.width: control.borderWidth

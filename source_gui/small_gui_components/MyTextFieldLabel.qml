@@ -15,6 +15,7 @@ Item {
     property alias downText: downTextField.text
     property alias placeholder: downTextField.placeholderText
     property alias placeholderColor: downTextField.placeholderTextColor
+    property color textFieldColor: "transparent"
     property color borderColor: colorPalette.primary300
     property color textColor: colorPalette.primary300
     property bool enablePlaceholderWhenTyping: false
@@ -33,10 +34,10 @@ Item {
         id: layout
 
         Text {
-            text: upText
+            text: textField.upText
             font.pixelSize: fontStyle.paragraph_large
             color: colorPalette.primary300
-            visible: visibleUpText
+            visible: textField.visibleUpText
         }
 
         TextField {
@@ -47,7 +48,7 @@ Item {
             implicitWidth: parent.width
 
             background: Rectangle {
-                color: "transparent"
+                color: textField.textFieldColor
                 border.color: textField.borderColor
                 border.width: textField.borderWidth
                 radius: 2
