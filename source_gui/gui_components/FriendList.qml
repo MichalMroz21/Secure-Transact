@@ -8,7 +8,11 @@ import "../app_style"
 //User (Peer) List Class Blueprint
 Rectangle {
     //Class Properties (override if needed)
-    property string list_color: "#ffffff"
+    ColorPalette { id: colorPalette }
+    FontStyle { id: fontStyle }
+    SpacingObjects { id: spacingObjects }
+
+    property string list_color: colorPalette.background800
     property string border_color: "#dddddd"
     property int border_radius: 10
     property int list_width: parent.width / 3
@@ -16,14 +20,14 @@ Rectangle {
     property bool list_fill_width: true
     property bool list_fill_height: true
     property string active_color: "#00FF00"
+    property int widthPadding: 6
+    property int heightPadding: 6
 
     property var customFunctions: new Array(0);
 
     property var userClicked: function(model, mouseArea, popup) {
         popup.open();
     }
-
-    ColorPalette { id: colorPalette }
 
 
     // Create a ListModel for the users
@@ -36,7 +40,7 @@ Rectangle {
 
         // Iterate over peers array passed from Python
         for (let i = 0; i < user.peers.length; i++) {
-            var activeColor = user.peers[i].active > 0 ? "#00FF00" : "#FF0000"
+            var activeColor = user.peers[i].active > 0 ? colorPalette.primary500 : colorPalette.destructive400
             var isInGroup = false;
             var isSelected = false;
             var host = user.peers[i].host;
@@ -77,14 +81,14 @@ Rectangle {
     border.color: colorPalette.primary400
     radius: border_radius
 
-
     // ListView to display user names and IP addresses
     ListView {
-        id: friendListView
-        width: parent.width
-        height: parent.height
-        model: userModel
 
+        id: friendListView
+        width: parent.width - widthPadding
+        height: parent.height - heightPadding
+        anchors.centerIn: parent
+        model: userModel
 
         delegate: Rectangle {
             width: parent.width  // Set width explicitly for user list items
@@ -99,18 +103,19 @@ Rectangle {
                 hoverEnabled: true
 
                 onEntered: {
-                    model.isSelected === false ? parent.color = "lightgray" : null;
+                    model.isSelected === false ? parent.color = colorPalette.background700 : null;
                     mousearea.cursorShape = Qt.PointingHandCursor;
                 }
                 onExited: {
-                    model.isSelected === false ? parent.color = "white" : null;
+                    model.isSelected === false ? parent.color = colorPalette.background800 : null;
                     mousearea.cursorShape = Qt.ArrowCursor
                 }
 
                 // Use a single Text element to concatenate the name and IP address
                 Text {
                     anchors.centerIn: parent  // Center the text within the parent
-                    text: '<span style="color: ' + model.activeColor + '; ">' + '▮ ' + ' </span><span style="color: black; ">' + model.nickname + ' </span><span style="color: gray; "><i>(' + model.host + ":" + model.port + ')</i></span>'
+                    text: '<span style="color: ' + model.activeColor + '; ">' + '▮ ' + ' </span><span style="color: ' + colorPalette.primary300 + '; ">' + model.nickname + ' </span>'
+                    //<span style="color: gray; "><i>(' + model.host + ":" + model.port + ')</i></span>
                     color: "#000"
                     font.pixelSize: 12
                     horizontalAlignment: Text.AlignHCenter  // Center horizontally
@@ -124,6 +129,10 @@ Rectangle {
                 width: parent.width
                 focus: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+                background: Rectangle{
+                    color: "transparent"
+                }
 
                 padding: 0
 
@@ -148,8 +157,6 @@ Rectangle {
                                 text: customFunctions[index].text
                                 buttonHeight: 40
                                 buttonWidth: popup.width
-
-                                backgroundColor: "green"
 
                                 onClicked: {
                                     if (typeof customFunctions[index].action === "function") {

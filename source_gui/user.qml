@@ -11,7 +11,7 @@ Page {
     SpacingObjects { id: spacingObjects }
 
     background: Rectangle {
-        color: colorPalette.background900
+        color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
     }
 
     ListModel {
@@ -108,7 +108,6 @@ Page {
                     buttonHeight: 50  // Fixed height for the button
                     buttonWidth: Math.min(parent.width, 400)
                     Layout.alignment: Qt.AlignBottom
-                    backgroundColor: "green"
                     text: "Add new user"
 
                     onClicked: {

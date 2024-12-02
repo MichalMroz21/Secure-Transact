@@ -7,14 +7,21 @@ import "../app_style"
 
 //User (Peer) List Class Blueprint
 Rectangle {
+
+    ColorPalette { id: colorPalette }
+    FontStyle { id: fontStyle }
+    SpacingObjects { id: spacingObjects }
+
     //Class Properties (override if needed)
-    property string list_color: "#ffffff"
+    property string list_color: colorPalette.primary300
     property string border_color: "#dddddd"
     property int border_radius: 10
     property int list_width: parent.width / 3
     property int list_height: parent.height / 2 * 3
     property bool list_fill_width: true
     property bool list_fill_height: true
+    property int widthPadding: 6
+    property int heightPadding: 6
 
     property var customFunctions: new Array(0)
 
@@ -56,8 +63,9 @@ Rectangle {
 
     ListView {
         id: projectListView
-        width: parent.width
-        height: parent.height
+        width: parent.width - widthPadding
+        height: parent.height - heightPadding
+        anchors.centerIn: parent
         model: projectModel
 
         delegate: Rectangle {
@@ -73,7 +81,7 @@ Rectangle {
                 id: mousearea
 
                 onEntered: {
-                    parent.color = "lightgray"
+                    parent.color = colorPalette.background700
                     mousearea.cursorShape = Qt.PointingHandCursor
                 }
                 onExited: {
@@ -82,8 +90,8 @@ Rectangle {
                 }
 
                 Text {
-                    anchors.centerIn: parent
-                    text: '<span style="color: black; ">' + model.name + '</span>'
+                    anchors.centerIn: parent                 
+                    text: '<span style="color: ' + colorPalette.primary300 + '; ">' + model.name + '</span>'
                     color: "#000"
                     font.pixelSize: 12
                     horizontalAlignment: Text.AlignHCenter
@@ -98,6 +106,10 @@ Rectangle {
                 modal: true
                 focus: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+                background: Rectangle{
+                    color: "transparent"
+                }
 
                 property var projectModel: model
 
@@ -114,8 +126,6 @@ Rectangle {
                                 text: customFunctions[index].text
                                 buttonHeight: 40
                                 buttonWidth: popup.width
-
-                                backgroundColor: "green"
 
                                 onClicked: {
                                     if (typeof customFunctions[index].action === "function") {

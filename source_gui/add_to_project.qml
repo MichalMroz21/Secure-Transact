@@ -12,14 +12,14 @@ Page {
     property var onReturn
 
     background: Rectangle {
-        color: colorPalette.background900
+        color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
     }
 
     Component.onCompleted: {
         root.pageTitleText = "Add users to the project";
     }
 
-    Rectangle {
+    ColumnLayout {
         anchors.centerIn: parent
         width: parent.width
         height: parent.height
@@ -29,6 +29,7 @@ Page {
             anchors.horizontalCenter: parent.horizontalCenter
 
             list_height: parent.height - addUserButton.height
+            list_fill_width: false
             userClicked: function(model, mouseArea, popup) {
                 let index = selectedUsers.findIndex(u => u.host === model.host && u.port === model.port);
 

@@ -4,11 +4,17 @@ import QtCharts 6.3
 import QtQuick.Layouts 6.3
 
 import "../small_gui_components"
+import "../app_style"
 
 Item {
     id: invitesList
 
-    property string list_color: "#ffffff"
+    ColorPalette { id: colorPalette }
+    FontStyle { id: fontStyle }
+    SpacingObjects { id: spacingObjects }
+
+    property string list_color: colorPalette.background800
+    property color title_color: colorPalette.primary300
     property string border_color: "#dddddd"
     property int border_radius: 10
     property int list_width: parent.width * 0.6
@@ -54,7 +60,7 @@ Item {
         }
 
         ToolButton {
-            text: "🔔"
+            text: "<font color=\""+ colorPalette.primary50 + "\">🔔</font>"
             font.pixelSize: getDrawerEntrySize(root.width, root.height);
             onClicked: invitesDrawer.open();
         }
@@ -85,7 +91,7 @@ Item {
             property int drawerHeight: list_height
 
             Text {
-                text: "Friend invites"
+                text: "<font color=\""+ invitesList.title_color +"\">Friend invites</font>"
                 font.pixelSize: 18
                 font.bold: true
                 horizontalAlignment: Text.AlignHCenter
@@ -102,6 +108,7 @@ Item {
                     width: parent.width
                     height: 40
                     id: inviteRectangle
+                    color: colorPalette.background800
 
                     MouseArea {
                         anchors.fill: parent
@@ -110,17 +117,17 @@ Item {
                         id: inviteMouseArea
 
                         onEntered: {
-                            parent.color = "lightgray"
+                            parent.color = colorPalette.background700
                             inviteMouseArea.cursorShape = Qt.PointingHandCursor
                         }
                         onExited: {
-                            parent.color = "white"
+                            parent.color = colorPalette.background800
                             inviteMouseArea.cursorShape = Qt.ArrowCursor
                         }
 
                         Text {
                             anchors.centerIn: parent
-                            text: "From: " + model.host + ":" + model.port
+                            text: "<font color=\""+ colorPalette.primary400 +"\">From: </font><font color=\""+ colorPalette.primary300 +"\">" + model.host + ":" + model.port + " </font>"
                             color: "#000"
                             font.pixelSize: 14
                             horizontalAlignment: Text.AlignHCenter
@@ -133,6 +140,9 @@ Item {
                         width: parent.width
                         modal: true
                         focus: true
+                        background: Rectangle{
+                            color: colorPalette.background800
+                        }
                         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
                         property string inviteHost: model.host
@@ -154,7 +164,6 @@ Item {
                                         buttonHeight: 40
                                         buttonWidth: invitePopup.width
 
-                                        backgroundColor: "green"
 
                                         onClicked: {
                                             if (typeof customFunctions[index].action === "function") {
