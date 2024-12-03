@@ -15,7 +15,7 @@ Page {
     id: mainPage
 
     background: Rectangle {
-        color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
     Component.onCompleted: {
@@ -42,7 +42,7 @@ Page {
                 id: bigText
                 text: "Secure\nTransactions\nwith Blockchain\nPrecision."
                 font.pixelSize: fontStyle.getFontSize(root.width, root.height) * 3
-                color: colorPalette.primary300
+                color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 lineHeight: 1
                 wrapMode: Text.WordWrap
@@ -53,7 +53,7 @@ Page {
                 id: smallerText
                 text: "Experience unparalleled security and\ntransparency with our blockchain-powered\napplication, designed to protect Your\ntransactions with cutting-edge technlology."
                 font.pixelSize: fontStyle.getFontSize(root.width, root.height)
-                color: colorPalette.primary200
+                color: settings.light_mode ? colorPalette.accent700 : colorPalette.accent500
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 wrapMode: Text.WordWrap
                 Layout.preferredWidth: parent.width

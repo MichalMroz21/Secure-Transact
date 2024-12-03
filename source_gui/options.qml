@@ -15,11 +15,11 @@ Page {
         lightModeCheckbox.isToggled = settings.light_mode;
     }
     function changeColor() {
-        optionsPage.background.color = settings.light_mode ? colorPalette.background50 : colorPalette.background900
+        optionsPage.background.color = settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
     background: Rectangle {
-        color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
     Component.onCompleted: {

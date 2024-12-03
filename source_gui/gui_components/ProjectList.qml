@@ -13,7 +13,7 @@ Rectangle {
     SpacingObjects { id: spacingObjects }
 
     //Class Properties (override if needed)
-    property string list_color: colorPalette.primary300
+    property string list_color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
     property string border_color: "#dddddd"
     property int border_radius: 10
     property int list_width: parent.width / 3
@@ -66,8 +66,8 @@ Rectangle {
     Layout.fillHeight: list_fill_height
     implicitWidth: list_width
     implicitHeight: list_height
-    color: colorPalette.background800
-    border.color: colorPalette.primary400
+    color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+    border.color: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
     radius: border_radius
 
     ListView {
@@ -81,7 +81,7 @@ Rectangle {
             width: parent.width
             height: 40
             id: projectRectangle
-            color: colorPalette.background800
+            color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
 
             MouseArea {
                 anchors.fill: parent
@@ -90,11 +90,11 @@ Rectangle {
                 id: mousearea
 
                 onEntered: {
-                    parent.color = colorPalette.background700
+                    parent.color = settings.light_mode ? colorPalette.background100 : colorPalette.background700
                     mousearea.cursorShape = Qt.PointingHandCursor
                 }
                 onExited: {
-                    parent.color = colorPalette.background800
+                    parent.color = settings.light_mode ? colorPalette.background50 : colorPalette.background800
                     mousearea.cursorShape = Qt.ArrowCursor
                 }
                 RowLayout{
@@ -108,7 +108,7 @@ Rectangle {
                         Text {
                             Layout.alignment: Qt.AlignLeft
                             id: projectName
-                            text: '<span style="color: ' + colorPalette.primary300 + '; ">' + model.name + '</span>'
+                            text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.name + '</span>'
                             font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
@@ -122,7 +122,7 @@ Rectangle {
                         Text {
                             Layout.alignment: Qt.AlignRight
                             id: usersNumberName
-                            text: '<span style="color: ' + colorPalette.primary300 + '; ">' + model.usersNumber + '</span>'
+                            text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.usersNumber + '</span>'
                             textFormat: Text.RichText
                         }
                     }
@@ -132,7 +132,7 @@ Rectangle {
                         Text{
                             Layout.alignment: Qt.AlignRight
                             id: tasksNumberName
-                            text: '<span style="color: ' + colorPalette.primary300 + '; ">' + model.inProgressTasksNumber + "/" + model.totalTasksNumber + '</span>'
+                            text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.inProgressTasksNumber + "/" + model.totalTasksNumber + '</span>'
                             textFormat: Text.RichText
                         }
                     }

@@ -18,7 +18,7 @@ Page {
     }
 
     background: Rectangle {
-        color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
     Component.onCompleted: {
@@ -64,8 +64,8 @@ Page {
                 Layout.fillHeight: true  // Make it scale vertically
                 width: parent.width  // 2/3 for chat window (2x space)
                 height: parent.height
-                color: colorPalette.background800
-                border.color: colorPalette.accent400
+                color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+                border.color: settings.light_mode ? colorPalette.accent700 : colorPalette.accent400
                 radius: 10
 
                 // Scrollable ListView to display messages
@@ -108,8 +108,8 @@ Page {
                     id: inputArea
                     width: parent.width
                     height: 50
-                    color: colorPalette.background800
-                    border.color: colorPalette.accent400
+                    color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+                    border.color: settings.light_mode ? colorPalette.accent700 : colorPalette.accent400
                     anchors.bottom: parent.bottom
 
                     MyTextFieldLabel{
@@ -118,9 +118,9 @@ Page {
                         parentHeight: parent.height - 10
                         anchors.centerIn: parent
                         placeholder: "Type a message..."
-                        placeholderColor: colorPalette.accent400
+                        placeholderColor: settings.light_mode ? colorPalette.accent700 : colorPalette.accent400
                         borderWidth: 0
-                        textColor: colorPalette.accent400
+                        textColor: settings.light_mode ? colorPalette.accent700 : colorPalette.accent400
                         visibleUpText: false
                     }
 

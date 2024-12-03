@@ -17,7 +17,7 @@ Page {
     SpacingObjects { id: spacingObjects }
 
     background: Rectangle {
-        color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
     Component.onCompleted: {
@@ -33,7 +33,7 @@ Page {
 
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "<font color=\""+ colorPalette.primary300 +"\">New project info</font>"
+            text: "<font color=\""+ (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) +"\">New project info</font>"
             font.pixelSize: 20
             color: "black"
         }

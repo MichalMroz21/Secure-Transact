@@ -16,9 +16,9 @@ Button {
     property real radius: 5
     property real borderWidth: 0
     property color borderColor: "transparent"
-    property color backgroundColor: colorPalette.primary300
+    property color backgroundColor: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
     property string setIcon: ""
-    property color textColor: colorPalette.background800
+    property color textColor: settings.light_mode ? colorPalette.background50 : colorPalette.background800
     property int fontSize: fontStyle.display_h6
 
     implicitWidth: buttonWidth

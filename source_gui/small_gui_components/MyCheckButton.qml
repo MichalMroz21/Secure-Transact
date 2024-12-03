@@ -15,8 +15,8 @@ Rectangle
     id: myCheckBox
     property bool isToggled: true
     property string text
-    property color textColor: colorPalette.primary400
-    property color boxColor: colorPalette.primary400
+    property color textColor: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
+    property color boxColor: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
     property color tickColor: colorPalette.primary50
     property bool autoScale: true
     property int size: 30
