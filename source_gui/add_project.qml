@@ -34,14 +34,14 @@ Page {
             color: "black"
         }
 
-        MyTextFieldLabel{
+        MyTextFieldLabel {
             id: projectNameField
             upText: "Project name"
             parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
         }
 
-        RowLayout{
-            Text{
+        RowLayout {
+            Text {
                 id: usersText
                 text: "Users: "
                 font.pixelSize: 16

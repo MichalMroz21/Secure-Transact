@@ -9,65 +9,53 @@ import "small_gui_components"
 Page {
     property var usersInProject: new Array(0)
 
+    id: projectPage
+
     background: Rectangle {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
-    RowLayout {
-        Layout.preferredHeight: -1
-        Layout.preferredWidth: -1
-        implicitWidth: parent.width * 2 / 3
-        implicitHeight: parent.height * 2 / 3
+    GridLayout {
+        columns: 1  // Make sure it's only one column to resemble ColumnLayout
+        rows: 2
+
         anchors.centerIn: parent
+        width: parent.width * 2 / 3
+        height: parent.height * 2 / 3
+        rowSpacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_big, root.width, root.height, true)
 
-        spacing: 0
+        ProjectList {
+            id: projectList
+            list_width: parent.width * 2 / 3
+            list_fill_width: false
+            Layout.alignment: Qt.AlignHCenter
 
-        ColumnLayout {
-            Layout.preferredHeight: parent.height
-            Layout.preferredWidth: parent.width * 0.5
-
-            MyButton {
-                id: addUserButton
-                buttonHeight: 50  // Fixed height for the button
-                buttonWidth: 150
-                Layout.alignment: Qt.AlignHCenter ^ Qt.AlignVCenter
-                text: "Create a new project"
-
-                onClicked: {
-                    stackView.push("add_project.qml");
+            customFunctions: [
+                {
+                    text: "Add user to project",
+                    action: function (projectModel) {
+                        stackView.push("add_to_project.qml", {
+                                   currentIndex: projectModel.index,
+                                   onReturn: function(returnedUsers) {
+                                        usersInProject = returnedUsers;
+                                        console.log("Returned users:", returnedUsers);
+                                       user.update_project_users(projectModel.index, returnedUsers);
+                                    }
+                               });
+                    },
+                    isVisible: true
                 }
-            }
+            ]
         }
 
-        ColumnLayout{
-            Layout.preferredHeight: parent.height
-            Layout.preferredWidth: parent.width * 0.5
-            ProjectList {
-                id: projectList
-                list_width: parent.width * 2 / 3
-                list_fill_width: false
-                Layout.alignment: Qt.AlignHCenter
+        MyButton {
+            id: addUserButton
+            Layout.alignment: Qt.AlignHCenter
+            text: "New Project"
 
-
-                customFunctions: [
-                    {
-                        text: "Add user to project",
-                        action: function (projectModel) {
-                            stackView.push("add_to_project.qml", {
-                                       currentIndex: projectModel.index,
-                                       onReturn: function(returnedUsers) {
-                                            usersInProject = returnedUsers;
-                                            console.log("Returned users:", returnedUsers);
-                                           user.update_project_users(projectModel.index, returnedUsers);
-                                        }
-                                   });
-
-                        },
-                        isVisible: true
-                    }
-                ]
+            onClicked: {
+                stackView.push("add_project.qml");
             }
         }
     }
-
 }

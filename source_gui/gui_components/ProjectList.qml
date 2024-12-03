@@ -97,14 +97,17 @@ Rectangle {
                     parent.color = settings.light_mode ? colorPalette.background50 : colorPalette.background800
                     mousearea.cursorShape = Qt.ArrowCursor
                 }
-                RowLayout{
+
+                RowLayout {
                     width: parent.width
                     anchors.centerIn: parent
                     spacing: 0
-                    ColumnLayout{
+
+                    ColumnLayout {
                         Layout.alignment: Qt.AlignLeft
-                        Layout.minimumWidth: parent.width/2
-                        Layout.maximumWidth: parent.width/2
+                        Layout.minimumWidth: parent.width / 2
+                        Layout.maximumWidth: parent.width / 2
+
                         Text {
                             Layout.alignment: Qt.AlignLeft
                             id: projectName
@@ -115,10 +118,12 @@ Rectangle {
                             textFormat: Text.RichText
                         }
                     }
-                    ColumnLayout{
+
+                    ColumnLayout {
                         Layout.alignment: Qt.AlignHCenter
-                        Layout.minimumWidth: parent.width/4
-                        Layout.maximumWidth: parent.width/4
+                        Layout.minimumWidth: parent.width / 4
+                        Layout.maximumWidth: parent.width / 4
+
                         Text {
                             Layout.alignment: Qt.AlignRight
                             id: usersNumberName
@@ -126,10 +131,12 @@ Rectangle {
                             textFormat: Text.RichText
                         }
                     }
-                    ColumnLayout{
-                        Layout.minimumWidth: parent.width/4
-                        Layout.maximumWidth: parent.width/4
-                        Text{
+
+                    ColumnLayout {
+                        Layout.minimumWidth: parent.width / 4
+                        Layout.maximumWidth: parent.width / 4
+
+                        Text {
                             Layout.alignment: Qt.AlignRight
                             id: tasksNumberName
                             text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.inProgressTasksNumber + "/" + model.totalTasksNumber + '</span>'

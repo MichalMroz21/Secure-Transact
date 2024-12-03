@@ -55,6 +55,7 @@ Page {
                 Layout.preferredWidth: 1 / 2 * parent.width
                 Layout.preferredHeight: 256
                 Layout.alignment: Qt.AlignTop ^ Qt.AlignHCenter
+
                 spacing: 0
 
                 MyTextFieldLabel {

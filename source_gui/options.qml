@@ -10,10 +10,12 @@ import "small_gui_components"
 
 Page {
     id: optionsPage
+
     function updateCheckbox() {
         autoConnectionCheckbox.isToggled = settings.auto_connection;
         lightModeCheckbox.isToggled = settings.light_mode;
     }
+
     function changeColor() {
         optionsPage.background.color = settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
@@ -31,17 +33,17 @@ Page {
         anchors.centerIn: parent
         spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_big, root.width, root.height, true)
 
-        MyCheckButton{
+        MyCheckButton {
             id: autoConnectionCheckbox
             text: "Automatically accept friend invites"
         }
 
-        MyCheckButton{
+        MyCheckButton {
             id: lightModeCheckbox
             text: "Turn light mode"
         }
 
-        MyButton{
+        MyButton {
             text: "Save settings"
             onClicked: {
                 settings.auto_connection = autoConnectionCheckbox.isToggled;
@@ -49,8 +51,6 @@ Page {
                 updateCheckbox()
             }
         }
-
-
     }
 }
 
