@@ -18,10 +18,6 @@ Page {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
-    Component.onCompleted: {
-        root.pageTitleText = "Welcome";
-    }
-
     RowLayout {
         anchors.fill: parent
         Layout.preferredHeight: root.height
@@ -39,8 +35,13 @@ Page {
             spacing: spacingObjects.spacing_sm
 
             Text {
+                textFormat: Text.RichText
                 id: bigText
-                text: "Secure\nTransactions\nwith Blockchain\nPrecision."
+                text: "Secure\n" +
+                          "<span style='color:" + colorPalette.primary500 + ";'>Transactions</span>\n" +
+                          "with " +
+                          "<span style='color:" + colorPalette.primary500 + ";'>Blockchain</span>\n" +
+                          "Precision."
                 font.pixelSize: fontStyle.getFontSize(root.width, root.height) * 3
                 color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter

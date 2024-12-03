@@ -23,7 +23,6 @@ Page {
     }
 
     Component.onCompleted: {
-        root.pageTitleText = "Options";
         updateCheckbox();
         settings.lightModeChanged.connect(changeColor);
     }

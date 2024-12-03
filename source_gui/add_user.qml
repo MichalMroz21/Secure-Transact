@@ -13,10 +13,6 @@ Page {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
-    Component.onCompleted: {
-        root.pageTitleText = "Add new user";
-    }
-
     ColumnLayout {
         id: formContainer
         anchors.centerIn: parent
@@ -98,7 +94,6 @@ Page {
                     anchors.centerIn: parent
                 }
                 onClicked: {
-                    root.pageTitleText = "User profile";
                     stackView.pop();
                 }
             }

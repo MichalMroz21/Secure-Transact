@@ -15,10 +15,6 @@ Page {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
-    Component.onCompleted: {
-        root.pageTitleText = "Add users to the project";
-    }
-
     ColumnLayout {
         anchors.centerIn: parent
         width: parent.width

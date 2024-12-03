@@ -20,10 +20,6 @@ Page {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
-    Component.onCompleted: {
-        root.pageTitleText = "Create a new project";
-    }
-
     ColumnLayout {
         id: formContainer
         anchors.centerIn: parent
@@ -66,7 +62,6 @@ Page {
                     stackView.push("add_to_project.qml", {
                        currentIndex: index,
                        onReturn: function(returnedUsers) {
-                           root.pageTitleText = "Create a new project";
                             usersInProject = returnedUsers;
                             console.log("Returned users:", returnedUsers);
                         }
@@ -122,7 +117,6 @@ Page {
                     anchors.centerIn: parent
                 }
                 onClicked: {
-                    root.pageTitleText = "Planning";
                     stackView.pop();
                 }
             }

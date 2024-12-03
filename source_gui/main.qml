@@ -22,8 +22,6 @@ ApplicationWindow {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
-    property alias pageTitleText: pageTitle.text
-
     StackView {
        id: stackView
        initialItem: "initial_page.qml"
@@ -45,19 +43,6 @@ ApplicationWindow {
             font.pixelSize: getDrawerEntrySize(root.width, root.height);
             onClicked: drawer.open();
         }
-    }
-
-    Text{
-        id: pageTitle
-        anchors.left: menuToolbar.right
-        anchors.leftMargin: root.width * 1 / 6 - menuToolbar.width
-        anchors.top: menuToolbar.top
-        anchors.topMargin: menuToolbar.height / 4
-        font.pixelSize: getDrawerEntrySize(root.width, root.height);
-        font.family: fontStyle.getLatoRegular.name
-        font.pointSize: 9
-        color: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
-        text: "Test"
     }
 
     RotationAnimator {

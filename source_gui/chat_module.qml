@@ -22,7 +22,6 @@ Page {
     }
 
     Component.onCompleted: {
-        root.pageTitleText = "Chat";
         function loadChat(){
             var messages = user.prepare_conversation_history();
 
