@@ -34,6 +34,7 @@ QtObject {
     readonly property var getLatoRegular: contentLatoRegular
     readonly property var getLatoThin: contentLatoThin
     readonly property var getLatoThinItalic: contentLatoThinItalic
+
     readonly property var fontLatoBlack: FontLoader {
         source: "../../assets/fonts/Lato-Black.ttf"
     }

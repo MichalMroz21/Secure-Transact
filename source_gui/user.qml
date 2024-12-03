@@ -104,8 +104,6 @@ Page {
 
                 MyButton {
                     id: addUserButton
-                    buttonHeight: 50  // Fixed height for the button
-                    buttonWidth: Math.min(parent.width, 400)
                     Layout.alignment: Qt.AlignBottom
                     text: "Add new user"
 

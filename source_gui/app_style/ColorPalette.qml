@@ -142,6 +142,4 @@ QtObject {
 
     readonly property color gradient_20_1: "#F600FF"
     readonly property color gradient_20_2: "#FEE5FF"
-
-
 }

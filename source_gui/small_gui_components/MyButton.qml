@@ -11,8 +11,18 @@ Button {
     ColorPalette { id: colorPalette }
     FontStyle { id: fontStyle }
 
-    property int buttonWidth: 46
-    property int buttonHeight: 46
+    //width: 600
+    //buttonWidth: 125
+    //buttonHeight: 40
+
+    //width: 1920
+    //buttonWidth: 250
+    //buttonHeight: 80
+
+    //Expressions below are combinations of both settings above
+    property int buttonWidth: root.width * 40/264 + 750/11
+    property int buttonHeight: root.height / 15 + 40 / 3
+
     property real radius: 5
     property real borderWidth: 0
     property color borderColor: "transparent"
@@ -76,16 +86,6 @@ Button {
         width: control.implicitWidth
         anchors.horizontalCenter: parent.horizontalCenter
 
-        Label {
-            id: label
-            z: 3
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-            font: control.font
-            text: control.text
-            color: control.textColor
-            visible: !setIcon
-        }
-
         Image {
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             sourceSize: Qt.size(control.implicitWidth * 0.6, control.implicitHeight * 0.6)
@@ -108,6 +108,16 @@ Button {
                 easing.type: Easing.Linear
                 duration: 200
             }
+        }
+
+        Label {
+            id: label
+            z: 3
+            anchors.centerIn: parent
+            font: control.font
+            text: control.text
+            color: control.textColor
+            visible: !setIcon
         }
 
         Rectangle {

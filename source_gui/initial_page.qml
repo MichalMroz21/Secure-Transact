@@ -32,7 +32,7 @@ Page {
 
             Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
-            spacing: spacingObjects.spacing_sm
+            spacing: spacingObjects.spacing_big
 
             Text {
                 textFormat: Text.RichText
@@ -58,17 +58,6 @@ Page {
 
             MyButton {
                 text: "Enter"
-                //width: 600
-                //buttonWidth: 125
-                //buttonHeight: 40
-
-                //width: 1920
-                //buttonWidth: 250
-                //buttonHeight: 80
-
-                //Expressions below are combinations of both settings above
-                buttonWidth: root.width * 25/264 + 750/11
-                buttonHeight: root.height / 15 + 40 / 3
 
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 

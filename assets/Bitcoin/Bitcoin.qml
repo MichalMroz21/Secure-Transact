@@ -15,24 +15,28 @@ Node {
         baseColor: colorPalette.generic100  // Change to green
         indexOfRefraction: 1
     }
+
     PrincipledMaterial {
         id: gold_material
         objectName: "GOLD"
         baseColor: colorPalette.primary600
         indexOfRefraction: 1.4500000476837158
     }
+
     PrincipledMaterial {
         id: gold_001_material
         objectName: "GOLD.001"
         baseColor: colorPalette.primary400
         indexOfRefraction: 1.4500000476837158
     }
+
     PrincipledMaterial {
         id: gold_002_material
         objectName: "GOLD.002"
         baseColor: colorPalette.generic100
         indexOfRefraction: 1.4500000476837158
     }
+
     PrincipledMaterial {
         id: material_004_material
         objectName: "Material.004"
@@ -79,6 +83,5 @@ Node {
             ]
         }
     }
-
     // Animations:
 }
