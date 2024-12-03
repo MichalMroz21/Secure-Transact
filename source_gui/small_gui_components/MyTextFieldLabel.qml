@@ -25,15 +25,14 @@ Item {
     property int parentHeight
 
     implicitWidth: parentWidth
-    implicitHeight: parentHeight
+    implicitHeight: upTextVar.height + downTextField.height
 
     ColumnLayout {
-        implicitWidth: parentWidth
-        implicitHeight: parentHeight
-
+        implicitWidth: textField.implicitWidth
         id: layout
 
         Text {
+            id: upTextVar
             text: textField.upText
             font.pixelSize: fontStyle.paragraph_large
             color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300

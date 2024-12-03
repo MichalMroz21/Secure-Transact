@@ -19,13 +19,15 @@ Page {
     background: Rectangle {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
-
+    width: root.width
+    height: root.height
     ColumnLayout {
         id: formContainer
         anchors.centerIn: parent
-        spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_md, root.width, root.height, true)
-        width: Math.min(parent.width / 3, maxInputWidth)  // Set a maximum width for the form
-        height: implicitHeight
+        spacing: 15
+        //width: Math.min(parent.width / 3, maxInputWidth)  // Set a maximum width for the form
+        implicitWidth: parent.width / 2
+        implicitHeight: parent.height
 
         Text {
             Layout.alignment: Qt.AlignHCenter
@@ -34,26 +36,28 @@ Page {
             color: "black"
         }
 
-        MyTextFieldLabel {
+        MyTextFieldLabel{
+            Layout.alignment: Qt.AlignHCenter
             id: projectNameField
             upText: "Project name"
-            parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
+            parentWidth: parent.width - spacingObjects.spacing_x_big
+            //parentHeight: 50
         }
 
         RowLayout {
             Text {
                 id: usersText
-                text: "Users: "
-                font.pixelSize: 16
-                height: 40
+                text: "<font color=\""+ (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) +"\">Users: </font>"
+                font.pixelSize: fontStyle.getFontSize(root.width, root.height)
+                //height: 40
                 Layout.fillWidth: true
                 Layout.maximumWidth: maxInputWidth  // Set a maximum width for the input
             }
 
             MyButton {
                 id: addUserButton
-                buttonHeight: 50  // Fixed height for the button
-                buttonWidth: 100
+                //buttonHeight: 50  // Fixed height for the button
+                //buttonWidth: 100
                 Layout.alignment: Qt.AlignBottom
                 text: "Add new user"
 
@@ -73,7 +77,7 @@ Page {
 
         // Buttons Row
         RowLayout {
-            spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_big, root.width, root.height, false)
+            spacing: 20
             Layout.alignment: Qt.AlignHCenter
 
             // Accept Button
