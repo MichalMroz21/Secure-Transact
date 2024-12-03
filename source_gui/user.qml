@@ -104,7 +104,7 @@ Page {
 
                 MyButton {
                     id: addUserButton
-                    Layout.alignment: Qt.AlignBottom
+                    Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
                     text: "Add new user"
 
                     onClicked: {
@@ -113,6 +113,5 @@ Page {
                 }
 
             }
-
     }
 }
