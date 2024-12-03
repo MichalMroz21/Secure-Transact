@@ -20,20 +20,65 @@ Button {
     property string setIcon: ""
     property color textColor: settings.light_mode ? colorPalette.background50 : colorPalette.background800
     property int fontSize: fontStyle.display_h6
+    property bool autoScale: true
+    property real textWidthFill: 0.75
+    property real textHeightFill: 0.75
+
+    // function getFontSize(autoScale){
+    //     if (!autoScale) return fontSize;
+    //     label.font.pixelSize = fontStyle.mobile_h6
+    //     while(true){
+    //         if(label.width < buttonWidth - radius*2) {
+    //             label.font.pixelSize += 2;
+    //         }
+    //         else{
+    //             return label.font.pixelSize;
+    //         }
+    //     }
+    // }
+
+    function getFontSize(autoScale) {
+        if (!autoScale) return fontSize; // Jeśli skalowanie wyłączone, zwracamy domyślny rozmiar.
+
+        let testFontSize = fontStyle.mobile_h6; // Ustawiamy początkowy rozmiar.
+        let tempText = Qt.createQmlObject(
+            'import QtQuick 2.15; Text { visible: false; font.family: "' + label.font.family + '"; text: "' + label.text + '"; }',
+            label,
+            "TempText"
+        );
+
+        while (true) {
+            tempText.font.pixelSize = testFontSize; // Ustawiamy testowy rozmiar czcionki.
+
+            if (tempText.width <= buttonWidth * control.textWidthFill || tempText.height <= buttonHeight * control.textHeightFill) {
+                testFontSize += 2; // Jeśli mieści się, zwiększamy rozmiar czcionki.
+            } else {
+                tempText.destroy(); // Usuwamy dynamicznie stworzony Text.
+                return testFontSize - 2; // Zwracamy ostatni pasujący rozmiar.
+            }
+        }
+    }
+    onWidthChanged: {
+        label.font.pixelSize = getFontSize(control.autoScale);
+    }
+    onHeightChanged: {
+        label.font.pixelSize = getFontSize(control.autoScale);
+    }
 
     implicitWidth: buttonWidth
     implicitHeight: buttonHeight
 
-    font.pixelSize: fontSize
     font.family: fontStyle.getLatoRegular.name
 
     contentItem:ColumnLayout{
+        z: 2
         height: control.implicitHeight
         width: control.implicitWidth
         anchors.horizontalCenter: parent.horizontalCenter
 
         Label {
-            z: 2
+            id: label
+            z: 3
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             font: control.font
             text: control.text

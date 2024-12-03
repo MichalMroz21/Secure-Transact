@@ -4,10 +4,10 @@ import QtQuick.Controls 2.5
 QtObject {
     readonly property int display_large: 52
     readonly property int display_small: 44
-    readonly property int display_h1: 40
-    readonly property int display_h2: 36
-    readonly property int display_h3: 32
-    readonly property int display_h4: 28
+    readonly property int display_h1: 30
+    readonly property int display_h2: 28
+    readonly property int display_h3: 26
+    readonly property int display_h4: 24
     readonly property int display_h5: 22
     readonly property int display_h6: 20
     readonly property int mobile_h1: 18
