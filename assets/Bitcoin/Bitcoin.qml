@@ -1,32 +1,36 @@
 import QtQuick
 import QtQuick3D
 
+import "../../source_gui/app_style"
+
 Node {
     id: node
+
+    ColorPalette { id: colorPalette }
 
     // Resources
     PrincipledMaterial {
         id: svgmat_material
         objectName: "SVGMat"
-        baseColor: "#ff000000"
+        baseColor: colorPalette.generic100  // Change to green
         indexOfRefraction: 1
     }
     PrincipledMaterial {
         id: gold_material
         objectName: "GOLD"
-        baseColor: "#ffcccccc"
+        baseColor: colorPalette.primary600
         indexOfRefraction: 1.4500000476837158
     }
     PrincipledMaterial {
         id: gold_001_material
         objectName: "GOLD.001"
-        baseColor: "#ffcccccc"
+        baseColor: colorPalette.primary400
         indexOfRefraction: 1.4500000476837158
     }
     PrincipledMaterial {
         id: gold_002_material
         objectName: "GOLD.002"
-        baseColor: "#ffcccccc"
+        baseColor: colorPalette.generic100
         indexOfRefraction: 1.4500000476837158
     }
     PrincipledMaterial {
@@ -45,7 +49,7 @@ Node {
             objectName: "Curve"
             source: "meshes/curve_mesh.mesh"
             materials: [
-                svgmat_material
+                svgmat_material  // Apply the updated green material here
             ]
         }
         Model {

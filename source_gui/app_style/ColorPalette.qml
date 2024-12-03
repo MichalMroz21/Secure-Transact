@@ -143,13 +143,5 @@ QtObject {
     readonly property color gradient_20_1: "#F600FF"
     readonly property color gradient_20_2: "#FEE5FF"
 
-    readonly property color background: "#232429"
-    readonly property color hoverColor: "#2a2d36"
-    readonly property color textBackground: "#2b2f3b"
-    readonly property color popupBackground: "#250b0b"
-    readonly property color appStyle: "#1d5ffe"
-    readonly property color labelColor: "#85889b"
-    readonly property color textColor: "#FFFFFF"
-    readonly property color borderColor: "#464a53"
-    readonly property color placeholderColor: "#757985"
+
 }
