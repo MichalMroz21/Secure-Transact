@@ -43,7 +43,6 @@ Page {
 
         MyButton{
             text: "Save settings"
-            buttonWidth: 200
             onClicked: {
                 settings.auto_connection = autoConnectionCheckbox.isToggled;
                 settings.light_mode = lightModeCheckbox.isToggled;
