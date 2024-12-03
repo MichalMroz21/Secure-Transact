@@ -14,7 +14,7 @@ Page {
     }
 
     background: Rectangle {
-        color: settings.light_mode ? colorPalette.backgroun50 : colorPalette.background900
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
     RowLayout {

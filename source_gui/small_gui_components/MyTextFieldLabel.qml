@@ -16,8 +16,8 @@ Item {
     property alias placeholder: downTextField.placeholderText
     property alias placeholderColor: downTextField.placeholderTextColor
     property color textFieldColor: "transparent"
-    property color borderColor: colorPalette.primary300
-    property color textColor: colorPalette.primary300
+    property color borderColor: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
+    property color textColor: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
     property bool enablePlaceholderWhenTyping: false
     property int borderWidth: 1
 
@@ -36,7 +36,7 @@ Item {
         Text {
             text: textField.upText
             font.pixelSize: fontStyle.paragraph_large
-            color: colorPalette.primary300
+            color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
             visible: textField.visibleUpText
         }
 

@@ -15,7 +15,7 @@ Page {
     id: mainPage
 
     background: Rectangle {
-        color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
     Component.onCompleted: {
@@ -28,8 +28,8 @@ Page {
         Layout.preferredWidth: root.width
 
         ColumnLayout {
-            Layout.leftMargin: root.width * 11/190 + 320/19 //Yes.
-            //explaination: for original resolution width (400) it was best to have spacingObjects.spacing_x_lg = 48 margin and for full hd width (1920) spacingObjects.spacing_x_huge = 128
+            Layout.leftMargin: root.width * 8/165 + 384/11 //Yes.
+            //explaination: for original resolution width (600) it was best to have spacingObjects.spacing_Xx_lg = 64 margin and for full hd width (1920) spacingObjects.spacing_x_huge = 128
 
             Layout.preferredHeight: -1
             Layout.preferredWidth: parent.width / 2 - Layout.leftMargin
@@ -42,7 +42,7 @@ Page {
                 id: bigText
                 text: "Secure\nTransactions\nwith Blockchain\nPrecision."
                 font.pixelSize: fontStyle.getFontSize(root.width, root.height) * 3
-                color: colorPalette.primary300
+                color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 lineHeight: 1
                 wrapMode: Text.WordWrap
@@ -53,7 +53,7 @@ Page {
                 id: smallerText
                 text: "Experience unparalleled security and\ntransparency with our blockchain-powered\napplication, designed to protect Your\ntransactions with cutting-edge technlology."
                 font.pixelSize: fontStyle.getFontSize(root.width, root.height)
-                color: colorPalette.primary200
+                color: settings.light_mode ? colorPalette.accent700 : colorPalette.accent500
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 wrapMode: Text.WordWrap
                 Layout.preferredWidth: parent.width
@@ -61,10 +61,10 @@ Page {
 
             MyButton {
                 text: "Enter"
-                buttonWidth: 125
-                buttonHeight: 40
-                //buttonWidth: 250
-                //buttonHeight: 80
+                //buttonWidth: 125
+                //buttonHeight: 40
+                buttonWidth: 250
+                buttonHeight: 80
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
                 onClicked: {

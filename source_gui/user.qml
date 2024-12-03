@@ -11,7 +11,7 @@ Page {
     SpacingObjects { id: spacingObjects }
 
     background: Rectangle {
-        color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
     ListModel {

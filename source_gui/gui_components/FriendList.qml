@@ -12,7 +12,7 @@ Rectangle {
     FontStyle { id: fontStyle }
     SpacingObjects { id: spacingObjects }
 
-    property string list_color: colorPalette.background800
+    property string list_color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
     property string border_color: "#dddddd"
     property int border_radius: 10
     property int list_width: parent.width / 3
@@ -77,8 +77,8 @@ Rectangle {
     Layout.fillHeight: list_fill_height  // Make it scale vertically
     implicitWidth: list_width
     implicitHeight: list_height
-    color: colorPalette.background800
-    border.color: colorPalette.primary400
+    color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+    border.color: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
     radius: border_radius
 
     // ListView to display user names and IP addresses
@@ -94,7 +94,7 @@ Rectangle {
             width: parent.width  // Set width explicitly for user list items
             height: 40  // Fixed height for each user item
             id: userRectangle
-            color: colorPalette.background800
+            color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
 
             MouseArea {
                 id: mousearea
@@ -103,18 +103,18 @@ Rectangle {
                 hoverEnabled: true
 
                 onEntered: {
-                    model.isSelected === false ? parent.color = colorPalette.background700 : null;
+                    model.isSelected === false ? parent.color = (settings.light_mode ? colorPalette.background100 : colorPalette.background700) : null;
                     mousearea.cursorShape = Qt.PointingHandCursor;
                 }
                 onExited: {
-                    model.isSelected === false ? parent.color = colorPalette.background800 : null;
+                    model.isSelected === false ? parent.color = (settings.light_mode ? colorPalette.background50 : colorPalette.background800) : null;
                     mousearea.cursorShape = Qt.ArrowCursor
                 }
 
                 // Use a single Text element to concatenate the name and IP address
                 Text {
                     anchors.centerIn: parent  // Center the text within the parent
-                    text: '<span style="color: ' + model.activeColor + '; ">' + '▮ ' + ' </span><span style="color: ' + colorPalette.primary300 + '; ">' + model.nickname + ' </span>'
+                    text: '<span style="color: ' + model.activeColor + '; ">' + '▮ ' + ' </span><span style="color: ' + (settings.light_mode ? colorPalette.background600 : colorPalette.primary300) + '; ">' + model.nickname + ' </span>'
                     //<span style="color: gray; "><i>(' + model.host + ":" + model.port + ')</i></span>
                     color: "#000"
                     font.pixelSize: 12

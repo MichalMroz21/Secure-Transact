@@ -20,20 +20,21 @@ class Task(QObject):
         URGENT = 4
 
     class TaskStatus(Enum):
-        IN_PROGRESS = 0
-        COMPLETED = 1
-        FAILED = 2
+        TO_DO = 0
+        IN_PROGRESS = 1
+        COMPLETED = 2
+        FAILED = 3
 
-    def __init__(self):
+    def __init__(self, assignees=None, due_date=datetime.today().isoformat(), priority=TaskPriority.MEDIUM, status=TaskStatus.TO_DO, comments=None, name="", tags=None):
         super().__init__()
 
-        self._assignees = [] #Users list
-        self._due_date = datetime.today().isoformat()
-        self._priority = self.TaskPriority.MEDIUM
-        self._status = self.TaskStatus.IN_PROGRESS
-        self._comments = [] #string list
-        self._name = ""
-        self._tags = [] #string list
+        self._assignees = [] if assignees is None else assignees #Users list
+        self._due_date = due_date
+        self._priority = priority
+        self._status = status
+        self._comments = [] if comments is None else comments #string list
+        self._name = name
+        self._tags = [] if tags is None else tags #string list
 
     @Property("QVariantList", notify=assigneesChanged)
     def assignees(self):

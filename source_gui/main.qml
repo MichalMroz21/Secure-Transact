@@ -19,7 +19,7 @@ ApplicationWindow {
     SpacingObjects { id: spacingObjects }
 
     background: Rectangle {
-        color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
     property alias pageTitleText: pageTitle.text
@@ -41,7 +41,7 @@ ApplicationWindow {
 
         ToolButton {
             id: menuToolbarText
-            text: "<font color=\""+ colorPalette.primary500 + "\">☰</font>"
+            text: "<font color=\""+ (settings.light_mode ? colorPalette.primary900 : colorPalette.primary500) + "\">☰</font>"
             font.pixelSize: getDrawerEntrySize(root.width, root.height);
             onClicked: drawer.open();
         }
@@ -56,7 +56,7 @@ ApplicationWindow {
         font.pixelSize: getDrawerEntrySize(root.width, root.height);
         font.family: fontStyle.getLatoRegular.name
         font.pointSize: 9
-        color: colorPalette.primary400
+        color: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
         text: "Test"
     }
 
@@ -104,7 +104,7 @@ ApplicationWindow {
         width: parent.width * 0.15
         height: parent.height
         background: Rectangle {
-            color: colorPalette.background800
+            color: settings.light_mode ? colorPalette.background100 : colorPalette.background800
         }
 
         ListView {

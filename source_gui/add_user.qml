@@ -10,7 +10,7 @@ Page {
     property int maxInputWidth: 300
 
     background: Rectangle {
-        color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
     Component.onCompleted: {
@@ -30,7 +30,7 @@ Page {
             Layout.alignment: Qt.AlignHCenter
             text: "Connect to User"
             font.pixelSize: 20
-            color: colorPalette.primary300
+            color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
         }
 
         // IP Address Input

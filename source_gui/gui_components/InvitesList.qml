@@ -13,8 +13,8 @@ Item {
     FontStyle { id: fontStyle }
     SpacingObjects { id: spacingObjects }
 
-    property string list_color: colorPalette.background800
-    property color title_color: colorPalette.primary300
+    property string list_color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+    property color title_color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
     property string border_color: "#dddddd"
     property int border_radius: 10
     property int list_width: parent.width * 0.6
@@ -108,7 +108,7 @@ Item {
                     width: parent.width
                     height: 40
                     id: inviteRectangle
-                    color: colorPalette.background800
+                    color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
 
                     MouseArea {
                         anchors.fill: parent
@@ -117,17 +117,17 @@ Item {
                         id: inviteMouseArea
 
                         onEntered: {
-                            parent.color = colorPalette.background700
+                            parent.color = settings.light_mode ? colorPalette.background100 : colorPalette.background700
                             inviteMouseArea.cursorShape = Qt.PointingHandCursor
                         }
                         onExited: {
-                            parent.color = colorPalette.background800
+                            parent.color = settings.light_mode ? colorPalette.background50 : colorPalette.background800
                             inviteMouseArea.cursorShape = Qt.ArrowCursor
                         }
 
                         Text {
                             anchors.centerIn: parent
-                            text: "<font color=\""+ colorPalette.primary400 +"\">From: </font><font color=\""+ colorPalette.primary300 +"\">" + model.host + ":" + model.port + " </font>"
+                            text: "<font color=\""+ (settings.light_mode ? colorPalette.primary700 : colorPalette.primary400) +"\">From: </font><font color=\""+ (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) +"\">" + model.host + ":" + model.port + " </font>"
                             color: "#000"
                             font.pixelSize: 14
                             horizontalAlignment: Text.AlignHCenter
@@ -141,7 +141,7 @@ Item {
                         modal: true
                         focus: true
                         background: Rectangle{
-                            color: colorPalette.background800
+                            color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
                         }
                         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
