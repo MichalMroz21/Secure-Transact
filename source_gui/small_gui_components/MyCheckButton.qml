@@ -7,12 +7,13 @@ import Qt5Compat.GraphicalEffects
 
 import "../app_style"
 
-Rectangle
-{
+Rectangle {
 
     FontStyle { id: fontStyle }
     ColorPalette { id: colorPalette }
+
     id: myCheckBox
+
     property bool isToggled: true
     property string text
     property color textColor: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
@@ -20,12 +21,13 @@ Rectangle
     property color tickColor: colorPalette.primary50
     property bool autoScale: true
     property int size: 30
+
     width: childrenRect.width
     height: childrenRect.height
     color: "transparent"
-    Row
-    {
-        spacing: 5
+
+    Row {
+        spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_xx_sm, root.width, root.height, false)
         // Checkbox icons
         Rectangle {
             id: checkboxRect
@@ -47,8 +49,7 @@ Rectangle
             }
         }
         // Checkbox text
-        Text
-        {
+        Text {
             color: "#222"
             font.family: fontStyle.contentLatoLight.name
             font.pixelSize: myCheckBox.autoScale ? fontStyle.getFontSize(root.width, root.height) : myCheckBox.size
@@ -56,6 +57,7 @@ Rectangle
             anchors.verticalCenter: parent.verticalCenter
         }
     }
+
     MouseArea {
         anchors.fill: parent
         onClicked: {

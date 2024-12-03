@@ -29,7 +29,7 @@ Page {
 
     ColumnLayout {
         anchors.centerIn: parent
-        spacing: 20
+        spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_big, root.width, root.height, true)
 
         MyCheckButton{
             id: autoConnectionCheckbox

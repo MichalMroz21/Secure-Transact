@@ -61,21 +61,21 @@ Page {
                     id: usernameTextField
                     upText: "Username"
                     downText: user.nickname
-                    parentWidth: parent.width - spacingObjects.spacing_x_big
+                    parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
                 }
 
                 MyTextFieldLabel {
                     id: addressTextField
                     upText: "Address"
                     downText: user.host
-                    parentWidth: parent.width - spacingObjects.spacing_x_big
+                    parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
                 }
 
                 MyTextFieldLabel {
                     id: portTextField
                     upText: "Port"
                     downText: user.port
-                    parentWidth: parent.width - spacingObjects.spacing_x_big
+                    parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
                 }
             }
 
@@ -111,7 +111,6 @@ Page {
                         stackView.push("add_user.qml");
                     }
                 }
-
             }
     }
 }

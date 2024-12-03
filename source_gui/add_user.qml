@@ -16,7 +16,7 @@ Page {
     ColumnLayout {
         id: formContainer
         anchors.centerIn: parent
-        spacing: 15
+        spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_md, root.width, root.height, true)
         width: Math.min(parent.width / 3, maxInputWidth)  // Set a maximum width for the form
         height: implicitHeight
         Layout.preferredHeight: 256
@@ -47,7 +47,7 @@ Page {
 
         // Buttons Row
         RowLayout {
-            spacing: 20
+            spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_big, root.width, root.height, false)
             Layout.alignment: Qt.AlignHCenter
 
             // Accept Button

@@ -32,7 +32,7 @@ Page {
 
             Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
-            spacing: spacingObjects.spacing_big
+            spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_big, root.width, root.height, true)
 
             Text {
                 textFormat: Text.RichText
@@ -57,7 +57,7 @@ Page {
             }
 
             MyButton {
-                text: "Enter"
+                text: "Enter the App"
 
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
@@ -72,7 +72,7 @@ Page {
             Layout.preferredWidth: parent.width / 2
             Layout.alignment: Qt.AlignCenter // Aligns the entire ColumnLayout to the center
 
-            spacing: spacingObjects.spacing_x_big
+            spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, true)
 
             View3D {
                 id: view3D

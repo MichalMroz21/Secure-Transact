@@ -84,7 +84,7 @@ Item {
             id: column
             Layout.preferredHeight: parent.height
             Layout.preferredWidth: parent.width
-            spacing: 10
+            spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_sm, root.width, root.height, true)
             anchors.margins: 10
 
             property int drawerWidth: list_width
@@ -150,7 +150,7 @@ Item {
                         property int inviteIndex: model.index
 
                         ColumnLayout {
-                            spacing: 5
+                            spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_xx_sm, root.width, root.height, true)
                             anchors.margins: 10
 
                             Repeater {
