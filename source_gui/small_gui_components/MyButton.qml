@@ -31,8 +31,8 @@ Button {
     property color textColor: settings.light_mode ? colorPalette.background50 : colorPalette.background800
     property int fontSize: fontStyle.display_h6
     property bool autoScale: true
-    property real textWidthFill: 0.75
-    property real textHeightFill: 0.75
+    property real textWidthFill: 0.3
+    property real textHeightFill: 0.3
 
     // function getFontSize(autoScale){
     //     if (!autoScale) return fontSize;
