@@ -198,8 +198,28 @@ class User(QObject):
             return self.projects[project_index]
 
     @Slot(int, QObject, str, str, str, str)
-    def create_a_new_task(self, project_index, assignee, name, priority, dueDate, tags):
-        self.projects[project_index].tasks.append(Task())
+    def create_a_new_task(self, project_index, assignee, name, priority, due_date, tags):
+        parsed_priority = None
+        try:
+            if int(priority):
+                parsed_priority = priority if 0 <= priority < global_constants.TASKPRIORITIESMAXVALUE else 1
+        except ValueError:
+            parsed_priority = priority.lower()
+            if parsed_priority == "low":
+                parsed_priority = 0
+            elif parsed_priority == "medium":
+                parsed_priority = 1
+            elif parsed_priority == "high":
+                parsed_priority = 2
+            elif parsed_priority == "urgent":
+                parsed_priority = 3
+            else:
+                parsed_priority = 1
+
+        tags_list = tags.split(", ")
+        date = datetime.datetime.strptime(due_date, "%d.%m.%Y")
+        self.projects[project_index].tasks.append(Task(assignee=assignee, name=name, priority=parsed_priority, due_date=date, tags=tags_list))
+        self.projects[project_index].tasksChanged.emit()
         print(self.projects[project_index].tasks)
 
     @Slot(str, int)

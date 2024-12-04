@@ -35,7 +35,6 @@ Page {
             id: nameTextField
             upText: "Name"
             parentWidth: parent.width
-            enabled: false
         }
         // Assignee Input
         MyTextFieldLabel {
