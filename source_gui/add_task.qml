@@ -9,6 +9,7 @@ Page {
     id: formPage
     property int maxInputWidth: 300
     property int projectIndex: 0
+    property QtObject assignee
 
     background: Rectangle {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
@@ -29,42 +30,52 @@ Page {
             font.pixelSize: fontStyle.getFontSize(root.width, root.height)
             color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
         }
-
-        // IP Address Input
+        // Assignee Input
         MyTextFieldLabel {
-            id: addressTextField
-            upText: "Assignee IP Address"
+            id: nameTextField
+            upText: "Name"
             parentWidth: parent.width
-            //parentHeight: 50
+            enabled: false
         }
-
-        // Port Input
+        // Assignee Input
         MyTextFieldLabel {
-            id: portTextField
-            upText: "Assignee Port"
+            id: assigneeTextField
+            upText: "Assignee"
             parentWidth: parent.width
-            //parentHeight: 50
+            enabled: false
         }
-        // Port Input
+        MyButton{
+            text: "Select assignee"
+            buttonWidth: parent.width
+            onClicked: {
+                stackView.push("select_users.qml", {
+                    currentIndex: formPage.projectIndex,
+                    selectOnlyOne: true,
+                    onReturn: function (returnedUser) {
+                        formPage.assignee = returnedUser;
+                        console.log("Returned user:", returnedUser);
+                        assigneeTextField.downText = returnedUser.nickname;
+                    }
+                });
+            }
+        }
+        // Priority Input
         MyTextFieldLabel {
             id: priorityTextField
             upText: "Priority"
             parentWidth: parent.width
-            //parentHeight: 50
         }
-        // Port Input
+        // Due Date Input
         MyTextFieldLabel {
             id: dueDateTextField
-            upText: " Due Date"
+            upText: "Due Date"
             parentWidth: parent.width
-            //parentHeight: 50
         }
-        // Port Input
+        // Tags Input
         MyTextFieldLabel {
             id: tagsTextField
             upText: "Tags"
             parentWidth: parent.width
-            //parentHeight: 50
         }
 
         // Buttons Row
@@ -77,9 +88,8 @@ Page {
                 text: "Accept"
 
                 onClicked:{
-                    if(addressTextField.downText !== "" && portTextField.downText !== "" && priorityTextField.downText !== "" && dueDateTextField.downText !== "" && tagsTextField.downText !== ""){
-                        //na razie tylko samo tworzenie zadania, potem uzupelnie o parametry
-                        user.create_a_new_task(formPage.projectIndex, addressTextField.downText, portTextField.downText, priorityTextField.downText, dueDateTextField.downText, tagsTextField.downText);
+                    if(nameTextField.downText !== "" && assigneeTextField.downText !== "" && priorityTextField.downText !== "" && dueDateTextField.downText !== "" && tagsTextField.downText !== ""){
+                        user.create_a_new_task(formPage.projectIndex, formPage.assignee, nameTextField.downText, priorityTextField.downText, dueDateTextField.downText, tagsTextField.downText);
                         stackView.pop();
                     }
                 }
