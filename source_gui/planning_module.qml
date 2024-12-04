@@ -34,23 +34,6 @@ Page {
                 console.log(model.index);
                 stackView.push("project_details.qml", {currentIndex: model.index});
             }
-
-            // customFunctions: [
-            //     {
-            //         text: "Add user to project",
-            //         action: function (projectModel) {
-            //             stackView.push("add_to_project.qml", {
-            //                        currentIndex: projectModel.index,
-            //                        onReturn: function(returnedUsers) {
-            //                             usersInProject = returnedUsers;
-            //                             console.log("Returned users:", returnedUsers);
-            //                            user.update_project_users(projectModel.index, returnedUsers);
-            //                         }
-            //                    });
-            //         },
-            //         isVisible: true
-            //     }
-            // ]
         }
 
         MyButton {

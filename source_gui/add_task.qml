@@ -77,9 +77,9 @@ Page {
                 text: "Accept"
 
                 onClicked:{
-                    if(addressTextField.downText !== "" && portTextField.downText !== ""){
+                    if(addressTextField.downText !== "" && portTextField.downText !== "" && priorityTextField.downText !== "" && dueDateTextField.downText !== "" && tagsTextField.downText !== ""){
                         //na razie tylko samo tworzenie zadania, potem uzupelnie o parametry
-                        user.create_a_new_task(formPage.projectIndex);
+                        user.create_a_new_task(formPage.projectIndex, addressTextField.downText, portTextField.downText, priorityTextField.downText, dueDateTextField.downText, tagsTextField.downText);
                         stackView.pop();
                     }
                 }
