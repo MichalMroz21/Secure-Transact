@@ -5,8 +5,10 @@ import QtQuick.Layouts 1.15
 import "../small_gui_components"
 import "../app_style"
 
-//User (Peer) List Class Blueprint
+//Task List Class Blueprint
 Rectangle {
+    id: taskList
+
     ColorPalette { id: colorPalette }
     FontStyle { id: fontStyle }
     SpacingObjects { id: spacingObjects }
@@ -26,41 +28,42 @@ Rectangle {
 
     property var customFunctions: new Array(0)
 
-    property var userClicked: function(model, name, usersNumber, totalTasksNumber, inProgressTasksNumber, mouseArea, popup) {
+    property var userClicked: function(name, tasks, users, mouseArea, popup) {
         popup.open();
     }
 
+    property int currentIndex
+
     ListModel {
-        id: projectModel
+        id: taskModel
     }
 
-    function updateProjectModel() {
-        projectModel.clear();
+    function updateTaskModel(project) {
+        taskModel.clear();
 
-        var projects = user.projects;
+        var tasks = project.tasks;
 
-        for (let i = 0; i < projects.length; i++) {
-            let inProgressTasksNumber = 0;
+        for (let i = 0; i < tasks.length; i++) {
+            let task = tasks[i];
 
-            for(let j = 0; j < projects[i].tasks.length; j++){
-                if (projects[i].tasks[j].status === 1){
-                    inProgressTasksNumber++;
-                }
-            }
-
-            projectModel.append({
-                name: projects[i].name,
-                usersNumber: projects[i].users.length,
-                totalTasksNumber: projects[i].tasks.length,
-                inProgressTasksNumber: inProgressTasksNumber,
-                index: i
+            taskModel.append({
+                assignees = task.assignees,
+                due_date = task.due_date,
+                priority = task.priority,
+                status = task.status,
+                comments = task.comments,
+                name = task.name,
+                tags = task.tags
             });
         }
     }
 
+    function getProjectData(index) {
+        return user.get_project(index);
+    }
+
     Component.onCompleted: {
-        updateProjectModel();
-        user.projectsChanged.connect(updateProjectModel);
+        updateTaskModel(getProjectData(taskList.currentIndex));
     }
 
     Layout.fillWidth: list_fill_width
@@ -75,31 +78,33 @@ Rectangle {
     border.color: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
 
     ListView {
-        id: projectListView
+        id: taskListView
         width: parent.width - widthPadding
         height: parent.height - heightPadding
-        model: projectModel
+        model: taskModel
 
         anchors.centerIn: parent
 
-        property var projectHeight: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_lg, root.width, root.height, true)
+        property var taskHeight: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_lg, root.width, root.height, true)
 
         delegate: Rectangle {
             width: parent.width
-            height: projectListView.projectHeight
-            id: projectRectangle
+            height: taskListView.taskHeight
+            id: taskRectangle
             color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
 
             MouseArea {
-                anchors.fill: parent
-                onClicked: userClicked(model, model.name, model.usersNumber, model.totalTasksNumber, model.inProgressTasksNumber, mousearea, popup)
+                onClicked: userClicked(model.name, model.tasks, model.users, mousearea, popup)
                 hoverEnabled: true
                 id: mousearea
+
+                anchors.fill: parent
 
                 onEntered: {
                     parent.color = settings.light_mode ? colorPalette.background100 : colorPalette.background700
                     mousearea.cursorShape = Qt.PointingHandCursor
                 }
+
                 onExited: {
                     parent.color = settings.light_mode ? colorPalette.background50 : colorPalette.background800
                     mousearea.cursorShape = Qt.ArrowCursor

@@ -30,9 +30,10 @@ Page {
             list_fill_width: false
             Layout.alignment: Qt.AlignHCenter
 
-            userClicked: function(projectModel) {
-                    stackView.push("project_details.qml", {currentIndex: projectModel.index});
-                }
+            userClicked: function(model, name, usersNumber, totalTasksNumber, inProgressTasksNumber, mouseArea, popup) {
+                console.log(model.index);
+                stackView.push("project_details.qml", {currentIndex: model.index});
+            }
 
             // customFunctions: [
             //     {

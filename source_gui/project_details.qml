@@ -9,51 +9,22 @@ import "app_style"
 
 Page {
     id: projectDetailsPage
+
     SpacingObjects { id: spacingObjects }
+
     property int currentIndex
-    property string projectName: "Example project's task list"
-    property int usersInTheProject: 0
 
     background: Rectangle {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
-    ListModel {
-        id: inviteModel
-    }
-
-    function getDrawerEntrySize(width, height){
-        return (width + height) * 0.02;
-    }
-
-    function updateInvitesModel() {
-        inviteModel.clear();
-        for (let i = 0; i < user.invites.length; i++) {
-            if(user.invites[i].received === true){
-                inviteModel.append({
-                    host: user.invites[i].host,
-                    port: user.invites[i].port
-                });
-            };
-        }
-    }
-    function viewProjectData() {
-        var projectArray = user.get_project_details(projectDetailsPage.currentIndex);
-        projectDetailsPage.projectName = projectArray[0];
-        projectDetailsPage.usersInTheProject = projectArray[1];
-    }
-
-    Component.onCompleted: {
-        updateInvitesModel();
-        viewProjectData(projectDetailsPage.currentIndex);
-        user.invitesChanged.connect(updateInvitesModel);
-    }
-
     RowLayout {
         Layout.preferredHeight: -1
         Layout.preferredWidth: -1
+
         implicitWidth: parent.width * 2 / 3
         implicitHeight: parent.height * 1 / 6
+
         anchors.centerIn: parent
 
         spacing: 0

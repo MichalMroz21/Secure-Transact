@@ -190,12 +190,12 @@ class User(QObject):
 
         return messages
 
-    @Slot(int, result=list)
-    def get_project_details(self, project_index):
+    @Slot(int, result=QObject)
+    def get_project(self, project_index):
         if project_index is None or project_index < 0 or project_index >= len(self.projects):
-            return []
+            return None
         else:
-            return [self.projects[project_index].name, len(self.projects[project_index].users)]
+            return self.projects[project_index]
 
     @Slot(int)
     def create_a_new_task(self, project_index):
