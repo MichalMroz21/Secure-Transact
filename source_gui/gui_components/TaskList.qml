@@ -41,19 +41,23 @@ Rectangle {
     function updateTaskModel(project) {
         taskModel.clear();
 
+        console.log(project);
+        console.log(project.name);
+        console.log(project.tasks);
+
         var tasks = project.tasks;
 
         for (let i = 0; i < tasks.length; i++) {
             let task = tasks[i];
 
             taskModel.append({
-                assignees = task.assignees,
-                due_date = task.due_date,
-                priority = task.priority,
-                status = task.status,
-                comments = task.comments,
-                name = task.name,
-                tags = task.tags
+                assignees: task.assignees,
+                due_date: task.due_date,
+                priority: task.priority,
+                status: task.status,
+                comments: task.comments,
+                name: task.name,
+                tags: task.tags
             });
         }
     }
@@ -76,6 +80,32 @@ Rectangle {
     color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
 
     border.color: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
+
+    ColumnLayout{
+        implicitWidth: parent.width / 4
+        implicitHeight: parent.height
+        x: 500
+        MyButton{
+            id: addNewTaskButton
+            text: "Add a new task"
+            onClicked: {
+                stackView.push("../add_task.qml", {projectIndex: taskList.currentIndex});
+            }
+        }
+    }
+    ColumnLayout{
+        implicitWidth: parent.width / 4
+        implicitHeight: parent.height
+        MyButton{
+            buttonWidth: 20
+            buttonHeight: 20
+            id: placeHolderButton
+            text: "⁝"
+            onClicked: {
+                console.log("Here will be an another silly button. Hurray :D")
+            }
+        }
+    }
 
     ListView {
         id: taskListView
@@ -108,7 +138,7 @@ Rectangle {
                     Text {
                         Layout.alignment: Qt.AlignLeft
 
-                        id: projectName
+                        id: taskText
                         text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.name + '</span>'
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
@@ -126,7 +156,7 @@ Rectangle {
 
                     Text {
                         Layout.alignment: Qt.AlignLeft
-                        id: projectName
+                        id: assigneeText
                         text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.assignee.nickname + '</span>'
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
@@ -144,7 +174,7 @@ Rectangle {
 
                     Text {
                         Layout.alignment: Qt.AlignRight
-                        id: usersNumberName
+                        id: due_dateText
                         text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.due_date + '</span>'
                         textFormat: Text.RichText
                     }
@@ -156,7 +186,7 @@ Rectangle {
 
                     Text {
                         Layout.alignment: Qt.AlignRight
-                        id: tasksNumberName
+                        id: tagsText
                         text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.tags[0] + '</span>'
                         textFormat: Text.RichText
                     }
@@ -168,7 +198,7 @@ Rectangle {
 
                     Text {
                         Layout.alignment: Qt.AlignRight
-                        id: tasksNumberName
+                        id: priorityText
                         text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.priority + '</span>'
                         textFormat: Text.RichText
                     }
@@ -180,49 +210,49 @@ Rectangle {
 
                     Text {
                         Layout.alignment: Qt.AlignRight
-                        id: tasksNumberName
+                        id: statusText
                         text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.status + '</span>'
                         textFormat: Text.RichText
                     }
                 }
             }
 
-            Popup {
-                id: popup
-                width: parent.width
-                modal: true
-                focus: true
-                closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-                padding: 0
+            // Popup {
+            //     id: popup
+            //     width: parent.width
+            //     modal: true
+            //     focus: true
+            //     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+            //     padding: 0
 
-                property var projectModel: model
+            //     property var projectModel: model
 
-                background: Rectangle{
-                    color: "transparent"
-                }
+            //     background: Rectangle{
+            //         color: "transparent"
+            //     }
 
-                ColumnLayout {
-                    Repeater {
-                        model: customFunctions.length
+            //     ColumnLayout {
+            //         Repeater {
+            //             model: customFunctions.length
 
-                        Loader {
-                            active: customFunctions[index].isVisible
+            //             Loader {
+            //                 active: customFunctions[index].isVisible
 
-                            sourceComponent: MyButton {
-                                text: customFunctions[index].text
-                                buttonHeight: projectListView.projectHeight
-                                buttonWidth: popup.width
+            //                 sourceComponent: MyButton {
+            //                     text: customFunctions[index].text
+            //                     buttonHeight: projectListView.projectHeight
+            //                     buttonWidth: popup.width
 
-                                onClicked: {
-                                    if (typeof customFunctions[index].action === "function") {
-                                        customFunctions[index].action(popup.projectModel);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            //                     onClicked: {
+            //                         if (typeof customFunctions[index].action === "function") {
+            //                             customFunctions[index].action(popup.projectModel);
+            //                         }
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
         }
     }
 }
