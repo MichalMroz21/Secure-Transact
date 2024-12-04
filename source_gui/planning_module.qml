@@ -30,22 +30,26 @@ Page {
             list_fill_width: false
             Layout.alignment: Qt.AlignHCenter
 
-            customFunctions: [
-                {
-                    text: "Add user to project",
-                    action: function (projectModel) {
-                        stackView.push("add_to_project.qml", {
-                                   currentIndex: projectModel.index,
-                                   onReturn: function(returnedUsers) {
-                                        usersInProject = returnedUsers;
-                                        console.log("Returned users:", returnedUsers);
-                                       user.update_project_users(projectModel.index, returnedUsers);
-                                    }
-                               });
-                    },
-                    isVisible: true
+            userClicked: function(projectModel) {
+                    stackView.push("project_details.qml", {currentIndex: projectModel.index});
                 }
-            ]
+
+            // customFunctions: [
+            //     {
+            //         text: "Add user to project",
+            //         action: function (projectModel) {
+            //             stackView.push("add_to_project.qml", {
+            //                        currentIndex: projectModel.index,
+            //                        onReturn: function(returnedUsers) {
+            //                             usersInProject = returnedUsers;
+            //                             console.log("Returned users:", returnedUsers);
+            //                            user.update_project_users(projectModel.index, returnedUsers);
+            //                         }
+            //                    });
+            //         },
+            //         isVisible: true
+            //     }
+            // ]
         }
 
         MyButton {

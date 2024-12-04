@@ -8,6 +8,7 @@ import "small_gui_components"
 Page {
     id: formPage
     property int maxInputWidth: 300
+    property int projectIndex: 0
 
     background: Rectangle {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
@@ -77,9 +78,9 @@ Page {
 
                 onClicked:{
                     if(addressTextField.downText !== "" && portTextField.downText !== ""){
-                        //user.send_invitation(addressTextField.downText, portTextField.downText);
-                        //user.verify_peer_connection(addressTextField.text, portTextField.text);
-                        //stackView.push("chat_module.qml");
+                        //na razie tylko samo tworzenie zadania, potem uzupelnie o parametry
+                        user.create_a_new_task(formPage.projectIndex);
+                        stackView.pop();
                     }
                 }
             }

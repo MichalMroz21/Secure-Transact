@@ -122,26 +122,6 @@ Page {
                         textColor: settings.light_mode ? colorPalette.accent700 : colorPalette.accent400
                         visibleUpText: false
                     }
-
-                    // TextField {
-                    //     id: inputField
-                    //     width: parent.width - 20
-                    //     height: parent.height - 10
-                    //     anchors.centerIn: parent
-                    //     padding: 5
-                    //     placeholderText: "Type a message..."
-                    //     color: colorPalette.background800
-
-                    //     // When the user presses Enter, append the message to the ListView
-                    //     onAccepted: {
-                    //         if (inputField.text.trim() !== "") {
-                    //             // Append new message to the model
-                    //             user.send_mes(inputField.text);
-                    //             // Clear the input field
-                    //             inputField.text = "";
-                    //         }
-                    //     }
-                    // }
                 }
             }
             }

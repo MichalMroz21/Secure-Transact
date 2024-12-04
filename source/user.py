@@ -17,6 +17,7 @@ import global_constants
 
 from encryption import Encryption
 from project import Project
+from task import Task
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization, hashes
@@ -188,6 +189,18 @@ class User(QObject):
             messages.append(self.decrypt_single_message(message))
 
         return messages
+
+    @Slot(int, result=list)
+    def get_project_details(self, project_index):
+        if project_index is None or project_index < 0 or project_index >= len(self.projects):
+            return []
+        else:
+            return [self.projects[project_index].name, len(self.projects[project_index].users)]
+
+    @Slot(int)
+    def create_a_new_task(self, project_index):
+        self.projects[project_index].tasks.append(Task())
+        print(self.projects[project_index].tasks)
 
     @Slot(str, int)
     def addToGroup(self, host, port):
