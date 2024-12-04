@@ -50,7 +50,6 @@ Page {
             buttonWidth: friendList.width
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom  // Position the button at the bottom of the parent
-            backgroundColor: "green"
             text: "Add to project"
 
             onClicked: {

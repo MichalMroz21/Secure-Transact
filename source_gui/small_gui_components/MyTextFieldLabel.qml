@@ -20,6 +20,9 @@ Item {
     property color textColor: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
     property bool enablePlaceholderWhenTyping: false
     property int borderWidth: 1
+    property alias upTextFontSize: upTextVar.font.pixelSize
+    property alias downTextFontSize: downTextField.font.pixelSize
+    property alias downTextFieldHeight: downTextField.implicitHeight
 
     property int parentWidth
     property int parentHeight
@@ -34,17 +37,17 @@ Item {
         Text {
             id: upTextVar
             text: textField.upText
-            font.pixelSize: fontStyle.paragraph_large
             color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
             visible: textField.visibleUpText
         }
 
         TextField {
             id: downTextField
-            font.pixelSize: fontStyle.paragraph_large
+            //font.pixelSize: fontStyle.paragraph_large
             color: textField.textColor
 
             implicitWidth: parent.width
+            //implicitHeight: tu zmiana wysokosci textfielda
 
             background: Rectangle {
                 color: textField.textFieldColor

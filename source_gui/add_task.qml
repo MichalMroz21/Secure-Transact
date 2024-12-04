@@ -19,7 +19,7 @@ Page {
         spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_md, root.width, root.height, true)
         width: Math.min(parent.width / 3, maxInputWidth)  // Set a maximum width for the form
         height: implicitHeight
-        Layout.preferredHeight: 256
+        //Layout.preferredHeight: 256
 
         Text {
 
@@ -32,17 +32,38 @@ Page {
         // IP Address Input
         MyTextFieldLabel {
             id: addressTextField
-            upText: "IP Address"
+            upText: "Assignee IP Address"
             parentWidth: parent.width
-            parentHeight: 50
+            //parentHeight: 50
         }
 
         // Port Input
         MyTextFieldLabel {
             id: portTextField
-            upText: "Port"
+            upText: "Assignee Port"
             parentWidth: parent.width
-            parentHeight: 50
+            //parentHeight: 50
+        }
+        // Port Input
+        MyTextFieldLabel {
+            id: priorityTextField
+            upText: "Priority"
+            parentWidth: parent.width
+            //parentHeight: 50
+        }
+        // Port Input
+        MyTextFieldLabel {
+            id: dueDateTextField
+            upText: " Due Date"
+            parentWidth: parent.width
+            //parentHeight: 50
+        }
+        // Port Input
+        MyTextFieldLabel {
+            id: tagsTextField
+            upText: "Tags"
+            parentWidth: parent.width
+            //parentHeight: 50
         }
 
         // Buttons Row
@@ -56,20 +77,11 @@ Page {
 
                 onClicked:{
                     if(addressTextField.downText !== "" && portTextField.downText !== ""){
-                        user.send_invitation(addressTextField.downText, portTextField.downText);
+                        //user.send_invitation(addressTextField.downText, portTextField.downText);
                         //user.verify_peer_connection(addressTextField.text, portTextField.text);
-                        stackView.push("chat_module.qml");
+                        //stackView.push("chat_module.qml");
                     }
                 }
-            }
-        }
-    }
-    ColumnLayout{
-        MyButton {
-            text: "Project's details"
-
-            onClicked:{
-                stackView.push("project_details.qml");
             }
         }
     }
