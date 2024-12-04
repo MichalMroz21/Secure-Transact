@@ -28,7 +28,7 @@ Rectangle {
 
     property var customFunctions: new Array(0)
 
-    property var userClicked: function(name, tasks, users, mouseArea, popup) {
+    property var userClicked: function(popupIndex, assigness, due_date, priority, status, comments, name, tags, mouseArea, popup) {
         popup.open();
     }
 
@@ -93,67 +93,96 @@ Rectangle {
             id: taskRectangle
             color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
 
-            MouseArea {
-                onClicked: userClicked(model.name, model.tasks, model.users, mousearea, popup)
-                hoverEnabled: true
-                id: mousearea
+            RowLayout {
+                width: parent.width
+                spacing: 0
 
-                anchors.fill: parent
+                anchors.centerIn: parent
 
-                onEntered: {
-                    parent.color = settings.light_mode ? colorPalette.background100 : colorPalette.background700
-                    mousearea.cursorShape = Qt.PointingHandCursor
-                }
+                ColumnLayout {
+                    Layout.alignment: Qt.AlignLeft
 
-                onExited: {
-                    parent.color = settings.light_mode ? colorPalette.background50 : colorPalette.background800
-                    mousearea.cursorShape = Qt.ArrowCursor
-                }
+                    Layout.minimumWidth: parent.width / 2
+                    Layout.maximumWidth: parent.width / 2
 
-                RowLayout {
-                    width: parent.width
-                    anchors.centerIn: parent
-                    spacing: 0
-
-                    ColumnLayout {
+                    Text {
                         Layout.alignment: Qt.AlignLeft
-                        Layout.minimumWidth: parent.width / 2
-                        Layout.maximumWidth: parent.width / 2
 
-                        Text {
-                            Layout.alignment: Qt.AlignLeft
-                            id: projectName
-                            text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.name + '</span>'
-                            font.pixelSize: fontStyle.getFontSize(root.width, root.height)
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            textFormat: Text.RichText
-                        }
+                        id: projectName
+                        text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.name + '</span>'
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        textFormat: Text.RichText
+
+                        font.pixelSize: fontStyle.getFontSize(root.width, root.height)
                     }
+                }
 
-                    ColumnLayout {
-                        Layout.alignment: Qt.AlignHCenter
-                        Layout.minimumWidth: parent.width / 4
-                        Layout.maximumWidth: parent.width / 4
+                ColumnLayout {
+                    Layout.alignment: Qt.AlignLeft
 
-                        Text {
-                            Layout.alignment: Qt.AlignRight
-                            id: usersNumberName
-                            text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.usersNumber + '</span>'
-                            textFormat: Text.RichText
-                        }
+                    Layout.minimumWidth: parent.width / 2
+                    Layout.maximumWidth: parent.width / 2
+
+                    Text {
+                        Layout.alignment: Qt.AlignLeft
+                        id: projectName
+                        text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.assignee.nickname + '</span>'
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        textFormat: Text.RichText
+
+                        font.pixelSize: fontStyle.getFontSize(root.width, root.height)
                     }
+                }
 
-                    ColumnLayout {
-                        Layout.minimumWidth: parent.width / 4
-                        Layout.maximumWidth: parent.width / 4
+                ColumnLayout {
+                    Layout.alignment: Qt.AlignHCenter
 
-                        Text {
-                            Layout.alignment: Qt.AlignRight
-                            id: tasksNumberName
-                            text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.inProgressTasksNumber + "/" + model.totalTasksNumber + '</span>'
-                            textFormat: Text.RichText
-                        }
+                    Layout.minimumWidth: parent.width / 4
+                    Layout.maximumWidth: parent.width / 4
+
+                    Text {
+                        Layout.alignment: Qt.AlignRight
+                        id: usersNumberName
+                        text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.due_date + '</span>'
+                        textFormat: Text.RichText
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.minimumWidth: parent.width / 4
+                    Layout.maximumWidth: parent.width / 4
+
+                    Text {
+                        Layout.alignment: Qt.AlignRight
+                        id: tasksNumberName
+                        text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.tags[0] + '</span>'
+                        textFormat: Text.RichText
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.minimumWidth: parent.width / 4
+                    Layout.maximumWidth: parent.width / 4
+
+                    Text {
+                        Layout.alignment: Qt.AlignRight
+                        id: tasksNumberName
+                        text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.priority + '</span>'
+                        textFormat: Text.RichText
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.minimumWidth: parent.width / 4
+                    Layout.maximumWidth: parent.width / 4
+
+                    Text {
+                        Layout.alignment: Qt.AlignRight
+                        id: tasksNumberName
+                        text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.status + '</span>'
+                        textFormat: Text.RichText
                     }
                 }
             }

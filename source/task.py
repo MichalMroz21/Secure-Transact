@@ -5,7 +5,7 @@ from PySide6.QtCore import QObject, Signal, Slot, Property
 from enum import Enum
 
 class Task(QObject):
-    assigneesChanged = Signal()
+    assigneeChanged = Signal()
     priorityChanged = Signal()
     statusChanged = Signal()
     commentsChanged = Signal()
@@ -25,10 +25,10 @@ class Task(QObject):
         COMPLETED = 2
         FAILED = 3
 
-    def __init__(self, assignees=None, due_date=datetime.today().isoformat(), priority=TaskPriority.MEDIUM, status=TaskStatus.TO_DO, comments=None, name="", tags=None):
+    def __init__(self, assignee=None, due_date=datetime.today().isoformat(), priority=TaskPriority.MEDIUM, status=TaskStatus.TO_DO, comments=None, name="", tags=None):
         super().__init__()
 
-        self._assignees = [] if assignees is None else assignees #Users list
+        self._assignee = assignee
         self._due_date = due_date
         self._priority = priority
         self._status = status
@@ -36,9 +36,9 @@ class Task(QObject):
         self._name = name
         self._tags = [] if tags is None else tags #string list
 
-    @Property("QVariantList", notify=assigneesChanged)
-    def assignees(self):
-        return self._assignees
+    @Property(QObject, notify=assigneeChanged)
+    def assignee(self):
+        return self._assignee
 
     @Property(str, notify=due_dateChanged)
     def due_date(self):
@@ -64,11 +64,11 @@ class Task(QObject):
     def tags(self):
         return self._tags
 
-    @assignees.setter
-    def assignees(self, new_val):
-        if self._assignees != new_val:
-            self._assignees = new_val
-            self.assigneesChanged.emit()
+    @assignee.setter
+    def assignee(self, new_val):
+        if self._assignee != new_val:
+            self._assignee = new_val
+            self.assigneeChanged.emit()
 
     @due_date.setter
     def due_date(self, new_val):
