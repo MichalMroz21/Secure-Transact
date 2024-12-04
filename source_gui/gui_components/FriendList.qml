@@ -100,7 +100,7 @@ Rectangle {
 
         delegate: Rectangle {
             width: parent.width  // Set width explicitly for user list items
-            height: userHeight
+            height: friendListView.userHeight
             id: userRectangle
             color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
 
@@ -162,7 +162,7 @@ Rectangle {
 
                             sourceComponent: MyButton {
                                 text: customFunctions[index].text
-                                buttonHeight: userHeight
+                                buttonHeight: friendListView.userHeight
                                 buttonWidth: popup.width
 
                                 onClicked: {

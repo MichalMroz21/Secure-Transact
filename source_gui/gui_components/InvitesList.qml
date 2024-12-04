@@ -113,7 +113,7 @@ Item {
 
                 delegate: Rectangle {
                     width: parent.width
-                    height: inviteHeight
+                    height: inviteListView.inviteHeight
                     id: inviteRectangle
                     color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
 
@@ -172,7 +172,7 @@ Item {
 
                                     sourceComponent: MyButton {
                                         text: customFunctions[index].text
-                                        buttonHeight: inviteHeight
+                                        buttonHeight: inviteListView.inviteHeight
                                         buttonWidth: invitePopup.width
 
                                         onClicked: {

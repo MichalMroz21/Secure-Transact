@@ -24,7 +24,7 @@ Item {
     property bool enablePlaceholderWhenTyping: false
     property bool visibleUpText: true
 
-    property int borderWidth: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_xxxx_sm, root.width, root.height, false)
+    property int borderWidth: 1
     property int parentWidth
     property int parentHeight
 

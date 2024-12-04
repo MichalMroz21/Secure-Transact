@@ -88,7 +88,7 @@ Rectangle {
 
         delegate: Rectangle {
             width: parent.width
-            height: projectHeight
+            height: projectListView.projectHeight
             id: projectRectangle
             color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
 
@@ -178,7 +178,7 @@ Rectangle {
 
                             sourceComponent: MyButton {
                                 text: customFunctions[index].text
-                                buttonHeight: projectHeight
+                                buttonHeight: projectListView.projectHeight
                                 buttonWidth: popup.width
 
                                 onClicked: {
