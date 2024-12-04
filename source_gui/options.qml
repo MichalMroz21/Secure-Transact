@@ -6,29 +6,49 @@ import QtQuick.Layouts 6.3
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 
+import "small_gui_components"
+
 Page {
+    id: optionsPage
+
     function updateCheckbox() {
-        autoConnectionCheckbox.checked = settings.auto_connection;
+        autoConnectionCheckbox.isToggled = settings.auto_connection;
+        lightModeCheckbox.isToggled = settings.light_mode;
+    }
+
+    function changeColor() {
+        optionsPage.background.color = settings.light_mode ? colorPalette.background100 : colorPalette.background900
+    }
+
+    background: Rectangle {
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
     Component.onCompleted: {
         updateCheckbox();
-        settings.autoConnectionChanged.connect(updateCheckbox);
+        settings.lightModeChanged.connect(changeColor);
     }
 
     ColumnLayout {
         anchors.centerIn: parent
-        spacing: 20
+        spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_big, root.width, root.height, true)
 
-        CheckBox {
+        MyCheckButton {
             id: autoConnectionCheckbox
-            text: "Automatycznie akceptuj prośby o połączenie się z użytkownikiem"
+            text: "Automatically accept friend invites"
         }
 
-        Button {
-            text: "Zapisz ustawienia"
+        MyCheckButton {
+            id: lightModeCheckbox
+            text: "Turn light mode"
+        }
+
+        MyButton {
+            text: "Save settings"
             onClicked: {
-                settings.auto_connection = autoConnectionCheckbox.checked;
+                settings.auto_connection = autoConnectionCheckbox.isToggled;
+                settings.light_mode = lightModeCheckbox.isToggled;
+                updateCheckbox()
             }
         }
     }

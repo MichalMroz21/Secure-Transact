@@ -3,6 +3,9 @@ import QtQuick.Controls 6.8
 import QtQuick.Layouts 1.15
 
 import "gui_components"
+import "small_gui_components"
+import "app_style"
+
 
 Page {
     id: chatPage
@@ -12,6 +15,10 @@ Page {
     // Create a ListModel to hold the messages
     ListModel {
         id: messageModel
+    }
+
+    background: Rectangle {
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
     Component.onCompleted: {
@@ -41,25 +48,23 @@ Page {
         user.messagesAppend.connect(appendToChat);
     }
 
-    // Rectangle for the main chat container
-    Rectangle {
-        width: parent.width / 1.5
-        height: parent.height / 1.5
-        color: "#f0f0f0"
-        radius: 10
-        anchors.centerIn: parent
 
         RowLayout {
-            anchors.fill: parent
+            width: parent.width / 1.5
+            height: parent.height / 1.5
+            anchors.centerIn: parent
 
-            // Chat Window (left side)
-            Rectangle {
+            ColumnLayout{
+                Layout.preferredWidth: parent.width * 2 / 3
+                Layout.preferredHeight: parent.height
+                // Chat Window (left side)
+                Rectangle {
                 Layout.fillWidth: true  // Make it scale horizontally
                 Layout.fillHeight: true  // Make it scale vertically
-                width: parent.width * 2 / 3  // 2/3 for chat window (2x space)
+                width: parent.width  // 2/3 for chat window (2x space)
                 height: parent.height
-                color: "#f0f0f0"
-                border.color: "#ddd"
+                color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+                border.color: settings.light_mode ? colorPalette.accent700 : colorPalette.accent400
                 radius: 10
 
                 // Scrollable ListView to display messages
@@ -72,6 +77,7 @@ Page {
                     anchors.bottom: inputArea.top
                     anchors.left: parent.left
                     anchors.right: parent.right
+
 
                     // Enable automatic scrolling when new messages are added
                     onContentYChanged: {
@@ -101,54 +107,68 @@ Page {
                     id: inputArea
                     width: parent.width
                     height: 50
-                    color: "#ffffff"
-                    border.color: "#ccc"
+                    color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+                    border.color: settings.light_mode ? colorPalette.accent700 : colorPalette.accent400
                     anchors.bottom: parent.bottom
 
-                    TextField {
+                    MyTextFieldLabel{
                         id: inputField
-                        width: parent.width - 20
-                        height: parent.height - 10
+                        parentWidth: parent.width - 20
+                        parentHeight: parent.height - 10
                         anchors.centerIn: parent
-                        padding: 5
-                        placeholderText: "Type a message..."
-
-                        background: Rectangle {
-                            border.width: 0
-                            border.color: "transparent"
-                        }
-
-                        // When the user presses Enter, append the message to the ListView
-                        onAccepted: {
-                            if (inputField.text.trim() !== "") {
-                                // Append new message to the model
-                                user.send_mes(inputField.text);
-                                // Clear the input field
-                                inputField.text = "";
-                            }
-                        }
+                        placeholder: "Type a message..."
+                        placeholderColor: settings.light_mode ? colorPalette.accent700 : colorPalette.accent400
+                        borderWidth: 0
+                        textColor: settings.light_mode ? colorPalette.accent700 : colorPalette.accent400
+                        visibleUpText: false
                     }
+
+                    // TextField {
+                    //     id: inputField
+                    //     width: parent.width - 20
+                    //     height: parent.height - 10
+                    //     anchors.centerIn: parent
+                    //     padding: 5
+                    //     placeholderText: "Type a message..."
+                    //     color: colorPalette.background800
+
+                    //     // When the user presses Enter, append the message to the ListView
+                    //     onAccepted: {
+                    //         if (inputField.text.trim() !== "") {
+                    //             // Append new message to the model
+                    //             user.send_mes(inputField.text);
+                    //             // Clear the input field
+                    //             inputField.text = "";
+                    //         }
+                    //     }
+                    // }
                 }
             }
+            }
 
-            FriendList{
-                customFunctions: [
-                     {
-                         text: "Add to group",
-                         action: function(model, mouseArea, popup) {
-                             user.addToGroup(model.host, model.port);
+            ColumnLayout{
+                Layout.preferredWidth: parent.width * 1 / 3
+                Layout.preferredHeight: parent.height
+                FriendList{
+
+                    customFunctions: [
+                         {
+                             text: "Add to group",
+                             action: function(model, mouseArea, popup) {
+                                 user.addToGroup(model.host, model.port);
+                             },
+                             isVisible: true
                          },
-                         isVisible: true
-                     },
-                    {
-                        text: "Remove from group",
-                        action: function (model, mouseArea, popup) {
-                            user.removeFromGroup(model.host, model.port);
-                        },
-                        isVisible: true
-                    }
-                ]
+                        {
+                            text: "Remove from group",
+                            action: function (model, mouseArea, popup) {
+                                user.removeFromGroup(model.host, model.port);
+                            },
+                            isVisible: true
+                        }
+                    ]
+                }
             }
         }
-    }
+
 }

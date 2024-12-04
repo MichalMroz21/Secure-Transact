@@ -272,9 +272,9 @@ class User(QObject):
         """
         for invite in self.invites:
             if invite["host"] == host and int(invite["port"]) == int(port):
-                self.verify_peer_connection(host, port)
-                self.invites.remove(invite)
-                self.invitesChanged.emit()
+                if self.verify_peer_connection(host, port):
+                    self.invites.remove(invite)
+                    self.invitesChanged.emit()
                 break
 
     @Slot(str, str)
@@ -293,21 +293,44 @@ class User(QObject):
                 self.invitesChanged.emit()
                 break
 
-    @Slot(str, str)
+    @Slot(str, str, result=bool)
     def verify_peer_connection(self, host, port):
         """
         Verify if given peer is correct.
         :param examined_peer: Peer which connection is tested for
         :return: boolean, str
         """
-        # send request to examined peer
-        response = requests.get("http://{}:{}/establish_a_connection".format(host, port),
-                                json={"host": self.host, "port": self.port, "pk": self.public_key_to_pem(), "nickname": self.nickname})
-        # check if examined peer responded with a correct status code
-        if response.status_code == http.HTTPStatus.OK:
-            # add new peer
-            self.peer(host, int(port), response.json()["pk"], response.json()["nickname"])
-            self.peersChanged.emit()  # notify QML
+        try:
+            # send request to examined peer
+            response = requests.get("http://{}:{}/establish_a_connection".format(host, port),
+                                    json={"host": self.host, "port": self.port, "pk": self.public_key_to_pem(), "nickname": self.nickname})
+            # check if examined peer responded with a correct status code
+            if response.status_code == http.HTTPStatus.OK:
+                # add new peer
+                self.peer(host, int(port), response.json()["pk"], response.json()["nickname"])
+                self.peersChanged.emit()  # notify QML
+                return True
+            return False
+        except Exception as e:
+            print(e)
+            return False
+
+    @Slot(str, "QVariantList")
+    def add_new_project_from_FE(self, name, users):
+        #We need to add ourselves to be in the project's users list because in FE we don't need to add ourselves
+        new_users_list = [self]
+        for user in users:
+            new_users_list.append(user)
+        self.projects.append(Project(name, new_users_list))
+
+    @Slot(int, "QVariantList")
+    def update_project_users(self, index, users):
+        print(self.projects[index].name)
+        print(len(self.projects[index].users))
+        for user in users:
+            if user not in self.projects[index].users:
+                self.projects[index].users.append(user)
+                print(len(self.projects[index].users))
 
     @Slot(str)
     def send_mes(self, message):

@@ -19,3 +19,4 @@ RANDOM_NUMBER_COUNT = 10
 CONNECTION_ATTEMPTS = 3                                     #How many tries could occur until peer is considered active
 RECONNECTION_DELAY = 5                                      #How much time has to be passed until reconnection to inactive peer
 AUTO_CONNECTION_STRING = "auto-connection"
+LIGHT_MODE_STRING = "light-mode"

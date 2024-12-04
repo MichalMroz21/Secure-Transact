@@ -3,103 +3,73 @@ import QtQuick.Controls 6.8
 import QtCharts 6.3
 import QtQuick.Layouts 6.3
 
+import "small_gui_components"
+
 Page {
     id: formPage
     property int maxInputWidth: 300
 
+    background: Rectangle {
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
+    }
+
     ColumnLayout {
         id: formContainer
         anchors.centerIn: parent
-        spacing: 15
+        spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_md, root.width, root.height, true)
         width: Math.min(parent.width / 3, maxInputWidth)  // Set a maximum width for the form
         height: implicitHeight
+        Layout.preferredHeight: 256
 
         Text {
+
             Layout.alignment: Qt.AlignHCenter
             text: "Connect to User"
-            font.pixelSize: 20
-            color: "black"
+            font.pixelSize: fontStyle.getFontSize(root.width, root.height)
+            color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
         }
 
         // IP Address Input
-        TextField {
-            id: ipAddressField
-            placeholderText: "IP Address"
-            font.pixelSize: 16
-            height: 40
-            Layout.fillWidth: true
-            Layout.maximumWidth: maxInputWidth  // Set a maximum width for the input
-            background: Rectangle {
-                color: "#ffffff"
-                border.color: "#ccc"
-                radius: 5
-            }
+        MyTextFieldLabel {
+            id: addressTextField
+            upText: "IP Address"
+            parentWidth: parent.width
+            parentHeight: 50
         }
 
         // Port Input
-        TextField {
-            id: portField
-            placeholderText: "Port"
-            font.pixelSize: 16
-            height: 40
-            Layout.fillWidth: true
-            Layout.maximumWidth: maxInputWidth  // Set a maximum width for the input
-            background: Rectangle {
-                color: "#ffffff"
-                border.color: "#ccc"
-                radius: 5
-            }
+        MyTextFieldLabel {
+            id: portTextField
+            upText: "Port"
+            parentWidth: parent.width
+            parentHeight: 50
         }
 
         // Buttons Row
         RowLayout {
-            spacing: 20
+            spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_big, root.width, root.height, false)
             Layout.alignment: Qt.AlignHCenter
 
             // Accept Button
-            Button {
+            MyButton {
                 text: "Accept"
-                font.pixelSize: 16
-                width: 100
-                height: 40
-                background: Rectangle {
-                    color: "green"
-                    radius: 5
-                }
-                contentItem: Text {
-                    text: "Accept"
-                    color: "white"
-                    font.pixelSize: 16
-                    anchors.centerIn: parent
-                }
+
                 onClicked:{
-                    if(ipAddressField.text !== "" && portField.text !== ""){
-                        user.send_invitation(ipAddressField.text, portField.text);
-                        //user.verify_peer_connection(ipAddressField.text, portField.text);
+                    if(addressTextField.downText !== "" && portTextField.downText !== ""){
+                        user.send_invitation(addressTextField.downText, portTextField.downText);
+                        //user.verify_peer_connection(addressTextField.text, portTextField.text);
                         stackView.push("chat_module.qml");
                     }
                 }
             }
+        }
+    }
+    ColumnLayout{
+        MyButton {
+            text: "Project's details"
 
-            // Cancel Button
-            Button {
-                text: "Cancel"
-                font.pixelSize: 16
-                width: 100
-                height: 40
-                background: Rectangle {
-                    color: "red"
-                    radius: 5
-                }
-                contentItem: Text {
-                    text: "Cancel"
-                    color: "white"
-                    font.pixelSize: 16
-                    anchors.centerIn: parent
-                }
-                onClicked: {
-                    stackView.pop();
-                }
+            onClicked:{
+                stackView.push("project_details.qml");
             }
         }
     }

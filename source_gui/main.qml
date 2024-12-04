@@ -1,7 +1,11 @@
 import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick.Controls.Material
 import QtQuick.Layouts 2.15
 import Qt5Compat.GraphicalEffects
+
+import "gui_components"
+import "app_style"
+import "small_gui_components"
 
 ApplicationWindow {
     width: 600
@@ -10,17 +14,22 @@ ApplicationWindow {
     id: root
     title: qsTr("Secure Transact")
 
-    StackView{
+    ColorPalette { id: colorPalette }
+    FontStyle { id: fontStyle }
+    SpacingObjects { id: spacingObjects }
+
+    background: Rectangle {
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
+    }
+
+    StackView {
        id: stackView
-       initialItem: "user.qml"
+       initialItem: "initial_page.qml"
        anchors.fill: parent
     }
 
-    Component.onCompleted: {
-        stackView.push("chat_module.qml");
-    }
-
     ToolBar {
+        id: menuToolbar
         contentHeight: 40
         z: 1
 
@@ -29,7 +38,8 @@ ApplicationWindow {
         }
 
         ToolButton {
-            text: "☰"
+            id: menuToolbarText
+            text: "<font color=\""+ (settings.light_mode ? colorPalette.primary900 : colorPalette.primary500) + "\">☰</font>"
             font.pixelSize: getDrawerEntrySize(root.width, root.height);
             onClicked: drawer.open();
         }
@@ -50,10 +60,37 @@ ApplicationWindow {
         duration: 450
     }
 
+    InvitesList {
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.rightMargin: menuToolbar.contentHeight * 1.2 + getDrawerEntrySize(root.width, root.height)
+        customFunctions: [
+            {
+                text: "Accept",
+                action: function(host, port, index, model) {
+                    user.accept_invitation(host, port);
+                    //model.remove(index);
+                },
+                isVisible: true
+            },
+            {
+                text: "Reject",
+                action: function(host, port, index, model) {
+                    user.reject_invitation(host, port);
+                    //model.remove(index);
+                },
+                isVisible: true
+            }
+        ]
+    }
+
     Drawer {
         id: drawer
         width: parent.width * 0.15
         height: parent.height
+        background: Rectangle {
+            color: settings.light_mode ? colorPalette.background100 : colorPalette.background800
+        }
 
         ListView {
             id: listView
@@ -107,7 +144,7 @@ ApplicationWindow {
                     Text {
                         anchors.centerIn: parent
                         text: model.text
-                        font.pixelSize: getFontSize(parent.width, parent.height);
+                        font.pixelSize: fontStyle.getFontSize(parent.width, parent.height);
                         opacity: 0
                     }
 
@@ -204,9 +241,5 @@ ApplicationWindow {
 
     function getDrawerEntrySize(width, height){
         return (width + height) * 0.02;
-    }
-
-    function getFontSize(width, height){
-        return (width + height) * 0.1;
     }
 }

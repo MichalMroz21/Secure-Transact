@@ -4,12 +4,18 @@ import QtCharts 6.3
 import QtQuick.Layouts 6.3
 
 import "gui_components"
+import "small_gui_components"
 
 Page {
     property int currentIndex
     property var selectedUsers: new Array(0)
+    property var onReturn
 
-    Rectangle {
+    background: Rectangle {
+        color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
+    }
+
+    ColumnLayout {
         anchors.centerIn: parent
         width: parent.width
         height: parent.height
@@ -18,7 +24,8 @@ Page {
             id: friendList
             anchors.horizontalCenter: parent.horizontalCenter
 
-            list_height: parent.height - addProjectButton.height
+            list_height: parent.height - addUserButton.height
+            list_fill_width: false
             userClicked: function(model, mouseArea, popup) {
                 let index = selectedUsers.findIndex(u => u.host === model.host && u.port === model.port);
 
@@ -37,46 +44,19 @@ Page {
             }
         }
 
-        // Add New User Button
-        Rectangle {
-            id: addProjectButton
-            width: friendList.width
-
+        MyButton {
+            id: addUserButton
+            buttonHeight: 50  // Fixed height for the button
+            buttonWidth: friendList.width
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom  // Position the button at the bottom of the parent
+            text: "Add to project"
 
-            height: 50  // Fixed height for the button
-            color: "green"
-
-            MouseArea {
-                id: addButton
-                anchors.fill: parent
-                onClicked: {
-                    console.log(selectedUsers);
-                    for(let i = 0; i < selectedUsers.length; i++) {
-                        console.log(selectedUsers[i]);
-                        user.projects[currentIndex].add_user(selectedUsers[i]);
-                    }
-                    stackView.pop();
+            onClicked: {
+                if (onReturn) {
+                    onReturn(selectedUsers);
                 }
-                hoverEnabled: true
-
-                onEntered: {
-                    parent.color = "darkgreen";  // Change color on hover
-                }
-                onExited: {
-                    parent.color = "green";
-                }
-
-                Text {
-                    id: addUserButtonText
-                    anchors.centerIn: parent
-                    text: "Add to project"
-                    color: "white"
-                    font.pixelSize: 16
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
+                stackView.pop();
             }
         }
     }

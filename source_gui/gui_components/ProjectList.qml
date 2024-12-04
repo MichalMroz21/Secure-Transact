@@ -2,23 +2,34 @@ import QtQuick 2.15
 import QtQuick.Controls 6.8
 import QtQuick.Layouts 1.15
 
+import "../small_gui_components"
+import "../app_style"
+
 //User (Peer) List Class Blueprint
 Rectangle {
+    ColorPalette { id: colorPalette }
+    FontStyle { id: fontStyle }
+    SpacingObjects { id: spacingObjects }
+
     //Class Properties (override if needed)
-    property string list_color: "#ffffff"
-    property string border_color: "#dddddd"
-    property int border_radius: 10
+    property color list_color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
+
     property int list_width: parent.width / 3
-    property int list_height: parent.height
+    property int list_height: parent.height / 2 * 3
+
+    property int border_radius: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_sm, root.width, root.height, false)
+    property int widthPadding: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_sm, root.width, root.height, false)
+    property int heightPadding: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_sm, root.width, root.height, true)
+
     property bool list_fill_width: true
     property bool list_fill_height: true
 
-    property var customFunctions: new Array(0);
+    property var customFunctions: new Array(0)
+
     property var userClicked: function(name, tasks, users, mouseArea, popup) {
         popup.open();
     }
 
-    // Create a ListModel for the projects
     ListModel {
         id: projectModel
     }
@@ -28,12 +39,22 @@ Rectangle {
 
         var projects = user.projects;
 
-        // Iterate over peers array passed from Python
         for (let i = 0; i < projects.length; i++) {
+            let inProgressTasksNumber = 0;
+
+            for(let j = 0; j < projects[i].tasks.length; j++){
+                if (projects[i].tasks[j].status === 1){
+                    inProgressTasksNumber++;
+                }
+            }
+
             projectModel.append({
                 name: projects[i].name,
-                tasks: projects[i].tasks,
-                users: projects[i].users,
+                //tasks: projects[i].tasks,
+                //users: projects[i].users,
+                usersNumber: projects[i].users.length,
+                totalTasksNumber: projects[i].tasks.length,
+                inProgressTasksNumber: inProgressTasksNumber,
                 index: i
             });
         }
@@ -44,25 +65,32 @@ Rectangle {
         user.projectsChanged.connect(updateProjectModel);
     }
 
-    Layout.fillWidth: list_fill_width  // Make it scale horizontally
-    Layout.fillHeight: list_fill_height  // Make it scale vertically
-    width: list_width
-    height: list_height
-    color: list_color
-    border.color: border_color
-    radius: border_radius
+    Layout.fillWidth: list_fill_width
+    Layout.fillHeight: list_fill_height
 
-    // ListView to display user names and IP addresses
+    implicitWidth: list_width
+    implicitHeight: list_height
+
+    radius: border_radius
+    color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+
+    border.color: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
+
     ListView {
         id: projectListView
-        width: parent.width
-        height: parent.height
+        width: parent.width - widthPadding
+        height: parent.height - heightPadding
         model: projectModel
 
+        anchors.centerIn: parent
+
+        property var projectHeight: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_lg, root.width, root.height, true)
+
         delegate: Rectangle {
-            width: parent.width  // Set width explicitly for user list items
-            height: 40  // Fixed height for each user item
-            id: userRectangle
+            width: parent.width
+            height: projectListView.projectHeight
+            id: projectRectangle
+            color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
 
             MouseArea {
                 anchors.fill: parent
@@ -71,23 +99,59 @@ Rectangle {
                 id: mousearea
 
                 onEntered: {
-                    parent.color = "lightgray"
+                    parent.color = settings.light_mode ? colorPalette.background100 : colorPalette.background700
                     mousearea.cursorShape = Qt.PointingHandCursor
                 }
                 onExited: {
-                    parent.color = "white"
+                    parent.color = settings.light_mode ? colorPalette.background50 : colorPalette.background800
                     mousearea.cursorShape = Qt.ArrowCursor
                 }
 
-                // Use a single Text element to concatenate the name and IP address
-                Text {
-                    anchors.centerIn: parent  // Center the text within the parent
-                    text: '<span style="color: black; ">' + model.name + '</span>'
-                    color: "#000"
-                    font.pixelSize: 12
-                    horizontalAlignment: Text.AlignHCenter  // Center horizontally
-                    verticalAlignment: Text.AlignVCenter  // Center vertically
-                    textFormat: Text.RichText  // Enable HTML formatting
+                RowLayout {
+                    width: parent.width
+                    anchors.centerIn: parent
+                    spacing: 0
+
+                    ColumnLayout {
+                        Layout.alignment: Qt.AlignLeft
+                        Layout.minimumWidth: parent.width / 2
+                        Layout.maximumWidth: parent.width / 2
+
+                        Text {
+                            Layout.alignment: Qt.AlignLeft
+                            id: projectName
+                            text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.name + '</span>'
+                            font.pixelSize: fontStyle.getFontSize(root.width, root.height)
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            textFormat: Text.RichText
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.minimumWidth: parent.width / 4
+                        Layout.maximumWidth: parent.width / 4
+
+                        Text {
+                            Layout.alignment: Qt.AlignRight
+                            id: usersNumberName
+                            text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.usersNumber + '</span>'
+                            textFormat: Text.RichText
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.minimumWidth: parent.width / 4
+                        Layout.maximumWidth: parent.width / 4
+
+                        Text {
+                            Layout.alignment: Qt.AlignRight
+                            id: tasksNumberName
+                            text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.inProgressTasksNumber + "/" + model.totalTasksNumber + '</span>'
+                            textFormat: Text.RichText
+                        }
+                    }
                 }
             }
 
@@ -97,11 +161,13 @@ Rectangle {
                 modal: true
                 focus: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                padding: 0
 
-                property var myname: model.name
-                property var mytasks: model.tasks
-                property var myusers: model.users
-                property var myindex: model.index
+                property var projectModel: model
+
+                background: Rectangle{
+                    color: "transparent"
+                }
 
                 ColumnLayout {
                     Repeater {
@@ -110,13 +176,14 @@ Rectangle {
                         Loader {
                             active: customFunctions[index].isVisible
 
-                            sourceComponent: Button {
-                                height: 40
+                            sourceComponent: MyButton {
                                 text: customFunctions[index].text
+                                buttonHeight: projectListView.projectHeight
+                                buttonWidth: popup.width
 
                                 onClicked: {
-                                    if (typeof customFunctions[index].action === "function"){
-                                        customFunctions[index].action(popup.myname, popup.mytasks, popup.myusers, popup.myindex);
+                                    if (typeof customFunctions[index].action === "function") {
+                                        customFunctions[index].action(popup.projectModel);
                                     }
                                 }
                             }
