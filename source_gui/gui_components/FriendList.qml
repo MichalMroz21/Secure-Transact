@@ -117,7 +117,7 @@ Rectangle {
                     text: '<span style="color: ' + model.activeColor + '; ">' + '▮ ' + ' </span><span style="color: ' + (settings.light_mode ? colorPalette.background600 : colorPalette.primary300) + '; ">' + model.nickname + ' </span>'
                     //<span style="color: gray; "><i>(' + model.host + ":" + model.port + ')</i></span>
                     color: "#000"
-                    font.pixelSize: 12
+                    font.pixelSize: fontStyle.getFontSize(root.width, root.height)
                     horizontalAlignment: Text.AlignHCenter  // Center horizontally
                     verticalAlignment: Text.AlignVCenter  // Center vertically
                     textFormat: Text.RichText  // Enable HTML formatting

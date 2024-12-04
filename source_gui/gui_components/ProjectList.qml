@@ -112,7 +112,7 @@ Rectangle {
                             Layout.alignment: Qt.AlignLeft
                             id: projectName
                             text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.name + '</span>'
-                            font.pixelSize: 12
+                            font.pixelSize: fontStyle.getFontSize(root.width, root.height)
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                             textFormat: Text.RichText

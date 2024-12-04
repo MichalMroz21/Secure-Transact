@@ -25,7 +25,7 @@ Page {
 
             Layout.alignment: Qt.AlignHCenter
             text: "Connect to User"
-            font.pixelSize: 20
+            font.pixelSize: fontStyle.getFontSize(root.width, root.height)
             color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
         }
 
@@ -51,50 +51,15 @@ Page {
             Layout.alignment: Qt.AlignHCenter
 
             // Accept Button
-            Button {
+            MyButton {
                 text: "Accept"
-                font.pixelSize: 16
-                width: 100
-                height: 40
-                background: Rectangle {
-                    color: "green"
-                    radius: 5
-                }
-                contentItem: Text {
-                    text: "Accept"
-                    color: "white"
-                    font.pixelSize: 16
-                    anchors.centerIn: parent
-                }
+
                 onClicked:{
-                    console.log(addressTextField.downText)
-                    console.log(portTextField.downText)
                     if(addressTextField.downText !== "" && portTextField.downText !== ""){
                         user.send_invitation(addressTextField.downText, portTextField.downText);
                         //user.verify_peer_connection(addressTextField.text, portTextField.text);
                         stackView.push("chat_module.qml");
                     }
-                }
-            }
-
-            // Cancel Button
-            Button {
-                text: "Cancel"
-                font.pixelSize: 16
-                width: 100
-                height: 40
-                background: Rectangle {
-                    color: "red"
-                    radius: 5
-                }
-                contentItem: Text {
-                    text: "Cancel"
-                    color: "white"
-                    font.pixelSize: 16
-                    anchors.centerIn: parent
-                }
-                onClicked: {
-                    stackView.pop();
                 }
             }
         }

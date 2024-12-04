@@ -8,6 +8,7 @@ import "app_style"
 
 Page {
     id: formPage
+
     property int maxInputWidth: 300
     property var usersInProject: new Array(0)
     property int index: 0
@@ -19,20 +20,22 @@ Page {
     background: Rectangle {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
+
     width: root.width
     height: root.height
+
     ColumnLayout {
         id: formContainer
-        anchors.centerIn: parent
-        spacing: 15
-        //width: Math.min(parent.width / 3, maxInputWidth)  // Set a maximum width for the form
+        spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_lg, root.width, root.height, true)
         implicitWidth: parent.width / 2
         implicitHeight: parent.height
+
+        anchors.centerIn: parent
 
         Text {
             Layout.alignment: Qt.AlignHCenter
             text: "<font color=\""+ (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) +"\">New project info</font>"
-            font.pixelSize: 20
+            font.pixelSize: fontStyle.getFontSize(root.width, root.height)
             color: "black"
         }
 
@@ -40,88 +43,23 @@ Page {
             Layout.alignment: Qt.AlignHCenter
             id: projectNameField
             upText: "Project name"
-            parentWidth: parent.width - spacingObjects.spacing_x_big
-            //parentHeight: 50
-        }
-
-        RowLayout {
-            Text {
-                id: usersText
-                text: "<font color=\""+ (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) +"\">Users: </font>"
-                font.pixelSize: fontStyle.getFontSize(root.width, root.height)
-                //height: 40
-                Layout.fillWidth: true
-                Layout.maximumWidth: maxInputWidth  // Set a maximum width for the input
-            }
-
-            MyButton {
-                id: addUserButton
-                //buttonHeight: 50  // Fixed height for the button
-                //buttonWidth: 100
-                Layout.alignment: Qt.AlignBottom
-                text: "Add new user"
-
-                onClicked: {
-                    index = user.projects.length
-                    stackView.push("add_to_project.qml", {
-                       currentIndex: index,
-                       onReturn: function(returnedUsers) {
-                            usersInProject = returnedUsers;
-                            console.log("Returned users:", returnedUsers);
-                        }
-                   });
-                }
-            }
-
+            parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
         }
 
         // Buttons Row
         RowLayout {
-            spacing: 20
+            spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_big, root.width, root.height, false)
             Layout.alignment: Qt.AlignHCenter
 
-            // Accept Button
-            Button {
-                text: "Accept"
-                font.pixelSize: 16
-                width: 100
-                height: 40
-                background: Rectangle {
-                    color: "green"
-                    radius: 5
-                }
-                contentItem: Text {
-                    text: "Accept"
-                    color: "white"
-                    font.pixelSize: 16
-                    anchors.centerIn: parent
-                }
-                onClicked:{
+            MyButton {
+                Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
+                text: "Create project"
+
+                onClicked: {
                     if(projectNameField.text !== ""){
                         user.add_new_project_from_FE(projectNameField.downText, usersInProject);
                         stackView.push("chat_module.qml");
                     }
-                }
-            }
-
-            // Cancel Button
-            Button {
-                text: "Cancel"
-                font.pixelSize: 16
-                width: 100
-                height: 40
-                background: Rectangle {
-                    color: "red"
-                    radius: 5
-                }
-                contentItem: Text {
-                    text: "Cancel"
-                    color: "white"
-                    font.pixelSize: 16
-                    anchors.centerIn: parent
-                }
-                onClicked: {
-                    stackView.pop();
                 }
             }
         }

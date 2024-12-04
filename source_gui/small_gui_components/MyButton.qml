@@ -68,6 +68,7 @@ Button {
             }
         }
     }
+
     onWidthChanged: {
         label.font.pixelSize = getFontSize(control.autoScale);
     }

@@ -92,7 +92,7 @@ Item {
 
             Text {
                 text: "<font color=\""+ invitesList.title_color +"\">Friend invites</font>"
-                font.pixelSize: 18
+                font.pixelSize: fontStyle.getFontSize(root.width, root.height)
                 font.bold: true
                 horizontalAlignment: Text.AlignHCenter
                 Layout.alignment: Qt.AlignHCenter ^ Qt.AlignTop
@@ -129,7 +129,7 @@ Item {
                             anchors.centerIn: parent
                             text: "<font color=\""+ (settings.light_mode ? colorPalette.primary700 : colorPalette.primary400) +"\">From: </font><font color=\""+ (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) +"\">" + model.host + ":" + model.port + " </font>"
                             color: "#000"
-                            font.pixelSize: 14
+                            font.pixelSize: fontStyle.getFontSize(root.width, root.height)
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                         }
