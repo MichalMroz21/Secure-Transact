@@ -197,9 +197,8 @@ class User(QObject):
         else:
             return self.projects[project_index]
 
-    @Slot(int, QObject, int, str, str)
-    def create_a_new_task(self, project_index, assignee, priority, dueDate, tags):
-        #__init__(self, assignees=None, due_date=datetime.today().isoformat(), priority=TaskPriority.MEDIUM, status=TaskStatus.TO_DO, comments=None, name="", tags=None)
+    @Slot(int, QObject, str, str, str, str)
+    def create_a_new_task(self, project_index, assignee, name, priority, dueDate, tags):
         self.projects[project_index].tasks.append(Task())
         print(self.projects[project_index].tasks)
 

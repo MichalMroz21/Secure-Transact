@@ -7,9 +7,11 @@ import "gui_components"
 import "small_gui_components"
 
 Page {
+    id: selectUsersPage
     property int currentIndex
     property var selectedUsers: new Array(0)
     property var onReturn
+    property bool selectOnlyOne: false
 
     background: Rectangle {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
@@ -50,11 +52,16 @@ Page {
             buttonWidth: friendList.width
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom  // Position the button at the bottom of the parent
-            text: "Add to project"
+            text: "Continue"
 
             onClicked: {
                 if (onReturn) {
-                    onReturn(selectedUsers);
+                    if (!selectUsersPage.selectOnlyOne) {
+                        onReturn(selectedUsers);
+                    }
+                    else{
+                        onReturn(selectedUsers[0]);
+                    }
                 }
                 stackView.pop();
             }
