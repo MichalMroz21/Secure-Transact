@@ -7,20 +7,24 @@ import "../app_style"
 
 Item {
     id: textField
+
     ColorPalette { id: colorPalette }
     FontStyle { id: fontStyle }
 
     property string upText: ""
-    property bool visibleUpText: true
+
     property alias downText: downTextField.text
     property alias placeholder: downTextField.placeholderText
     property alias placeholderColor: downTextField.placeholderTextColor
+
     property color textFieldColor: "transparent"
     property color borderColor: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
     property color textColor: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
-    property bool enablePlaceholderWhenTyping: false
-    property int borderWidth: 1
 
+    property bool enablePlaceholderWhenTyping: false
+    property bool visibleUpText: true
+
+    property int borderWidth: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_xxxx_sm, root.width, root.height, false)
     property int parentWidth
     property int parentHeight
 
@@ -28,31 +32,32 @@ Item {
     implicitHeight: upTextVar.height + downTextField.height
 
     ColumnLayout {
-        implicitWidth: textField.implicitWidth
         id: layout
+        implicitWidth: textField.implicitWidth
 
         Text {
             id: upTextVar
             text: textField.upText
-            font.pixelSize: fontStyle.paragraph_large
             color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
             visible: textField.visibleUpText
+
+            font.pixelSize: fontStyle.paragraph_large
         }
 
         TextField {
             id: downTextField
-            font.pixelSize: fontStyle.paragraph_large
             color: textField.textColor
-
             implicitWidth: parent.width
+
+            font.pixelSize: fontStyle.paragraph_large
 
             background: Rectangle {
                 color: textField.textFieldColor
+                radius: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_xxx_sm, root.width, root.height, false)
+                width: parent.width
+
                 border.color: textField.borderColor
                 border.width: textField.borderWidth
-                radius: 2
-
-                width: parent.width
             }
         }
     }

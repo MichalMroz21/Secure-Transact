@@ -7,21 +7,22 @@ import "../app_style"
 
 //User (Peer) List Class Blueprint
 Rectangle {
-
     ColorPalette { id: colorPalette }
     FontStyle { id: fontStyle }
     SpacingObjects { id: spacingObjects }
 
     //Class Properties (override if needed)
-    property string list_color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
-    property string border_color: "#dddddd"
-    property int border_radius: 10
+    property color list_color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
+
     property int list_width: parent.width / 3
     property int list_height: parent.height / 2 * 3
+
+    property int border_radius: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_sm, root.width, root.height, false)
+    property int widthPadding: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_sm, root.width, root.height, false)
+    property int heightPadding: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_sm, root.width, root.height, true)
+
     property bool list_fill_width: true
     property bool list_fill_height: true
-    property int widthPadding: 6
-    property int heightPadding: 6
 
     property var customFunctions: new Array(0)
 
@@ -40,11 +41,13 @@ Rectangle {
 
         for (let i = 0; i < projects.length; i++) {
             let inProgressTasksNumber = 0;
+
             for(let j = 0; j < projects[i].tasks.length; j++){
                 if (projects[i].tasks[j].status === 1){
                     inProgressTasksNumber++;
                 }
             }
+
             projectModel.append({
                 name: projects[i].name,
                 //tasks: projects[i].tasks,
@@ -64,22 +67,28 @@ Rectangle {
 
     Layout.fillWidth: list_fill_width
     Layout.fillHeight: list_fill_height
+
     implicitWidth: list_width
     implicitHeight: list_height
-    color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
-    border.color: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
+
     radius: border_radius
+    color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+
+    border.color: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
 
     ListView {
         id: projectListView
         width: parent.width - widthPadding
         height: parent.height - heightPadding
-        anchors.centerIn: parent
         model: projectModel
+
+        anchors.centerIn: parent
+
+        property var projectHeight: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_lg, root.width, root.height, true)
 
         delegate: Rectangle {
             width: parent.width
-            height: 40
+            height: projectHeight
             id: projectRectangle
             color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
 
@@ -143,8 +152,6 @@ Rectangle {
                             textFormat: Text.RichText
                         }
                     }
-
-
                 }
             }
 
@@ -154,14 +161,13 @@ Rectangle {
                 modal: true
                 focus: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                padding: 0
+
+                property var projectModel: model
 
                 background: Rectangle{
                     color: "transparent"
                 }
-
-                property var projectModel: model
-
-                padding: 0
 
                 ColumnLayout {
                     Repeater {
@@ -172,7 +178,7 @@ Rectangle {
 
                             sourceComponent: MyButton {
                                 text: customFunctions[index].text
-                                buttonHeight: 40
+                                buttonHeight: projectHeight
                                 buttonWidth: popup.width
 
                                 onClicked: {
