@@ -1,6 +1,8 @@
 import QtQuick 2.15
 
 QtObject {
+    readonly property int spacing_xxxx_sm: 1
+    readonly property int spacing_xxx_sm: 2
     readonly property int spacing_xx_sm: 4
     readonly property int spacing_x_sm: 8
     readonly property int spacing_sm: 12
@@ -17,6 +19,8 @@ QtObject {
     readonly property int spacing_x_huge: 128
     readonly property int spacing_xx_huge: 160
     readonly property int spacing_xxx_huge: 192
+    readonly property int spacing_xxxx_huge: 384
+    readonly property int spacing_xxxxx_huge: 768
 
     readonly property var base_x: 1280.0
     readonly property var base_y: 720.0

@@ -20,17 +20,21 @@ Button {
     //buttonHeight: 80
 
     //Expressions below are combinations of both settings above
-    property int buttonWidth: root.width * 40/264 + 750/11
+    property int buttonWidth: root.width * 40 / 264 + 750 / 11
     property int buttonHeight: root.height / 15 + 40 / 3
+    property int fontSize: fontStyle.display_h6
 
-    property real radius: 5
+    property real radius: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_sm, root.width, root.height, false)
     property real borderWidth: 0
+
     property color borderColor: "transparent"
     property color backgroundColor: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
-    property string setIcon: ""
     property color textColor: settings.light_mode ? colorPalette.background50 : colorPalette.background800
-    property int fontSize: fontStyle.display_h6
+
+    property string setIcon: ""
+
     property bool autoScale: true
+
     property real textWidthFill: 0.5
     property real textHeightFill: 0.5
 
@@ -48,9 +52,9 @@ Button {
     // }
 
     function getFontSize(autoScale) {
-        if (!autoScale) return fontSize; // Jeśli skalowanie wyłączone, zwracamy domyślny rozmiar.
+        if (!autoScale) return fontSize; // If scaling is disabled, return the default font size.
 
-        let testFontSize = fontStyle.mobile_h6; // Ustawiamy początkowy rozmiar.
+        let testFontSize = fontStyle.mobile_h6; // Set the initial font size.
         let tempText = Qt.createQmlObject(
             'import QtQuick 2.15; Text { visible: false; font.family: "' + label.font.family + '"; text: "' + label.text + '"; }',
             label,
@@ -58,13 +62,13 @@ Button {
         );
 
         while (true) {
-            tempText.font.pixelSize = testFontSize; // Ustawiamy testowy rozmiar czcionki.
+            tempText.font.pixelSize = testFontSize; // Set the test font size.
 
             if (tempText.width <= buttonWidth * control.textWidthFill || tempText.height <= buttonHeight * control.textHeightFill) {
-                testFontSize += 2; // Jeśli mieści się, zwiększamy rozmiar czcionki.
+                testFontSize += 2; // If it fits, increase the font size.
             } else {
-                tempText.destroy(); // Usuwamy dynamicznie stworzony Text.
-                return testFontSize - 2; // Zwracamy ostatni pasujący rozmiar.
+                tempText.destroy(); // Dynamically remove the created Text object.
+                return testFontSize - 2; // Return the last fitting font size.
             }
         }
     }
@@ -72,6 +76,7 @@ Button {
     onWidthChanged: {
         label.font.pixelSize = getFontSize(control.autoScale);
     }
+
     onHeightChanged: {
         label.font.pixelSize = getFontSize(control.autoScale);
     }
@@ -81,10 +86,11 @@ Button {
 
     font.family: fontStyle.getLatoRegular.name
 
-    contentItem:ColumnLayout{
+    contentItem: ColumnLayout {
         z: 2
         height: control.implicitHeight
         width: control.implicitWidth
+
         anchors.horizontalCenter: parent.horizontalCenter
 
         Image {
@@ -99,10 +105,10 @@ Button {
         width: control.implicitWidth
         radius: control.radius
         color: control.backgroundColor
+        visible: false
+
         border.width: control.borderWidth
         border.color: control.borderColor
-
-        visible: false
 
         Behavior on color {
             ColorAnimation {
@@ -136,14 +142,16 @@ Button {
     Rectangle{
         id: mask
         radius: control.radius
-        anchors.fill: parent
         visible: false
+
+        anchors.fill: parent
     }
 
     OpacityMask {
-        anchors.fill: background
         source: background
         maskSource: mask
+
+        anchors.fill: background
     }
 
     MouseArea {
@@ -151,6 +159,7 @@ Button {
         hoverEnabled: true
         acceptedButtons: Qt.NoButton
         cursorShape: Qt.PointingHandCursor
+
         anchors.fill: parent
     }
 
