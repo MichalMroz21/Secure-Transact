@@ -26,6 +26,8 @@ Rectangle {
 
     property var customFunctions: new Array(0);
 
+    property bool includeMyself: false
+
     property var userClicked: function(model, mouseArea, popup) {
         popup.open();
     }
@@ -37,6 +39,18 @@ Rectangle {
 
     function updateUserModel() {
         userModel.clear();
+
+        if(includeMyself) {
+            userModel.append({
+                nickname: user.nickname,
+                host: user.host,
+                port: user.port,
+                active: user.active,
+                isInGroup: true,
+                isSelected: false,
+                activeColor: colorPalette.primary500
+            });
+        }
 
         // Iterate over peers array passed from Python
         for (let i = 0; i < user.peers.length; i++) {

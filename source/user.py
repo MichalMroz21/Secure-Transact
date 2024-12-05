@@ -17,6 +17,7 @@ import global_constants
 
 from encryption import Encryption
 from project import Project
+from task import Task
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization, hashes
@@ -188,6 +189,38 @@ class User(QObject):
             messages.append(self.decrypt_single_message(message))
 
         return messages
+
+    @Slot(int, result=QObject)
+    def get_project(self, project_index):
+        if project_index is None or project_index < 0 or project_index >= len(self.projects):
+            return None
+        else:
+            return self.projects[project_index]
+
+    @Slot(int, QObject, str, str, str, str)
+    def create_a_new_task(self, project_index, assignee, name, priority, due_date, tags):
+        parsed_priority = None
+        try:
+            parsed_priority = int(priority)
+            parsed_priority = parsed_priority if -1 < parsed_priority < global_constants.TASKPRIORITIESMAXVALUE else 1
+        except ValueError:
+            parsed_priority = priority.lower()
+            if parsed_priority == "low":
+                parsed_priority = 0
+            elif parsed_priority == "medium":
+                parsed_priority = 1
+            elif parsed_priority == "high":
+                parsed_priority = 2
+            elif parsed_priority == "urgent":
+                parsed_priority = 3
+            else:
+                parsed_priority = 1
+
+        tags_list = tags.split(", ")
+        date = datetime.datetime.strptime(due_date, "%Y-%m-%d")
+        self.projects[project_index].tasks.append(Task(assignee=assignee, name=name, priority=parsed_priority, due_date=date, tags=tags_list))
+        #self.projects[project_index].tasksChanged.emit()
+        print(self.projects[project_index].tasks)
 
     @Slot(str, int)
     def addToGroup(self, host, port):
@@ -370,8 +403,13 @@ class User(QObject):
         except Exception as e:
             return e
 
-    @Slot(str, str, result=QObject)
-    def find_peer(self, host, port):
+    @Slot(str, str, bool, result=QObject)
+    def find_peer(self, host, port, includeMyself=False):
+        if includeMyself:
+            print("czy tu wszedlem?")
+            print(self.host + ":" + str(self.port))
+            if self.host == host and int(self.port) == int(port):
+                return self
         for peer in self.peers:
             if peer.host == host and int(peer.port) == int(port):
                 return peer

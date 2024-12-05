@@ -20,11 +20,10 @@ Item {
     property color textFieldColor: "transparent"
     property color borderColor: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
     property color textColor: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
-    property bool enablePlaceholderWhenTyping: false
-    property int borderWidth: 1
     property alias upTextFontSize: upTextVar.font.pixelSize
     property alias downTextFontSize: downTextField.font.pixelSize
     property alias downTextFieldHeight: downTextField.implicitHeight
+    signal accepted()
 
     property bool enablePlaceholderWhenTyping: false
     property bool visibleUpText: true
@@ -64,6 +63,9 @@ Item {
 
                 border.color: textField.borderColor
                 border.width: textField.borderWidth
+            }
+            onAccepted:{
+                textField.accepted();
             }
         }
     }

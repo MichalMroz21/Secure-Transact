@@ -26,7 +26,7 @@ Rectangle {
 
     property var customFunctions: new Array(0)
 
-    property var userClicked: function(name, tasks, users, mouseArea, popup) {
+    property var userClicked: function(model, name, usersNumber, totalTasksNumber, inProgressTasksNumber, mouseArea, popup) {
         popup.open();
     }
 
@@ -50,8 +50,6 @@ Rectangle {
 
             projectModel.append({
                 name: projects[i].name,
-                //tasks: projects[i].tasks,
-                //users: projects[i].users,
                 usersNumber: projects[i].users.length,
                 totalTasksNumber: projects[i].tasks.length,
                 inProgressTasksNumber: inProgressTasksNumber,
@@ -94,7 +92,7 @@ Rectangle {
 
             MouseArea {
                 anchors.fill: parent
-                onClicked: userClicked(model.name, model.tasks, model.users, mousearea, popup)
+                onClicked: userClicked(model, model.name, model.usersNumber, model.totalTasksNumber, model.inProgressTasksNumber, mousearea, popup)
                 hoverEnabled: true
                 id: mousearea
 
