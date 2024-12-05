@@ -55,6 +55,7 @@ Rectangle {
         // Iterate over peers array passed from Python
         for (let i = 0; i < user.peers.length; i++) {
             var activeColor = user.peers[i].active > 0 ? colorPalette.primary500 : colorPalette.destructive400
+            var colorString = activeColor.toString();
 
             var isInGroup = false;
             var isSelected = false;
@@ -76,7 +77,7 @@ Rectangle {
                 active: user.peers[i].active,
                 isInGroup: isInGroup,
                 isSelected: isSelected,
-                activeColor: activeColor
+                activeColor: colorString
             });
         }
     }
@@ -137,6 +138,7 @@ Rectangle {
 
                 // Use a single Text element to concatenate the name and IP address
                 Text {
+                    Component.onCompleted: { console.log("Kolor to: " + model.activeColor);}
                     anchors.centerIn: parent
                     font.pixelSize: fontStyle.getFontSize(root.width, root.height)
                     text: '<span style="color: ' + model.activeColor + '; ">' + '▮ ' + ' </span><span style="color: ' + (settings.light_mode ? colorPalette.background600 : colorPalette.primary300) + '; ">' + model.nickname + ' </span>'
