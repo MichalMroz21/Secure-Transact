@@ -23,6 +23,7 @@ Item {
     property alias upTextFontSize: upTextVar.font.pixelSize
     property alias downTextFontSize: downTextField.font.pixelSize
     property alias downTextFieldHeight: downTextField.implicitHeight
+    signal accepted()
 
     property bool enablePlaceholderWhenTyping: false
     property bool visibleUpText: true
@@ -62,6 +63,9 @@ Item {
 
                 border.color: textField.borderColor
                 border.width: textField.borderWidth
+            }
+            onAccepted:{
+                textField.accepted();
             }
         }
     }

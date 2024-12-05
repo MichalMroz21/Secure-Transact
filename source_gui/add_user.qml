@@ -64,13 +64,4 @@ Page {
             }
         }
     }
-    ColumnLayout{
-        MyButton {
-            text: "Project's details"
-
-            onClicked:{
-                stackView.push("project_details.qml");
-            }
-        }
-    }
 }

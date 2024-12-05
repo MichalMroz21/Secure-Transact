@@ -121,6 +121,12 @@ Page {
                         borderWidth: 0
                         textColor: settings.light_mode ? colorPalette.accent700 : colorPalette.accent400
                         visibleUpText: false
+                        onAccepted: {
+                            if (inputField.downText.trim() !== "") {
+                                user.send_mes(inputField.downText);
+                                inputField.downText = "";
+                            }
+                        }
                     }
                 }
             }
