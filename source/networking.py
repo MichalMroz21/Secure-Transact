@@ -37,11 +37,16 @@ class Networking(QObject):
             group = message["group"]
 
             if message:
-                self.user.messages[group].append(message)
-                self.user.messagesAppend.emit(self.user.decrypt_single_message(message))
-                self.buffered_messages.append(message)
+                try:
+                    self.user.messages[group].append(message)
+                    if self.user.group_to_string(self.user.group) == group:
+                        #Emit signal only if the user is currently displaying given chat group
+                        self.user.messagesAppend.emit(self.user.decrypt_single_message(message))
+                    self.buffered_messages.append(message)
 
-                return jsonify({"status": "Message received!"}), HTTPStatus.OK
+                    return jsonify({"status": "Message received!"}), HTTPStatus.OK
+                except KeyError:
+                    return jsonify({"error": "There is no group chat with given key!"}), HTTPStatus.BAD_REQUEST
             else:
                 return jsonify({"error": "Got no message"}), HTTPStatus.BAD_REQUEST
 

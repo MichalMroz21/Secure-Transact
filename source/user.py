@@ -259,8 +259,18 @@ class User(QObject):
         :param public_key: Second's device public key
         :param nickname: Second's device nickname
         """
-        self._peers.append(User(self.encryption, self.settings, host, int(port), True, public_key, nickname))
+        new_user = User(self.encryption, self.settings, host, int(port), True, public_key, nickname)
+        self._peers.append(new_user)
         self.peersChanged.emit() #Notify QML
+
+        temp_group = [new_user]
+        group_str = self.group_to_string(temp_group)
+
+        if group_str not in self.messages:
+            #In case if this person was a peer in the past but was deleted from the peers list
+            self.messages[group_str] = []
+
+        print(self.group)
 
         self.update_encrypted_string(self.public_key, self.random_key)
 
@@ -598,8 +608,8 @@ class User(QObject):
                     if identicalResult:
                         jsonAString = json.dumps(ListOfJSON, sort_keys=True, separators=(',', ':'))
                         base64Signature = self.createSignatureBase64(jsonAString)
-                        requests.post("http://{}:{}/send_message".format(ip(), self.port),
-                          json={"addr": ip(), "port": self.port,
+                        requests.post("http://{}:{}/send_message".format(self.ip(), self.port),
+                          json={"addr": self.ip(), "port": self.port,
                                 "message": "-----BEGIN DIGITAL SIGNATURE-----\n*" + str(drawnVerifier) + "*" + base64Signature + "\n"})
                         for peer in self.peers:
                             requests.post("http://{}:{}/send_message".format(peer.addr, peer.port),
