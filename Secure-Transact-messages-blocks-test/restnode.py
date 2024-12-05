@@ -192,12 +192,17 @@ class Node:
 
     def drawPerson(self):
         keyList = []
+
         for peer in self.peers:
             keyList.append(peer.port)
+
         keyList.append(self.port)
         keyList.sort()  # wazne sortuj liste by taka sama byla
+
         keyRaw = " ".join(str(x) for x in keyList)
+
         self.drawString = keyRaw
+
         numeric_seed = int.from_bytes(hashlib.sha256(keyRaw.encode('utf-8')).digest())  # Konwersja stringa na liczbę
         random.seed(numeric_seed)
         chosen_port = random.choice(keyList)

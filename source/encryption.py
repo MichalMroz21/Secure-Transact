@@ -1,3 +1,4 @@
+import hashlib
 import json
 import base64
 
@@ -142,3 +143,19 @@ class Encryption(QObject):
         except Exception as e:
             print(e)
 
+    def deterministicHash(self, dataString):
+        numeric_seed = int.from_bytes(hashlib.sha256(dataString.encode('utf-8')).digest())
+        return numeric_seed
+
+    def createSignature(self, dataStrng):
+        data = dataStrng.encode('utf-8')
+        signature = self.private_key.sign(
+            data,
+            padding.PKCS1v15(),  # Deterministyczny algorytm podpisu
+            hashes.SHA256()
+        )
+        return signature
+
+    def createSignatureBase64(self, dataStrng):
+        bytesSignature = self.createSignature(dataStrng)
+        return base64.b64encode(bytesSignature).decode('utf-8')

@@ -2,7 +2,6 @@ import sys
 
 from settings import Settings
 from user import User
-from powlib import PowLib
 from networking import Networking
 from encryption import Encryption
 
@@ -16,10 +15,9 @@ if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
 
-    powlib = PowLib()
     encryption = Encryption()
     settings = Settings()
-    user = User(powlib, encryption, settings)
+    user = User(encryption, settings)
     network = Networking(user)
     threads = network.start()
     pk = user.public_key_to_pem()
