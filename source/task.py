@@ -42,7 +42,8 @@ class Task(QObject):
 
     @Property(str, notify=due_dateChanged)
     def due_date(self):
-        return self._due_date
+        date_string = self._due_date.date().isoformat()
+        return date_string
 
     @Property(int, notify=priorityChanged)
     def priority(self):

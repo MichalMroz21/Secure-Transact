@@ -201,8 +201,8 @@ class User(QObject):
     def create_a_new_task(self, project_index, assignee, name, priority, due_date, tags):
         parsed_priority = None
         try:
-            if int(priority):
-                parsed_priority = priority if 0 <= priority < global_constants.TASKPRIORITIESMAXVALUE else 1
+            parsed_priority = int(priority)
+            parsed_priority = parsed_priority if -1 < parsed_priority < global_constants.TASKPRIORITIESMAXVALUE else 1
         except ValueError:
             parsed_priority = priority.lower()
             if parsed_priority == "low":
@@ -217,9 +217,9 @@ class User(QObject):
                 parsed_priority = 1
 
         tags_list = tags.split(", ")
-        date = datetime.datetime.strptime(due_date, "%d.%m.%Y")
+        date = datetime.datetime.strptime(due_date, "%Y-%m-%d")
         self.projects[project_index].tasks.append(Task(assignee=assignee, name=name, priority=parsed_priority, due_date=date, tags=tags_list))
-        self.projects[project_index].tasksChanged.emit()
+        #self.projects[project_index].tasksChanged.emit()
         print(self.projects[project_index].tasks)
 
     @Slot(str, int)
@@ -403,8 +403,13 @@ class User(QObject):
         except Exception as e:
             return e
 
-    @Slot(str, str, result=QObject)
-    def find_peer(self, host, port):
+    @Slot(str, str, bool, result=QObject)
+    def find_peer(self, host, port, includeMyself=False):
+        if includeMyself:
+            print("czy tu wszedlem?")
+            print(self.host + ":" + str(self.port))
+            if self.host == host and int(self.port) == int(port):
+                return self
         for peer in self.peers:
             if peer.host == host and int(peer.port) == int(port):
                 return peer

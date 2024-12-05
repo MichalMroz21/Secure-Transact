@@ -28,12 +28,14 @@ Page {
 
             list_height: parent.height - addUserButton.height
             list_fill_width: false
+            includeMyself: true
             userClicked: function(model, mouseArea, popup) {
                 let index = selectedUsers.findIndex(u => u.host === model.host && u.port === model.port);
 
                 if (index === -1) {
                     model.isSelected = true;
-                    selectedUsers.push(user.find_peer(model.host, model.port));
+                    console.log(model.host + ":" + model.port);
+                    selectedUsers.push(user.find_peer(model.host, model.port, true));
                     console.log(selectedUsers);
                     mouseArea.parent.color = "lightblue";
 
