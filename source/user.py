@@ -224,6 +224,10 @@ class User(QObject):
     def addToGroup(self, host, port):
         for peer in self.peers:
             if peer.host == host and peer.port == port:
+                for member in self.group:
+                    if member == peer:
+                        #Do not add the same member to the group again
+                        return None
                 self.group.append(peer)
 
                 group_str = self.group_to_string(self.group)
@@ -238,9 +242,12 @@ class User(QObject):
     def removeFromGroup(self, host, port):
         for peer in self.peers:
             if peer.host == host and peer.port == port:
-                self.group.remove(peer)
-                self.groupChanged.emit()
-                break
+                for member in self.group:
+                    if member == peer:
+                        #Delete only if the given peer is in the group
+                        self.group.remove(peer)
+                        self.groupChanged.emit()
+                        return None
 
     @Slot(str, int)
     def removeFromPeers(self, host, port):
