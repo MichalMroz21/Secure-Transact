@@ -41,7 +41,7 @@ class User(QObject):
     activeChanged = Signal()
     invitesChanged = Signal()
 
-    def __init__(self, encryption, settings, host=None, port=None, active=True, public_key=None, nickname=None):
+    def __init__(self, encryption, settings, host=None, port=None, active=True, public_key=None, nickname=None, stake=None):
         super().__init__()
         """
         Creates a user
@@ -75,7 +75,7 @@ class User(QObject):
         self._peers = []
         self._active = active
         self._invites = []
-        self.stake = global_constants.INITIAL_CURRENCY
+        self.stake = stake if stake is not None else global_constants.INITIAL_CURRENCY
 
         self._nickname = self.generate_random_string(global_constants.MAX_NICKNAME_LENGTH) if nickname is None else nickname
 
@@ -200,7 +200,7 @@ class User(QObject):
         parsed_priority = None
         try:
             parsed_priority = int(priority)
-            parsed_priority = parsed_priority if -1 < parsed_priority < global_constants.TASKPRIORITIESMAXVALUE else 1
+            parsed_priority = parsed_priority if -1 < parsed_priority < global_constants.TASK_PRIORITIES_MAX_VALUE else 1
         except ValueError:
             parsed_priority = priority.lower()
             if parsed_priority == "low":
@@ -257,16 +257,17 @@ class User(QObject):
                 self.peersChanged.emit()
                 break
 
-    @Slot(str, str, str, str)
-    def peer(self, host, port, public_key, nickname="User"):
+    @Slot(str, str, str, str, int)
+    def peer(self, host, port, public_key, nickname="User", stake=global_constants.INITIAL_CURRENCY):
         """
         Creates peer with second device
         :param host: Second's device IP address
         :param port: Second's device port
         :param public_key: Second's device public key
         :param nickname: Second's device nickname
+        :param stake: Second's device currency
         """
-        new_user = User(self.encryption, self.settings, host, int(port), True, public_key, nickname)
+        new_user = User(self.encryption, self.settings, host, int(port), True, public_key, nickname, stake)
         self._peers.append(new_user)
         self.peersChanged.emit() #Notify QML
 
@@ -284,7 +285,7 @@ class User(QObject):
         for peer in self._peers:
             peer.update_encrypted_string(peer.public_key, self.random_key)
 
-        self.sendEncryptedKeys()
+        self.send_encrypted_keys()
 
     @Slot(str, str)
     def send_invitation(self, host, port):
@@ -302,7 +303,7 @@ class User(QObject):
         try:
             response = requests.post("http://{}:{}/invite_me".format(host, port),
                                     json={"host": self.host, "port": self.port, "pk": self.public_key_to_pem(),
-                                          "nickname": self.nickname})
+                                          "nickname": self.nickname, "stake": self.stake})
             if response.status_code == http.HTTPStatus.OK:
                 #Remember the user which was invited
                 self.invites.append({"host": host, "port": port, "received": False})
@@ -351,11 +352,11 @@ class User(QObject):
         try:
             # send request to examined peer
             response = requests.get("http://{}:{}/establish_a_connection".format(host, port),
-                                    json={"host": self.host, "port": self.port, "pk": self.public_key_to_pem(), "nickname": self.nickname})
+                                    json={"host": self.host, "port": self.port, "pk": self.public_key_to_pem(), "nickname": self.nickname, "stake": self.stake})
             # check if examined peer responded with a correct status code
             if response.status_code == http.HTTPStatus.OK:
                 # add new peer
-                self.peer(host, int(port), response.json()["pk"], response.json()["nickname"])
+                self.peer(host, int(port), response.json()["pk"], response.json()["nickname"], int(response.json()["nickname"]))
                 self.peersChanged.emit()  # notify QML
                 return True
             return False
@@ -379,6 +380,21 @@ class User(QObject):
             if user not in self.projects[index].users:
                 self.projects[index].users.append(user)
                 print(len(self.projects[index].users))
+
+    @Slot(str)
+    def send_block_being_verified(self, messages):
+        parsed_messages = ""
+        messages[:] = [elem for elem in messages if not elem["message"].startswith("-----BEGIN JSON-----")]
+        for message in messages:
+            editedMessage = message["message"].replace("-----BEGIN JSON-----", "").replace("\n", "")
+            ListOfJSON = json.loads(editedMessage)
+            ListWithoutKeys = [d for d in ListOfJSON if not d["message"].startswith("-----BEGIN ENCRYPTED KEY-----")]
+            global currentList
+            currentList = ListWithoutKeys
+            self.sendDigitalSignature(ListWithoutKeys, self)
+            # me.remove_messages_block(host)
+            parsed_messages += "" + "Wyslano JSON" + "\n"
+            print(editedMessage)
 
     @Slot(str)
     def send_mes(self, message):
@@ -584,6 +600,25 @@ class User(QObject):
 
         return decryptedSessionKey
 
+    @Slot(QObject, result=QObject)
+    def draw_verifier(self):
+        person_stake_list = []
+        for peer in self.peers:
+            person_stake_list.append(peer)
+        person_stake_list.append(self)
+        person_stake_list.sort(key=lambda x: x.port)
+        stake_list = [x.stake for x in person_stake_list]
+        keyRaw = " ".join(str(x.port) for x in person_stake_list)
+        self.drawString = keyRaw
+        numeric_seed = int.from_bytes(hashlib.sha256(keyRaw.encode('utf-8')).digest())  # Konwersja stringa na liczbę
+        random.seed(numeric_seed)  # zmiana seeda dla losowania weryfikatora
+        chosen_peer = random.choices(person_stake_list, weights=stake_list, k=1)[0]
+        return chosen_peer
+
+
+
+
+
     def drawVerifier(self):
         personStakeList = []
         for peer in self.peers:
@@ -601,20 +636,39 @@ class User(QObject):
         chosen_port = random.choices(portSingleList, weights=stakeSingleList, k=1)[0]
         return chosen_port
 
-    def sendDigitalSignature(self, ListOfJSON, me):
-        jsonMessages = self.get_messages_block(ip()) # to tylko w sieciach lokalnych działa
+    def send_digital_signature(self):
+        messages_list = list(self.messages[self.group_to_string(self.group)].items())[-global_constants.MESSAGES_IN_BLOCK:]
+        messages_block = dict(messages_list)
+        drawn_verifier = self.draw_verifier()
+        print("Drawn Verifier " + str(drawn_verifier.nickname))
+        if drawn_verifier == self:
+            jsonAString = json.dumps(messages_block, sort_keys=True, separators=(',', ':'))
+            base64Signature = self.encryption.createSignatureBase64(jsonAString)
+            requests.post("http://{}:{}/receive_messages_to_be_verified".format(self.host, self.port),
+                          json={"addr": self.host, "port": self.port,
+                                "message": "-----BEGIN DIGITAL SIGNATURE-----\n*" + str(
+                                    drawn_verifier) + "*" + base64Signature + "\n"})
+            for peer in self.peers:
+                requests.post("http://{}:{}/receive_messages_to_be_verified".format(peer.addr, peer.port),
+                              json={"addr": self.host, "port": self.port,
+                                    "message": "-----BEGIN DIGITAL SIGNATURE-----\n*" + str(
+                                        drawn_verifier) + "*" + base64Signature + "\n"})
+
+
+    def sendDigitalSignature(self, ListOfJSON):
+        jsonMessages = self.get_messages_block(self.ip()) # to tylko w sieciach lokalnych działa
         # time.sleep(5) do sprawdzenia czy sa nowe wiadomosci
         drawnVerifier = self.drawVerifier()
         print("Drawn Verifier " + str(drawnVerifier))
         if drawnVerifier == self.port:
-            me.remove_single_message_JSON(ip())
+            self.remove_single_message_JSON(self.ip())
             for count, jsonSingleMessage in enumerate(jsonMessages):
                 if jsonMessages[count] == ListOfJSON[0]:
                     length = len(ListOfJSON)
                     identicalResult = jsonMessages[count:count+length] == ListOfJSON
                     if identicalResult:
                         jsonAString = json.dumps(ListOfJSON, sort_keys=True, separators=(',', ':'))
-                        base64Signature = self.createSignatureBase64(jsonAString)
+                        base64Signature = self.encryption.createSignatureBase64(jsonAString)
                         requests.post("http://{}:{}/send_message".format(self.ip(), self.port),
                           json={"addr": self.ip(), "port": self.port,
                                 "message": "-----BEGIN DIGITAL SIGNATURE-----\n*" + str(drawnVerifier) + "*" + base64Signature + "\n"})
@@ -637,7 +691,7 @@ class User(QObject):
     #     chosen_port = random.choice(keyList)
     #     return chosen_port
 
-    def sendEncryptedKeys(self):
+    def send_encrypted_keys(self):
         drawn_peer = self.drawPerson()
 
         if self.host == drawn_peer[0] and self.port == drawn_peer[1]:

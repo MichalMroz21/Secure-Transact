@@ -20,4 +20,6 @@ CONNECTION_ATTEMPTS = 3                                     #How many tries coul
 RECONNECTION_DELAY = 5                                      #How much time has to be passed until reconnection to inactive peer
 AUTO_CONNECTION_STRING = "auto-connection"
 LIGHT_MODE_STRING = "light-mode"
-TASKPRIORITIESMAXVALUE = 4
+TASK_PRIORITIES_MAX_VALUE = 4
+MESSAGES_IN_BLOCK = 20
+

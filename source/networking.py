@@ -62,6 +62,11 @@ class Networking(QObject):
             else:
                 return jsonify({"error": "Got no public key"}), HTTPStatus.BAD_REQUEST
 
+        @self.app.rout('/receive_messages_to_be_verified', methods=['POST'])
+        def receive_messages_to_be_verified():
+            print("tutaj trzeba zrobic logike odbierania podpisu")
+            print("bedzie trzeba wziac z guinode.py z funkcji parsed_messages caly blok kodu zwiazny z \"BEGIN DIGITAL SIGNATURE\" ")
+
         @self.app.route('/reject_me', methods=['GET'])
         def reject_me():
             """
@@ -107,10 +112,11 @@ class Networking(QObject):
             port = json_array.get("port")
             pk = json_array.get("pk")
             nickname = json_array.get("nickname")
+            stake = int(json_array.get("stake"))
 
             try:
                 # TODO: coś w stylu get_pk
-                self.user.peer(host, int(port), pk, nickname)
+                self.user.peer(host, int(port), pk, nickname, stake)
                 return jsonify({"status": "Connection established", "pk": self.user.public_key_to_pem(), "nickname": self.user.nickname}), HTTPStatus.OK
             except Exception as e:
                 return jsonify({"error": str(e)}), HTTPStatus.SERVICE_UNAVAILABLE
