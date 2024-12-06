@@ -600,7 +600,7 @@ class User(QObject):
 
         return decryptedSessionKey
 
-    @Slot(QObject, result=QObject)
+    @Slot(result=QObject)
     def draw_verifier(self):
         person_stake_list = []
         for peer in self.peers:
