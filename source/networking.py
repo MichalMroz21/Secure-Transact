@@ -62,10 +62,23 @@ class Networking(QObject):
             else:
                 return jsonify({"error": "Got no public key"}), HTTPStatus.BAD_REQUEST
 
-        @self.app.rout('/receive_messages_to_be_verified', methods=['POST'])
+        @self.app.route('/receive_messages_to_be_verified', methods=['POST'])
         def receive_messages_to_be_verified():
-            print("tutaj trzeba zrobic logike odbierania podpisu")
-            print("bedzie trzeba wziac z guinode.py z funkcji parsed_messages caly blok kodu zwiazny z \"BEGIN DIGITAL SIGNATURE\" ")
+            json_array = request.json
+            self.user.buffer = json_array.get("block")
+            self.user.send_digital_signature()
+            return jsonify({"status": "Messages were successfully saved"}), HTTPStatus.OK
+
+        @self.app.route('/receive_signature', methods=['POST'])
+        def receive_signature():
+            json_array = request.json
+            host = json_array.get("host")
+            port = json_array.get("port")
+            signature = json_array.get("signature")
+            print("Przed dodaniem jest tyle blokow: " + str(len(self.user.chain.blocks)))
+            self.user.create_a_block(host, port, signature)
+            print("Po dodaniu jest tyle blokow: " + str(len(self.user.chain.blocks)))
+            return jsonify({"status": "Signature was successfully used"}), HTTPStatus.OK
 
         @self.app.route('/reject_me', methods=['GET'])
         def reject_me():
@@ -115,9 +128,8 @@ class Networking(QObject):
             stake = int(json_array.get("stake"))
 
             try:
-                # TODO: coś w stylu get_pk
                 self.user.peer(host, int(port), pk, nickname, stake)
-                return jsonify({"status": "Connection established", "pk": self.user.public_key_to_pem(), "nickname": self.user.nickname}), HTTPStatus.OK
+                return jsonify({"status": "Connection established", "pk": self.user.public_key_to_pem(), "nickname": self.user.nickname, "stake": self.user.stake}), HTTPStatus.OK
             except Exception as e:
                 return jsonify({"error": str(e)}), HTTPStatus.SERVICE_UNAVAILABLE
 

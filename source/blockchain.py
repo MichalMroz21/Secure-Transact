@@ -4,7 +4,7 @@ import json
 from PySide6.QtCore import QObject
 
 class Block(QObject):
-    def __init__(self, index, data, digitalEncryption, portVerifier, publicKeyVerifier, lastDigitalEncryption):
+    def __init__(self, index, data, digitalEncryption, hostVerifier, portVerifier, publicKeyVerifier, lastDigitalEncryption):
         """
         Creates new Block object
         :param index: Which block in blockchain it is
@@ -16,6 +16,7 @@ class Block(QObject):
         self.index = index
         self.data = data
         self.digitalEncryption = digitalEncryption
+        self.hostVerifier = hostVerifier
         self.portVerifier = portVerifier
         self.publicKeyVerifier = publicKeyVerifier
         self.lastDigitalEncryption = lastDigitalEncryption
@@ -28,6 +29,7 @@ class Block(QObject):
         return json.dumps({"index": self.index,
                            "data": self.data,
                            "digitalEncryption": self.digitalEncryption,
+                           "hostVerifier": self.hostVerifier,
                            "portVerifier": self.portVerifier,
                            "publicKeyVerifier": self.publicKeyVerifier,
                            "lastDigitalEncryption": self.lastDigitalEncryption})
@@ -50,6 +52,7 @@ class Block(QObject):
         return {"index": self.index,
                 "data": self.data,
                 "digitalEncryption": self.digitalEncryption,
+                "hostVerifier": self.hostVerifier,
                 "portVerifier": self.portVerifier,
                 "publicKeyVerifier": self.publicKeyVerifier,
                 "lastDigitalEncryption": self.lastDigitalEncryption}
@@ -69,11 +72,11 @@ class Blockchain(QObject):
         Sets first block in blockchain
         :return:
         """
-        self.blocks = [Block(0, ["Opening block"], "", 0, "", "")]
+        self.blocks = [Block(0, ["Opening block"], "", "",0, "", "")]
 
-    def add_signature_block(self, data, digitalEncryption, portVerifier, publicKeyVerifier):
+    def add_signature_block(self, data, digitalEncryption, hostVerifier, portVerifier, publicKeyVerifier):
         last = self.blocks[-1]
-        currentBlock = Block(last.index + 1, data, digitalEncryption, portVerifier, publicKeyVerifier, last.digitalEncryption)
+        currentBlock = Block(last.index + 1, data, digitalEncryption, hostVerifier, portVerifier, publicKeyVerifier, last.digitalEncryption)
         self.blocks.append(currentBlock)
 
     def verify(self) -> bool:
@@ -122,7 +125,7 @@ class Blockchain(QObject):
 
         for jblock in jblocks:
             chain.append(Block(jblock["index"], jblock["data"],
-                               jblock["digitalEncryption"], jblock["portVerifier"],
+                               jblock["digitalEncryption"], jblock["hostVerifier"], jblock["portVerifier"],
                                jblock["publicKeyVerifier"], jblock["lastDigitalEncryption"]))
 
         return Blockchain(chain)

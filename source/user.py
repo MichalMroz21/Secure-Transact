@@ -62,6 +62,7 @@ class User(QObject):
         self.chain = Blockchain()    #Copy of blockchain
         self.chain.genesis()                    #Initiating first block of blockchain
         self.staging = []                       #Staging data to add to block
+        self.buffer = []
 
         #Socket stuff
         self._port = self.get_port() if port is None else port
@@ -356,7 +357,7 @@ class User(QObject):
             # check if examined peer responded with a correct status code
             if response.status_code == http.HTTPStatus.OK:
                 # add new peer
-                self.peer(host, int(port), response.json()["pk"], response.json()["nickname"], int(response.json()["nickname"]))
+                self.peer(host, int(port), response.json()["pk"], response.json()["nickname"], int(response.json()["stake"]))
                 self.peersChanged.emit()  # notify QML
                 return True
             return False
@@ -381,20 +382,6 @@ class User(QObject):
                 self.projects[index].users.append(user)
                 print(len(self.projects[index].users))
 
-    @Slot(str)
-    def send_block_being_verified(self, messages):
-        parsed_messages = ""
-        messages[:] = [elem for elem in messages if not elem["message"].startswith("-----BEGIN JSON-----")]
-        for message in messages:
-            editedMessage = message["message"].replace("-----BEGIN JSON-----", "").replace("\n", "")
-            ListOfJSON = json.loads(editedMessage)
-            ListWithoutKeys = [d for d in ListOfJSON if not d["message"].startswith("-----BEGIN ENCRYPTED KEY-----")]
-            global currentList
-            currentList = ListWithoutKeys
-            self.sendDigitalSignature(ListWithoutKeys, self)
-            # me.remove_messages_block(host)
-            parsed_messages += "" + "Wyslano JSON" + "\n"
-            print(editedMessage)
 
     @Slot(str)
     def send_mes(self, message):
@@ -416,12 +403,12 @@ class User(QObject):
                                            "date": date, "group": group})
 
             if response.status_code == HTTPStatus.OK and not appended_message:
-                response = requests.post("http://{}:{}/receive_message".format(self.host, self.port),
-                                         json={"host": self.host, "port": self.port, "message": encrypted_message,
+                self.messages[self.group_to_string(self.group)].append({"host": self.host, "port": self.port, "message": encrypted_message,
                                                "date": date, "group": group})
-
-                if response.status_code == HTTPStatus.OK:
-                    appended_message = True
+                self.messagesAppend.emit(str(self.port) + " (" + date + "): " + message)
+                appended_message = True
+                if len(self.messages[self.group_to_string(self.group)]) % global_constants.MESSAGES_IN_BLOCK == 0:
+                    self.send_block_being_verified()
 
     @Slot(str, str)
     def get_messages_block(self, host):
@@ -600,6 +587,17 @@ class User(QObject):
 
         return decryptedSessionKey
 
+    @Slot(str)
+    def send_block_being_verified(self):
+        messages_list = list(self.messages[self.group_to_string(self.group)])[
+                        -global_constants.MESSAGES_IN_BLOCK:]
+        json_block = json.dumps(messages_list, sort_keys=True, separators=(',', ':'))
+        self.buffer = messages_list
+        self.send_digital_signature()
+        for peer in self.peers:
+            requests.post("http://{}:{}/receive_messages_to_be_verified".format(peer.host, peer.port), json={"host": self.host, "port": self.port,
+                                "block": json_block})
+
     @Slot(result=QObject)
     def draw_verifier(self):
         person_stake_list = []
@@ -617,23 +615,82 @@ class User(QObject):
 
     @Slot()
     def send_digital_signature(self):
-        messages_list = list(self.messages[self.group_to_string(self.group)].items())[-global_constants.MESSAGES_IN_BLOCK:]
-        messages_block = dict(messages_list)
         drawn_verifier = self.draw_verifier()
         print("Drawn Verifier " + str(drawn_verifier.nickname))
         if drawn_verifier == self:
-            jsonAString = json.dumps(messages_block, sort_keys=True, separators=(',', ':'))
-            base64Signature = self.encryption.createSignatureBase64(jsonAString)
-            requests.post("http://{}:{}/receive_messages_to_be_verified".format(self.host, self.port),
-                          json={"addr": self.host, "port": self.port,
-                                "message": "-----BEGIN DIGITAL SIGNATURE-----\n*" + str(
-                                    drawn_verifier) + "*" + base64Signature + "\n"})
+            jsonAString = json.dumps(self.buffer, sort_keys=True, separators=(',', ':'))
+            base64Signature = self.encryption.createSignatureBase64(self, jsonAString)
+            requests.post("http://{}:{}/receive_signature".format(self.host, self.port),
+                          json={"host": self.host, "port": self.port,
+                                "signature": base64Signature})
             for peer in self.peers:
-                requests.post("http://{}:{}/receive_messages_to_be_verified".format(peer.addr, peer.port),
-                              json={"addr": self.host, "port": self.port,
-                                    "message": "-----BEGIN DIGITAL SIGNATURE-----\n*" + str(
-                                        drawn_verifier) + "*" + base64Signature + "\n"})
+                requests.post("http://{}:{}/receive_signature".format(peer.host, peer.port),
+                              json={"host": self.host, "port": self.port,
+                                    "signature": base64Signature})
 
+    @Slot(str, str, str)
+    def create_a_block(self, host, port, signature):
+        # editedMessage = message["message"].replace("-----BEGIN DIGITAL SIGNATURE-----", "").replace("\n", "")
+        # pierwsza_gwiazda = editedMessage.find("*")
+        # druga_gwiazda = editedMessage.find("*", pierwsza_gwiazda + 1)
+        # numerNadawcy = int(editedMessage[pierwsza_gwiazda + 1:druga_gwiazda])
+        # kluczNadawcy = ""
+        # for peer in me.peers:
+        #     if peer.port == numerNadawcy:
+        #         kluczNadawcy = peer.PKString
+        # if me.port == numerNadawcy:
+        #     kluczNadawcy = me.public_key_to_pem()
+        # clearedMessage = editedMessage[druga_gwiazda + 1:].strip()
+        # uniqueSignature = True
+        # for elem in me.chain.blocks:
+        #     if elem.digitalEncryption == clearedMessage:
+        #         uniqueSignature = False
+        # if uniqueSignature:
+        #     czystyKluczNadawcy = kluczNadawcy.replace("-----BEGIN PUBLIC KEY-----", "").replace("\n", "")
+        #     me.chain.add_signature_block(currentList, clearedMessage, numerNadawcy, czystyKluczNadawcy)
+        #     it = me  # debufowanie
+        #     me.remove_messages_block(host)
+        #     global last_message_index
+        #     last_message_index = 0
+        #     global read_from_block
+        #     read_from_block = True
+        #     parsed_messages += editedMessage + "\n"
+        #     print(editedMessage)
+
+        signatory = None
+        if self.host == host and int(self.port) == port:
+            signatory = self
+        if signatory is None:
+            for peer in self.peers:
+                if peer.host == host and int(peer.port) == int(port):
+                    signatory = peer
+                    break
+        uniqueSignature = True
+        for elem in self.chain.blocks:
+            if elem.digitalEncryption == signature:
+                uniqueSignature = False
+        if uniqueSignature:
+            public_key = self.encryption.public_key_to_pem(signatory.public_key)
+            public_key = public_key.replace("-----BEGIN PUBLIC KEY-----", "").replace("\n", "")
+            self.chain.add_signature_block(self.buffer, signature, signatory.host, signatory.port, public_key)
+
+
+
+
+    @Slot(str)
+    def sendBlockBeingVerified(self, messages):
+        parsed_messages = ""
+        messages[:] = [elem for elem in messages if not elem["message"].startswith("-----BEGIN JSON-----")]
+        for message in messages:
+            editedMessage = message["message"].replace("-----BEGIN JSON-----", "").replace("\n", "")
+            ListOfJSON = json.loads(editedMessage)
+            ListWithoutKeys = [d for d in ListOfJSON if not d["message"].startswith("-----BEGIN ENCRYPTED KEY-----")]
+            global currentList
+            currentList = ListWithoutKeys
+            self.sendDigitalSignature(ListWithoutKeys, self)
+            # me.remove_messages_block(host)
+            parsed_messages += "" + "Wyslano JSON" + "\n"
+            print(editedMessage)
 
     def drawVerifier(self):
         personStakeList = []

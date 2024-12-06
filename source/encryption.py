@@ -147,15 +147,15 @@ class Encryption(QObject):
         numeric_seed = int.from_bytes(hashlib.sha256(dataString.encode('utf-8')).digest())
         return numeric_seed
 
-    def createSignature(self, dataStrng):
+    def createSignature(self, user, dataStrng):
         data = dataStrng.encode('utf-8')
-        signature = self.private_key.sign(
+        signature = user.private_key.sign(
             data,
             padding.PKCS1v15(),  # Deterministyczny algorytm podpisu
             hashes.SHA256()
         )
         return signature
 
-    def createSignatureBase64(self, dataStrng):
-        bytesSignature = self.createSignature(dataStrng)
+    def createSignatureBase64(self, user, dataStrng):
+        bytesSignature = self.createSignature(user, dataStrng)
         return base64.b64encode(bytesSignature).decode('utf-8')
