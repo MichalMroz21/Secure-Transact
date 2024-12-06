@@ -615,8 +615,24 @@ class User(QObject):
         chosen_peer = random.choices(person_stake_list, weights=stake_list, k=1)[0]
         return chosen_peer
 
-
-
+    @Slot()
+    def send_digital_signature(self):
+        messages_list = list(self.messages[self.group_to_string(self.group)].items())[-global_constants.MESSAGES_IN_BLOCK:]
+        messages_block = dict(messages_list)
+        drawn_verifier = self.draw_verifier()
+        print("Drawn Verifier " + str(drawn_verifier.nickname))
+        if drawn_verifier == self:
+            jsonAString = json.dumps(messages_block, sort_keys=True, separators=(',', ':'))
+            base64Signature = self.encryption.createSignatureBase64(jsonAString)
+            requests.post("http://{}:{}/receive_messages_to_be_verified".format(self.host, self.port),
+                          json={"addr": self.host, "port": self.port,
+                                "message": "-----BEGIN DIGITAL SIGNATURE-----\n*" + str(
+                                    drawn_verifier) + "*" + base64Signature + "\n"})
+            for peer in self.peers:
+                requests.post("http://{}:{}/receive_messages_to_be_verified".format(peer.addr, peer.port),
+                              json={"addr": self.host, "port": self.port,
+                                    "message": "-----BEGIN DIGITAL SIGNATURE-----\n*" + str(
+                                        drawn_verifier) + "*" + base64Signature + "\n"})
 
 
     def drawVerifier(self):
@@ -635,24 +651,6 @@ class User(QObject):
         random.seed(numeric_seed) #zmiana seeda dla losowania weryfikatora
         chosen_port = random.choices(portSingleList, weights=stakeSingleList, k=1)[0]
         return chosen_port
-
-    def send_digital_signature(self):
-        messages_list = list(self.messages[self.group_to_string(self.group)].items())[-global_constants.MESSAGES_IN_BLOCK:]
-        messages_block = dict(messages_list)
-        drawn_verifier = self.draw_verifier()
-        print("Drawn Verifier " + str(drawn_verifier.nickname))
-        if drawn_verifier == self:
-            jsonAString = json.dumps(messages_block, sort_keys=True, separators=(',', ':'))
-            base64Signature = self.encryption.createSignatureBase64(jsonAString)
-            requests.post("http://{}:{}/receive_messages_to_be_verified".format(self.host, self.port),
-                          json={"addr": self.host, "port": self.port,
-                                "message": "-----BEGIN DIGITAL SIGNATURE-----\n*" + str(
-                                    drawn_verifier) + "*" + base64Signature + "\n"})
-            for peer in self.peers:
-                requests.post("http://{}:{}/receive_messages_to_be_verified".format(peer.addr, peer.port),
-                              json={"addr": self.host, "port": self.port,
-                                    "message": "-----BEGIN DIGITAL SIGNATURE-----\n*" + str(
-                                        drawn_verifier) + "*" + base64Signature + "\n"})
 
 
     def sendDigitalSignature(self, ListOfJSON):
