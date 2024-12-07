@@ -589,19 +589,35 @@ class User(QObject):
 
     @Slot(str)
     def send_block_being_verified(self):
+        """
+        Send to each connected peer
+        :return:
+        """
         messages_list = list(self.messages[self.group_to_string(self.group)])[
                         -global_constants.MESSAGES_IN_BLOCK:]
         json_block = json.dumps(messages_list, sort_keys=True, separators=(',', ':'))
         self.buffer = messages_list
-        self.send_digital_signature()
+        self.send_digital_signature(self.group_to_string(self.group))
+
         for peer in self.peers:
-            requests.post("http://{}:{}/receive_messages_to_be_verified".format(peer.host, peer.port), json={"host": self.host, "port": self.port,
-                                "block": json_block})
+            if peer.active == global_constants.CONNECTION_ATTEMPTS:
+                #This check prevents from sending to the peer that for sure is not connected to the network
+                try:
+                    #Even with a previous check it is not obvious that the peer is connected to the network
+                    requests.post("http://{}:{}/receive_messages_to_be_verified".format(peer.host, peer.port),
+                            json={"host": self.host, "port": self.port, "group" : self.group_to_string(self.group), "block": json_block})
+                except Exception as e:
+                    print(e)
 
     @Slot(result=QObject)
-    def draw_verifier(self):
+    def draw_verifier(self, group):
+        """
+        Draw a person which will verify correctness of data to be included in the block
+        :param group: User[] - List of candidates in PoS
+        :return: User - Candidate who has to verify data to be included in the block
+        """
         person_stake_list = []
-        for peer in self.peers:
+        for peer in group:
             person_stake_list.append(peer)
         person_stake_list.append(self)
         person_stake_list.sort(key=lambda x: x.port)
@@ -613,9 +629,14 @@ class User(QObject):
         chosen_peer = random.choices(person_stake_list, weights=stake_list, k=1)[0]
         return chosen_peer
 
-    @Slot()
-    def send_digital_signature(self):
-        drawn_verifier = self.draw_verifier()
+    @Slot(str)
+    def send_digital_signature(self, group):
+        """
+        :param group: str - Key in user.messages[Key]
+        """
+        print(group)
+        grp = self.string_to_group(group)
+        drawn_verifier = self.draw_verifier(grp)
         print("Drawn Verifier " + str(drawn_verifier.nickname))
         if drawn_verifier == self:
             jsonAString = json.dumps(self.buffer, sort_keys=True, separators=(',', ':'))
@@ -624,9 +645,15 @@ class User(QObject):
                           json={"host": self.host, "port": self.port,
                                 "signature": base64Signature})
             for peer in self.peers:
-                requests.post("http://{}:{}/receive_signature".format(peer.host, peer.port),
-                              json={"host": self.host, "port": self.port,
-                                    "signature": base64Signature})
+                if peer.active == global_constants.CONNECTION_ATTEMPTS:
+                    # This check prevents from sending to the peer that for sure is not connected to the network
+                    try:
+                        # Even with a previous check it is not obvious that the peer is connected to the network
+                        requests.post("http://{}:{}/receive_signature".format(peer.host, peer.port),
+                                  json={"host": self.host, "port": self.port,
+                                        "signature": base64Signature})
+                    except Exception as e:
+                        print(e)
 
     @Slot(str, str, str)
     def create_a_block(self, host, port, signature):

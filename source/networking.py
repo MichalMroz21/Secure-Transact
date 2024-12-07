@@ -66,7 +66,8 @@ class Networking(QObject):
         def receive_messages_to_be_verified():
             json_array = request.json
             self.user.buffer = json_array.get("block")
-            self.user.send_digital_signature()
+            group = json_array.get("group")
+            self.user.send_digital_signature(group)
             return jsonify({"status": "Messages were successfully saved"}), HTTPStatus.OK
 
         @self.app.route('/receive_signature', methods=['POST'])
