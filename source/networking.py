@@ -29,7 +29,10 @@ class Networking(QObject):
 
         @self.app.route("/chain")
         def chain():
-            return self.user.chain.jsonrep()
+            if self.user.buffer is None:
+                return self.user.chain.jsonrep()
+            else:
+                return jsonify({"error": "This peer is currently proceeding adding a new block to its blockchain! Try again later!"}), HTTPStatus.IM_USED
 
         @self.app.route('/receive_message', methods=['POST'])
         def receive_message():

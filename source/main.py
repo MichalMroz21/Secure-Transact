@@ -22,10 +22,6 @@ if __name__ == "__main__":
     threads = network.start()
     pk = user.public_key_to_pem()
 
-
-
-
-
     #Give variables to QML
     engine.rootContext().setContextProperty("user", user)
     engine.rootContext().setContextProperty("pk", pk)

@@ -41,7 +41,7 @@ class User(QObject):
     activeChanged = Signal()
     invitesChanged = Signal()
 
-    def __init__(self, encryption, settings, host=None, port=None, active=True, public_key=None, nickname=None, stake=None):
+    def __init__(self, encryption, settings, host=None, port=None, active=global_constants.CONNECTION_ATTEMPTS, public_key=None, nickname=None, stake=None):
         super().__init__()
         """
         Creates a user
@@ -62,7 +62,7 @@ class User(QObject):
         self.chain = Blockchain()    #Copy of blockchain
         self.chain.genesis()                    #Initiating first block of blockchain
         self.staging = []                       #Staging data to add to block
-        self.buffer = []
+        self.buffer = None
 
         #Socket stuff
         self._port = self.get_port() if port is None else port
@@ -268,7 +268,7 @@ class User(QObject):
         :param nickname: Second's device nickname
         :param stake: Second's device currency
         """
-        new_user = User(self.encryption, self.settings, host, int(port), True, public_key, nickname, stake)
+        new_user = User(self.encryption, self.settings, host, int(port), global_constants.CONNECTION_ATTEMPTS, public_key, nickname, stake)
         self._peers.append(new_user)
         self.peersChanged.emit() #Notify QML
 
@@ -527,7 +527,7 @@ class User(QObject):
 
         return group_string
 
-    def string_to_group(self, string):
+    def string_to_group(self, string, appendSelf=False):
         if not string:
             return None
 
@@ -538,7 +538,10 @@ class User(QObject):
             splitted = peer_str.split(":")
             host = splitted[0]
             port = int(splitted[1])
-
+            if appendSelf:
+                if self.host == host and self.port == port:
+                    group.append(self)
+                    continue
             for peer in self.peers:
                 if peer.host == host and peer.port == port:
                     group.append(peer)
@@ -596,8 +599,6 @@ class User(QObject):
         messages_list = list(self.messages[self.group_to_string(self.group)])[
                         -global_constants.MESSAGES_IN_BLOCK:]
         json_block = json.dumps(messages_list, sort_keys=True, separators=(',', ':'))
-        self.buffer = messages_list
-        self.send_digital_signature(self.group_to_string(self.group))
 
         for peer in self.peers:
             if peer.active == global_constants.CONNECTION_ATTEMPTS:
@@ -608,6 +609,8 @@ class User(QObject):
                             json={"host": self.host, "port": self.port, "group" : self.group_to_string(self.group), "block": json_block})
                 except Exception as e:
                     print(e)
+        self.buffer = messages_list
+        self.send_digital_signature(self.group_to_string(self.group))
 
     @Slot(result=QObject)
     def draw_verifier(self, group):
@@ -619,7 +622,6 @@ class User(QObject):
         person_stake_list = []
         for peer in group:
             person_stake_list.append(peer)
-        person_stake_list.append(self)
         person_stake_list.sort(key=lambda x: x.port)
         stake_list = [x.stake for x in person_stake_list]
         keyRaw = " ".join(str(x.port) for x in person_stake_list)
@@ -635,7 +637,7 @@ class User(QObject):
         :param group: str - Key in user.messages[Key]
         """
         print(group)
-        grp = self.string_to_group(group)
+        grp = self.string_to_group(group, True)
         drawn_verifier = self.draw_verifier(grp)
         print("Drawn Verifier " + str(drawn_verifier.nickname))
         if drawn_verifier == self:
@@ -696,10 +698,12 @@ class User(QObject):
         for elem in self.chain.blocks:
             if elem.digitalEncryption == signature:
                 uniqueSignature = False
+                self.buffer = None
         if uniqueSignature:
             public_key = self.encryption.public_key_to_pem(signatory.public_key)
             public_key = public_key.replace("-----BEGIN PUBLIC KEY-----", "").replace("\n", "")
             self.chain.add_signature_block(self.buffer, signature, signatory.host, signatory.port, public_key)
+            self.buffer = None
 
 
 
@@ -821,8 +825,12 @@ class User(QObject):
 
                     print("Fetching chain from {}".format((peer.host, peer.port)))
 
-                    message = requests.get("http://{}:{}/chain".format(peer.host, peer.port)).text
-                    chain = self.chain.fromjson(message)
+                    if self.buffer is None:
+                        #If there is not an empty buffer then we are in the process of adding a new block so this check prevents this
+                        response = requests.get("http://{}:{}/chain".format(peer.host, peer.port))
+                        message = response.text
+                        if response.status_code == HTTPStatus.OK:
+                            chain = self.chain.fromjson(message)
 
                     peer.active = global_constants.CONNECTION_ATTEMPTS
 
