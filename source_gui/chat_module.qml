@@ -141,14 +141,14 @@ Page {
                          {
                              text: "Add to group",
                              action: function(model, mouseArea, popup) {
-                                 user.addToGroup(model.host, model.port);
+                                 user.add_to_group(model.host, model.port);
                              },
                              isVisible: true
                          },
                         {
                             text: "Remove from group",
                             action: function (model, mouseArea, popup) {
-                                user.removeFromGroup(model.host, model.port);
+                                user.remove_from_group(model.host, model.port);
                             },
                             isVisible: true
                         }

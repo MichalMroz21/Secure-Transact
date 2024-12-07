@@ -29,6 +29,10 @@ class Networking(QObject):
 
         @self.app.route("/chain")
         def chain():
+            """
+            Sends back a blockchain
+            :return: HTTPStatus.OK with str - JSON representation of the chain. | HTTPStatus.IM_USED
+            """
             if self.user.buffer is None:
                 return self.user.chain.jsonrep()
             else:
@@ -36,6 +40,10 @@ class Networking(QObject):
 
         @self.app.route('/receive_message', methods=['POST'])
         def receive_message():
+            """
+            Receives a message from the other peer
+            :return: HTTPStatus.OK | HTTPStatus.BAD_REQUEST
+            """
             message = request.json
             group = message["group"]
 
@@ -55,6 +63,10 @@ class Networking(QObject):
 
         @self.app.route('/receive_pk', methods=['POST'])
         def receive_pk():
+            """
+            Receives a public key from the other peer
+            :return: HTTPStatus.OK | HTTPStatus.BAD_REQUEST
+            """
             public_key = request.json
             editedMessage = public_key["message"].replace(global_constants.ENCRYPTED_KEY_BEGIN, "").replace("\n", "")
 
@@ -67,6 +79,10 @@ class Networking(QObject):
 
         @self.app.route('/receive_messages_to_be_verified', methods=['POST'])
         def receive_messages_to_be_verified():
+            """
+            Receives messages block and saves it to the buffer
+            :return: HTTPStatus.OK
+            """
             json_array = request.json
             self.user.buffer = json_array.get("block")
             group = json_array.get("group")
@@ -75,6 +91,10 @@ class Networking(QObject):
 
         @self.app.route('/receive_signature', methods=['POST'])
         def receive_signature():
+            """
+            Receives a signature to use in the creation of the block
+            :return: HTTPStatus.OK
+            """
             json_array = request.json
             host = json_array.get("host")
             port = json_array.get("port")
@@ -124,6 +144,10 @@ class Networking(QObject):
 
         @self.app.route('/establish_a_connection', methods=['GET'])
         def establish_a_connection():
+            """
+            Etablishes a connection with other peer
+            :return: HTTPStatus.OK | HTTPStatus.SERVICE_UNAVAILABLE
+            """
             json_array = request.json
             host = json_array.get("host")
             port = json_array.get("port")
@@ -137,64 +161,11 @@ class Networking(QObject):
             except Exception as e:
                 return jsonify({"error": str(e)}), HTTPStatus.SERVICE_UNAVAILABLE
 
-        @self.app.route('/get_messages', methods=['GET'])
-        def get_messages():
-            return jsonify(self.buffered_messages)
-
-        @self.app.route('/block_notify', methods=['POST'])
-        def block_notify():
-            hash = self.user.chain.blocks[-1].hash
-            request_hash = request.json.get("hash")
-            self.new_block_creation = (request_hash == hash)
-
-            if request_hash == hash:
-                self.block_time_creation = datetime.datetime.now()
-                return jsonify({"status": "Notified about new block in creation!"}), HTTPStatus.OK
-            else:
-                return jsonify({"error": "Hash mismatch! Aborting creation..."}), HTTPStatus.BAD_REQUEST
-
-        @self.app.route('/get_new_block_notification', methods=['GET'])
-        def get_new_block_notification():
-            return jsonify({
-                "status": "Ok",
-                "new_block_creation": self.new_block_creation,
-                "date": self.block_time_creation.isoformat()
-            }), HTTPStatus.OK
-
-        @self.app.route('/participation_signal', methods=['POST'])
-        def participation_signal():
-            port = request.json.get("port")
-            host = request.json.get("host")
-            hash = request.json.get("hash")
-            date = request.json.get("date")
-            stake = request.json.get("stake")
-
-            time_delta = self.block_time_creation + datetime.timedelta(seconds=global_constants.PARTICIPATION_ADDITIONAL_SECONDS)
-            time_from_request = datetime.datetime.fromisoformat(date)
-
-            if time_delta > time_from_request:
-                self.participants.append({
-                    "port": port,
-                    "host": host,
-                    "hash": hash,
-                    "date": date,
-                    "stake": stake
-                })
-                return jsonify({"status": "Participant added!"}), HTTPStatus.OK
-            else:
-                return jsonify({"error": "It is too late to add participant!"}), HTTPStatus.BAD_REQUEST
-
-        @self.app.route('/get_participants', methods=['GET'])
-        def get_participants():
-            self.participants.sort(key=lambda x: x["stake"])
-            return jsonify({"status": "Ok", "participants": self.participants}), HTTPStatus.OK
-
-        @self.app.route('/send_drawn_indexes', methods=['POST'])
-        def send_drawn_indexes():
-            self.drawn_indexes.append(request.json.get("indexes"))
-            return jsonify({"status": "Ok"}), HTTPStatus.OK
-
     def start(self):
+        """
+        Starts new threads
+        :return: Thread array - Started threads
+        """
         server_thread = threading.Thread(target=self.user.serve_chain, args=(self.app,), daemon=True)
         consensus_thread = threading.Thread(target=self.user.check_consensus, daemon=True)
         miner_thread = threading.Thread(target=self.user.add_blocks, daemon=True)

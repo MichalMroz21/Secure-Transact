@@ -6,17 +6,14 @@ import json
 import os
 import socket
 import time
-from enum import verify
 
 import requests
 import random
 import string
 
-from flask_cors.core import ensure_iterable
 
 import global_constants
 
-from encryption import Encryption
 from project import Project
 from task import Task
 
@@ -88,43 +85,53 @@ class User(QObject):
 
         self.drawString = ""
 
+
     #QVariantMap is for Dictionaries and keys must be strings
     @Property("QVariantMap", notify=groupChanged)
     def messages(self):
         return self._messages
+
 
     #QVariantList is for Lists
     @Property("QVariantList", notify=groupChanged)
     def group(self):
         return self._group
 
+
     @Property("QVariantList", notify=peersChanged)
     def peers(self):
         return self._peers
+
 
     @Property(int, notify=portChanged)
     def port(self):
         return self._port
 
+
     @Property(str, notify=hostChanged)
     def host(self):
         return self._host
+
 
     @Property(str, notify=nicknameChanged)
     def nickname(self):
         return self._nickname
 
+
     @Property("QVariantList", notify=projectsChanged)
     def projects(self):
         return self._projects
+
 
     @Property(bool, notify=activeChanged)
     def active(self):
         return self._active
 
+
     @Property("QVariantList", notify=invitesChanged)
     def invites(self):
         return self._invites
+
 
     @invites.setter
     def invites(self, new_val):
@@ -132,11 +139,13 @@ class User(QObject):
             self._invites = new_val
             self.activeChanged.emit()
 
+
     @active.setter
     def active(self, new_val):
         if self._active != new_val:
             self._active = new_val
             self.activeChanged.emit()
+
 
     @projects.setter
     def projects(self, new_val):
@@ -144,11 +153,13 @@ class User(QObject):
             self._projects = new_val
             self.projectsChanged.emit()
 
+
     @host.setter
     def host(self, new_val):
         if self._host != new_val:
             self._host = new_val
             self.hostChanged.emit()
+
 
     @port.setter
     def port(self, new_val):
@@ -156,21 +167,34 @@ class User(QObject):
             self._port = new_val
             self.portChanged.emit()
 
+
     @nickname.setter
     def nickname(self, new_val):
         if self._nickname != new_val:
             self._nickname = new_val
             self.nicknameChanged.emit(new_val)
 
+
     @Slot(str, str, str)
     def change_peers_nickname(self, host, port, new_val):
+        """
+        Changes peer's nickname to the new value
+        :param host: str - Peer's IP address
+        :param port: str - Peer's port
+        :param new_val: str - Peer's new nickname
+        """
         for peer in self.peers:
             if peer.host == host and peer.port == int(port):
                 peer.nickname = new_val
                 self.peersChanged.emit()
 
+
     @Slot(result=list)
     def prepare_conversation_history(self):
+        """
+        Retrieves messages from the memory
+        :return: str array - List of messages
+        """
         group_str = self.group_to_string(self.group)
 
         if group_str is None:
@@ -189,15 +213,31 @@ class User(QObject):
 
         return messages
 
+
     @Slot(int, result=QObject)
     def get_project(self, project_index):
+        """
+        Gets a project
+        :param project_index: int - Project index
+        :return: Project - Project
+        """
         if project_index is None or project_index < 0 or project_index >= len(self.projects):
             return None
         else:
             return self.projects[project_index]
 
+
     @Slot(int, QObject, str, str, str, str)
     def create_a_new_task(self, project_index, assignee, name, priority, due_date, tags):
+        """
+        Creates a new task in the given project
+        :param project_index: int - Project's index
+        :param assignee: User - User who is assigned to the task
+        :param name: str - Project's name
+        :param priority: TaskPriority - Priority of the task
+        :param due_date: str - Date of the task written in ISO format
+        :param tags: str array - Tags of the task
+        """
         parsed_priority = None
         try:
             parsed_priority = int(priority)
@@ -221,8 +261,14 @@ class User(QObject):
         #self.projects[project_index].tasksChanged.emit()
         print(self.projects[project_index].tasks)
 
+
     @Slot(str, int)
-    def addToGroup(self, host, port):
+    def add_to_group(self, host, port):
+        """
+        Adds given user to the group
+        :param host: User's IP address
+        :param port: User's port number
+        """
         for peer in self.peers:
             if peer.host == host and peer.port == port:
                 for member in self.group:
@@ -239,8 +285,14 @@ class User(QObject):
                 self.groupChanged.emit()
                 break
 
+
     @Slot(str, int)
-    def removeFromGroup(self, host, port):
+    def remove_from_group(self, host, port):
+        """
+        Removes given user from the group
+        :param host: User's IP address
+        :param port: User's port number
+        """
         for peer in self.peers:
             if peer.host == host and peer.port == port:
                 for member in self.group:
@@ -250,13 +302,20 @@ class User(QObject):
                         self.groupChanged.emit()
                         return None
 
+
     @Slot(str, int)
     def removeFromPeers(self, host, port):
+        """
+        Removes given user from the peers group
+        :param host: User's IP address
+        :param port: User's port number
+        """
         for peer in self.peers:
             if peer.host == host and peer.port == port:
                 self.peers.remove(peer)
                 self.peersChanged.emit()
                 break
+
 
     @Slot(str, str, str, str, int)
     def peer(self, host, port, public_key, nickname="User", stake=global_constants.INITIAL_CURRENCY):
@@ -288,6 +347,7 @@ class User(QObject):
 
         self.send_encrypted_keys()
 
+
     @Slot(str, str)
     def send_invitation(self, host, port):
         """
@@ -312,13 +372,13 @@ class User(QObject):
         except Exception as e:
             print(e)
 
+
     @Slot(str, str)
     def accept_invitation(self, host, port):
         """
         Accepts invitation from the user
-        :param host: User's IP address
-        :param port: User's port
-        :return:
+        :param host: str - User's IP address
+        :param port: str - User's port
         """
         for invite in self.invites:
             if invite["host"] == host and int(invite["port"]) == int(port):
@@ -327,13 +387,13 @@ class User(QObject):
                     self.invitesChanged.emit()
                 break
 
+
     @Slot(str, str)
     def reject_invitation(self, host, port):
         """
         Rejects invitation from the user
-        :param host: User's IP address'
-        :param port: User's port'
-        :return:
+        :param host: str - User's IP address'
+        :param port: str - User's port'
         """
         for invite in self.invites:
             if invite["host"] == host and int(invite["port"]) == int(port):
@@ -342,6 +402,7 @@ class User(QObject):
                 self.invites.remove(invite)
                 self.invitesChanged.emit()
                 break
+
 
     @Slot(str, str, result=bool)
     def verify_peer_connection(self, host, port):
@@ -365,30 +426,39 @@ class User(QObject):
             print(e)
             return False
 
+
     @Slot(str, "QVariantList")
     def add_new_project_from_FE(self, name, users):
+        """
+        Creates new project from given users and the person who used this function
+        :param name: str - Project name
+        :param users: User array - Group of users
+        """
         #We need to add ourselves to be in the project's users list because in FE we don't need to add ourselves
         new_users_list = [self]
         for user in users:
             new_users_list.append(user)
         self.projects.append(Project(name, new_users_list))
 
+
     @Slot(int, "QVariantList")
     def update_project_users(self, index, users):
-        print(self.projects[index].name)
-        print(len(self.projects[index].users))
+        """
+
+        :param index: int - Project index
+        :param users: User array - Group of users
+        """
         for user in users:
             if user not in self.projects[index].users:
                 self.projects[index].users.append(user)
-                print(len(self.projects[index].users))
 
 
     @Slot(str)
     def send_mes(self, message):
         """
         Sends message to other device
-        :param host: Sender IP address
-        :param message: message to be sent
+        :param host: str - Sender IP address
+        :param message: str - message to be sent
         """
         appended_message = False
 
@@ -410,22 +480,28 @@ class User(QObject):
                 if len(self.messages[self.group_to_string(self.group)]) % global_constants.MESSAGES_IN_BLOCK == 0:
                     self.send_block_being_verified()
 
+
     @Slot(str, str)
     def get_messages_block(self, host):
         """
-        :param host: sender IP address
-        :return: messages
+        :param host: str - Sender's IP address
+        :return: str - JSON messages
         """
         try:
             return requests.get("http://{}:{}/get_messages".format(host, self.port)).json()
         except Exception as e:
             return e
 
+
     @Slot(str, str, bool, result=QObject)
-    def find_peer(self, host, port, includeMyself=False):
-        if includeMyself:
-            print("czy tu wszedlem?")
-            print(self.host + ":" + str(self.port))
+    def find_peer(self, host, port, include_myself=False):
+        """
+        :param host: str - Searched user IP address
+        :param port: str - Searched user port
+        :param include_myself: bool - Does this function have to look also for the person which uses it
+        :return: User - Searched user
+        """
+        if include_myself:
             if self.host == host and int(self.port) == int(port):
                 return self
         for peer in self.peers:
@@ -433,21 +509,35 @@ class User(QObject):
                 return peer
         return None
 
+
     def decrypt_single_message(self, message_data):
+        """
+        Decrypts a message and formats it
+        :param message_data: str - Message to be decrypted
+        :return: str - Decrypted and formated message
+        """
         decrypted_message = self.encryption.decrypt_data_ecb(message_data["message"], self.useful_key)
         return str(message_data["port"]) + " (" + message_data["date"] + "): " + decrypted_message
+
 
     def generate_random_string(self, n):
         """
         Generates random string
-        :param n: length of string
+        :param n: int - length of string
         :return: str
         """
         return ''.join(random.choices(string.ascii_letters + string.digits, k=n))
 
+
     def update_encrypted_string(self, public_key, random_key):
+        """
+        Updates encrypted string
+        :param public_key: RSA encrypted public key
+        :param random_key: RSA encrypted random key
+        """
         self.EncryptedKBytes = self.encryption.encrypt_with_public_key(public_key, random_key)
         self.EncryptedKString = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
+
 
     def ip(self):
         """
@@ -461,6 +551,7 @@ class User(QObject):
 
         return ipa
 
+
     def get_port(self):
         """
         Gets host machine port value from config file
@@ -468,9 +559,6 @@ class User(QObject):
         """
         return random.randint(global_constants.MIN_PORT_VAL, global_constants.MAX_PORT_VAL)
 
-    def update_encrypted_string(self, public_key, random_key):
-        self.EncryptedKBytes = self.encryption.encrypt_with_public_key(public_key, random_key)
-        self.EncryptedKString = base64.b64encode(self.EncryptedKBytes).decode('utf-8')
 
     def consensus(self):
         """
@@ -484,22 +572,29 @@ class User(QObject):
         for chain in chains:
             self.chain.consensus(chain)
 
+
     def get_public_key(self):
         return self.public_key
 
+
     def public_key_to_pem(self):
+        """
+        Converts public key to PEM format
+        :return: str - Decoded public key to string
+        """
         pem = self.public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         )
-
         return pem.decode('utf-8')  #Conversion to text
+
 
     def add_block(self):
         """
         Adds block to be sent to other device
         """
         self.chain.add_block(self.staging)
+
 
     def add_data(self, data):
         """
@@ -512,7 +607,13 @@ class User(QObject):
         data = self.encryption.encrypt_data_ecb(data, self.useful_key)
         self.staging.append(data)
 
+
     def group_to_string(self, group):
+        """
+        Converts User array to String
+        :param group: User array - Group of users
+        :return: str - String containing a group
+        """
         if not group:
             return None
 
@@ -527,7 +628,14 @@ class User(QObject):
 
         return group_string
 
-    def string_to_group(self, string, appendSelf=False):
+
+    def string_to_group(self, string, append_self=False):
+        """
+        Converts String to User array
+        :param string: str - String with a group
+        :param append_self: bool - Does this function have to include the person who uses it
+        :return: User array - Group read from the string
+        """
         if not string:
             return None
 
@@ -538,7 +646,7 @@ class User(QObject):
             splitted = peer_str.split(":")
             host = splitted[0]
             port = int(splitted[1])
-            if appendSelf:
+            if append_self:
                 if self.host == host and self.port == port:
                     group.append(self)
                     continue
@@ -546,10 +654,14 @@ class User(QObject):
                 if peer.host == host and peer.port == port:
                     group.append(peer)
                     break
-
         return group
 
-    def drawPerson(self):
+
+    def draw_person(self):
+        """
+        Draw a user
+        :return: User - Peer which won the raffle
+        """
         keyList = []
 
         for peer in self._peers:
@@ -568,7 +680,13 @@ class User(QObject):
 
         return chosen_peer
 
+
     def convert_key(self, base64keyEncypted):
+        """
+        Converts Base64 Encrypted Key
+        :param base64keyEncypted: str - Base64 Encrypted Key
+        :return:
+        """
         byteKey = base64.b64decode(base64keyEncypted)
         decryptedSessionKey = self.private_key.decrypt(
             byteKey,
@@ -577,24 +695,13 @@ class User(QObject):
                 algorithm=hashes.SHA256(),
                 label=None
             ))
-
-        #sessionKey = user.random_key
-        #privateKey = user.private_key
-        #pemPrivateKey = encryption.private_key_to_pem(privateKey)
-        #publicKey = user.public_key
-        #pemPublicKey = encryption.public_key_to_pem(publicKey)
-        #encryptedKey = user.EncryptedKBytes
-        #encryptedKString = user.EncryptedKString
-
-        print("Convertions")
-
         return decryptedSessionKey
+
 
     @Slot(str)
     def send_block_being_verified(self):
         """
-        Send to each connected peer
-        :return:
+        Send data to each connected peer which will be included in the block
         """
         messages_list = list(self.messages[self.group_to_string(self.group)])[
                         -global_constants.MESSAGES_IN_BLOCK:]
@@ -611,6 +718,7 @@ class User(QObject):
                     print(e)
         self.buffer = messages_list
         self.send_digital_signature(self.group_to_string(self.group))
+
 
     @Slot(result=QObject)
     def draw_verifier(self, group):
@@ -631,9 +739,11 @@ class User(QObject):
         chosen_peer = random.choices(person_stake_list, weights=stake_list, k=1)[0]
         return chosen_peer
 
+
     @Slot(str)
     def send_digital_signature(self, group):
         """
+        Sends signature to others in the network which can be used to creation of the block
         :param group: str - Key in user.messages[Key]
         """
         print(group)
@@ -642,7 +752,7 @@ class User(QObject):
         print("Drawn Verifier " + str(drawn_verifier.nickname))
         if drawn_verifier == self:
             jsonAString = json.dumps(self.buffer, sort_keys=True, separators=(',', ':'))
-            base64Signature = self.encryption.createSignatureBase64(self, jsonAString)
+            base64Signature = self.encryption.create_signature_base64(self, jsonAString)
             requests.post("http://{}:{}/receive_signature".format(self.host, self.port),
                           json={"host": self.host, "port": self.port,
                                 "signature": base64Signature})
@@ -657,35 +767,15 @@ class User(QObject):
                     except Exception as e:
                         print(e)
 
+
     @Slot(str, str, str)
     def create_a_block(self, host, port, signature):
-        # editedMessage = message["message"].replace("-----BEGIN DIGITAL SIGNATURE-----", "").replace("\n", "")
-        # pierwsza_gwiazda = editedMessage.find("*")
-        # druga_gwiazda = editedMessage.find("*", pierwsza_gwiazda + 1)
-        # numerNadawcy = int(editedMessage[pierwsza_gwiazda + 1:druga_gwiazda])
-        # kluczNadawcy = ""
-        # for peer in me.peers:
-        #     if peer.port == numerNadawcy:
-        #         kluczNadawcy = peer.PKString
-        # if me.port == numerNadawcy:
-        #     kluczNadawcy = me.public_key_to_pem()
-        # clearedMessage = editedMessage[druga_gwiazda + 1:].strip()
-        # uniqueSignature = True
-        # for elem in me.chain.blocks:
-        #     if elem.digitalEncryption == clearedMessage:
-        #         uniqueSignature = False
-        # if uniqueSignature:
-        #     czystyKluczNadawcy = kluczNadawcy.replace("-----BEGIN PUBLIC KEY-----", "").replace("\n", "")
-        #     me.chain.add_signature_block(currentList, clearedMessage, numerNadawcy, czystyKluczNadawcy)
-        #     it = me  # debufowanie
-        #     me.remove_messages_block(host)
-        #     global last_message_index
-        #     last_message_index = 0
-        #     global read_from_block
-        #     read_from_block = True
-        #     parsed_messages += editedMessage + "\n"
-        #     print(editedMessage)
-
+        """
+        Creating a block with a signature of the person which verified data to be included in the block
+        :param host: IP Address of the signatory
+        :param port: Port of the signatory
+        :param signature: Signature which proof authenticity of the block
+        """
         signatory = None
         if self.host == host and int(self.port) == port:
             signatory = self
@@ -706,79 +796,11 @@ class User(QObject):
             self.buffer = None
 
 
-
-
-    @Slot(str)
-    def sendBlockBeingVerified(self, messages):
-        parsed_messages = ""
-        messages[:] = [elem for elem in messages if not elem["message"].startswith("-----BEGIN JSON-----")]
-        for message in messages:
-            editedMessage = message["message"].replace("-----BEGIN JSON-----", "").replace("\n", "")
-            ListOfJSON = json.loads(editedMessage)
-            ListWithoutKeys = [d for d in ListOfJSON if not d["message"].startswith("-----BEGIN ENCRYPTED KEY-----")]
-            global currentList
-            currentList = ListWithoutKeys
-            self.sendDigitalSignature(ListWithoutKeys, self)
-            # me.remove_messages_block(host)
-            parsed_messages += "" + "Wyslano JSON" + "\n"
-            print(editedMessage)
-
-    def drawVerifier(self):
-        personStakeList = []
-        for peer in self.peers:
-            personValue = {"port": peer.port, "stake": peer.stake}
-            personStakeList.append(personValue)
-        myValue = {"port": self.port, "stake": self.stake}
-        personStakeList.append(myValue)
-        personStakeList.sort(key=lambda x: x["port"])  # wazne sortuj liste by taka sama byla
-        portSingleList = [x["port"] for x in personStakeList]
-        stakeSingleList = [x["stake"] for x in personStakeList]
-        keyRaw = " ".join(str(x["port"]) for x in personStakeList)
-        self.drawString = keyRaw
-        numeric_seed = int.from_bytes(hashlib.sha256(keyRaw.encode('utf-8')).digest())  # Konwersja stringa na liczbę
-        random.seed(numeric_seed) #zmiana seeda dla losowania weryfikatora
-        chosen_port = random.choices(portSingleList, weights=stakeSingleList, k=1)[0]
-        return chosen_port
-
-
-    def sendDigitalSignature(self, ListOfJSON):
-        jsonMessages = self.get_messages_block(self.ip()) # to tylko w sieciach lokalnych działa
-        # time.sleep(5) do sprawdzenia czy sa nowe wiadomosci
-        drawnVerifier = self.drawVerifier()
-        print("Drawn Verifier " + str(drawnVerifier))
-        if drawnVerifier == self.port:
-            self.remove_single_message_JSON(self.ip())
-            for count, jsonSingleMessage in enumerate(jsonMessages):
-                if jsonMessages[count] == ListOfJSON[0]:
-                    length = len(ListOfJSON)
-                    identicalResult = jsonMessages[count:count+length] == ListOfJSON
-                    if identicalResult:
-                        jsonAString = json.dumps(ListOfJSON, sort_keys=True, separators=(',', ':'))
-                        base64Signature = self.encryption.createSignatureBase64(jsonAString)
-                        requests.post("http://{}:{}/send_message".format(self.ip(), self.port),
-                          json={"addr": self.ip(), "port": self.port,
-                                "message": "-----BEGIN DIGITAL SIGNATURE-----\n*" + str(drawnVerifier) + "*" + base64Signature + "\n"})
-                        for peer in self.peers:
-                            requests.post("http://{}:{}/send_message".format(peer.addr, peer.port),
-                              json={"addr": peer.addr, "port": peer.port,
-                                    "message": "-----BEGIN DIGITAL SIGNATURE-----\n*" + str(drawnVerifier) + "*" + base64Signature + "\n"})
-
-
-    # def drawPerson(self):
-    #     keyList = []
-    #     for peer in self.peers:
-    #         keyList.append(peer.port)
-    #     keyList.append(self.port)
-    #     keyList.sort()  # wazne sortuj liste by taka sama byla
-    #     keyRaw = " ".join(str(x) for x in keyList)
-    #     self.drawString = keyRaw
-    #     numeric_seed = int.from_bytes(hashlib.sha256(keyRaw.encode('utf-8')).digest())  # Konwersja stringa na liczbę
-    #     random.seed(numeric_seed)
-    #     chosen_port = random.choice(keyList)
-    #     return chosen_port
-
     def send_encrypted_keys(self):
-        drawn_peer = self.drawPerson()
+        """
+        Sends to every peer new encrypted keys
+        """
+        drawn_peer = self.draw_person()
 
         if self.host == drawn_peer[0] and self.port == drawn_peer[1]:
             requests.post("http://{}:{}/receive_pk".format(self.host, self.port),
@@ -789,6 +811,7 @@ class User(QObject):
                 requests.post("http://{}:{}/receive_pk".format(peer.host, peer.port),
                               json={"host": self.host, "port": self.port,
                                     "message": global_constants.ENCRYPTED_KEY_BEGIN + "\n" + peer.EncryptedKString + "\n"})
+
 
     def remove_messages_block(self, host):
         """
@@ -802,6 +825,7 @@ class User(QObject):
 
     def serve_chain(self, app):
         app.run(global_constants.ZERO_ADDRESS, self.port)
+
 
     def check_consensus(self):
         """
@@ -860,6 +884,7 @@ class User(QObject):
                     peer.active -= 1
 
             time.sleep(global_constants.CHECK_DELAY)
+
 
     def add_blocks(self):
         """
