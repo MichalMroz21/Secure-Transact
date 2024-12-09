@@ -38,7 +38,7 @@ Page {
                 textFormat: Text.RichText
                 id: bigText
                 text: "Secure<br><span style='color:" + colorPalette.primary500 + ";'>Transactions<br></span>with <span style='color:" + colorPalette.primary500 + ";'>Blockchain</span><br>Precision."
-                font.pixelSize: fontStyle.getFontSize(root.width, root.height) * 3
+                font.pixelSize: fontStyle.getFontSize(fontStyle.display_large, root.width, root.height)
                 color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 Layout.preferredWidth: parent.width
@@ -49,7 +49,7 @@ Page {
             Text {
                 id: smallerText
                 text: "Experience unparalleled security and\ntransparency with our blockchain-powered\napplication, designed to protect Your\ntransactions with cutting-edge technlology."
-                font.pixelSize: fontStyle.getFontSize(root.width, root.height)
+                font.pixelSize: fontStyle.getFontSize(fontStyle.display_h6, root.width, root.height)
                 color: settings.light_mode ? colorPalette.accent700 : colorPalette.accent500
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 wrapMode: Text.WordWrap
@@ -57,11 +57,11 @@ Page {
             }
 
             MyButton {
-                text: "Enter the App"
+                buttonText: "Enter the App"
 
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
-                onClicked: {
+                onClickedFunction: function () {
                     stackView.push("user.qml")
                 }
             }
@@ -70,14 +70,14 @@ Page {
         ColumnLayout {
             Layout.preferredHeight: parent.height
             Layout.preferredWidth: parent.width / 2
-            Layout.alignment: Qt.AlignCenter // Aligns the entire ColumnLayout to the center
+            Layout.alignment: Qt.AlignCenter
 
             spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, true)
 
             View3D {
                 id: view3D
-                Layout.alignment: Qt.AlignHCenter // Centers the View3D horizontally within the ColumnLayout
-                anchors.fill: parent // Make View3D fill its parent to track size changes dynamically
+                Layout.alignment: Qt.AlignHCenter
+                anchors.fill: parent
                 environment: sceneEnvironment
 
                 SceneEnvironment {
@@ -96,20 +96,18 @@ Page {
                         id: sceneCamera
                         x: 0
                         y: 0
-                        z: 500 // Adjust this as needed to control the camera's distance from the object
+                        z: 500
                     }
 
                     Bitcoin {
                         id: bitcoin
 
-                        // Center dynamically based on scale
-                        x: -scale.x * 0.5 // Adjust this multiplier to fine-tune centering
-                        y: -scale.y * 2 // Adjust this multiplier to fine-tune centering
-                        z: -scale.z * 1 // Adjust for depth if needed
+                        x: -scale.x * 0.5
+                        y: -scale.y * 2
+                        z: -scale.z * 1
 
                         property var scaleFactor: Math.sqrt(Math.min(root.width, root.height)) * 5
 
-                        // Dynamically adjust the scale based on View3D's width and height
                         scale: Qt.vector3d(scaleFactor, scaleFactor, scaleFactor)
                     }
                 }

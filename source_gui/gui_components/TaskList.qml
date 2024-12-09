@@ -16,15 +16,15 @@ Rectangle {
     //Class Properties (override if needed)
     property color list_color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
 
-    property int list_width: parent.width / 3
-    property int list_height: parent.height / 2 * 3
+    property int list_width: parent.width - 2 * spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_huge, root.width, root.height, false)
+    property int list_height: parent.height / 1.3
 
     property int border_radius: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_sm, root.width, root.height, false)
     property int widthPadding: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_sm, root.width, root.height, false)
     property int heightPadding: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_sm, root.width, root.height, true)
 
     property bool list_fill_width: true
-    property bool list_fill_height: true
+    property bool list_fill_height: false
 
     property var customFunctions: new Array(0)
 
@@ -47,17 +47,27 @@ Rectangle {
 
         var tasks = project.tasks;
 
+        taskModel.append({
+            assignee: "Assignee",
+            due_date: "Due Date",
+            priority: "Priority",
+            status: "Status",
+            name: "Name",
+            tags: "Tags",
+            first_element: true
+        });
+
         for (let i = 0; i < tasks.length; i++) {
             let task = tasks[i];
 
             taskModel.append({
-                assignees: task.assignees,
+                assignee: task.assignee,
                 due_date: task.due_date,
                 priority: task.priority,
                 status: task.status,
-                comments: task.comments,
                 name: task.name,
-                tags: task.tags
+                tags: task.tags,
+                first_element: false
             });
         }
     }
@@ -76,183 +86,133 @@ Rectangle {
     implicitWidth: list_width
     implicitHeight: list_height
 
+    anchors.centerIn: parent
+
     radius: border_radius
-    color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+    color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
 
     border.color: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
 
-    ColumnLayout{
-        implicitWidth: parent.width / 4
-        implicitHeight: parent.height
-        x: 500
-        MyButton{
+    Rectangle {
+        id: separatorLine
+
+        height: parent.height / 5
+        width: parent.width
+
+        color: parent.color
+        border.color: parent.border.color
+
+        MyButton {
             id: addNewTaskButton
-            text: "Add a new task"
-            onClicked: {
+            buttonText: "Add new task"
+
+            widthHeightScale: 4
+
+            anchors.right: parent.right
+            anchors.rightMargin: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_xx_big, root.width, root.height, false)
+
+            anchors.verticalCenter: separatorLine.verticalCenter
+
+            onClickedFunction: function () {
                 stackView.push("../add_task.qml", {projectIndex: taskList.currentIndex});
             }
         }
-    }
-    ColumnLayout{
-        implicitWidth: parent.width / 4
-        implicitHeight: parent.height
-        MyButton{
-            buttonWidth: 20
-            buttonHeight: 20
-            id: placeHolderButton
-            text: "⁝"
-            onClicked: {
-                console.log("Here will be an another silly button. Hurray :D")
-            }
-        }
+
+        z: 2 //yes, to be able to click
     }
 
     ListView {
         id: taskListView
-        width: parent.width - widthPadding
-        height: parent.height - heightPadding
+        width: parent.width
+        height: parent.height
         model: taskModel
 
-        anchors.centerIn: parent
+        //HAS TO BE CONSTANT HERE
+        property var taskHeight: spacingObjects.spacing_x_lg
 
-        property var taskHeight: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_lg, root.width, root.height, true)
+        anchors.top: separatorLine.bottom
 
         delegate: Rectangle {
-            width: parent.width
+            width: taskListView.width - taskList.border.width * 2
             height: taskListView.taskHeight
             id: taskRectangle
-            color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+            color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
 
-            RowLayout {
-                width: parent.width
-                spacing: 0
+            anchors.horizontalCenter: parent.horizontalCenter
 
-                anchors.centerIn: parent
-
-                ColumnLayout {
-                    Layout.alignment: Qt.AlignLeft
-
-                    Layout.minimumWidth: parent.width / 2
-                    Layout.maximumWidth: parent.width / 2
-
-                    Text {
-                        Layout.alignment: Qt.AlignLeft
-
-                        id: taskText
-                        text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.name + '</span>'
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        textFormat: Text.RichText
-
-                        font.pixelSize: fontStyle.getFontSize(root.width, root.height)
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.alignment: Qt.AlignLeft
-
-                    Layout.minimumWidth: parent.width / 2
-                    Layout.maximumWidth: parent.width / 2
-
-                    Text {
-                        Layout.alignment: Qt.AlignLeft
-                        id: assigneeText
-                        text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.assignee.nickname + '</span>'
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        textFormat: Text.RichText
-
-                        font.pixelSize: fontStyle.getFontSize(root.width, root.height)
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.alignment: Qt.AlignHCenter
-
-                    Layout.minimumWidth: parent.width / 4
-                    Layout.maximumWidth: parent.width / 4
-
-                    Text {
-                        Layout.alignment: Qt.AlignRight
-                        id: due_dateText
-                        text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.due_date + '</span>'
-                        textFormat: Text.RichText
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.minimumWidth: parent.width / 4
-                    Layout.maximumWidth: parent.width / 4
-
-                    Text {
-                        Layout.alignment: Qt.AlignRight
-                        id: tagsText
-                        text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.tags[0] + '</span>'
-                        textFormat: Text.RichText
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.minimumWidth: parent.width / 4
-                    Layout.maximumWidth: parent.width / 4
-
-                    Text {
-                        Layout.alignment: Qt.AlignRight
-                        id: priorityText
-                        text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.priority + '</span>'
-                        textFormat: Text.RichText
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.minimumWidth: parent.width / 4
-                    Layout.maximumWidth: parent.width / 4
-
-                    Text {
-                        Layout.alignment: Qt.AlignRight
-                        id: statusText
-                        text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.status + '</span>'
-                        textFormat: Text.RichText
-                    }
-                }
+            CustomBorder {
+                commonBorder: false
+                lBorderwidth: taskList.border.width
+                rBorderwidth: taskList.border.width
+                tBorderwidth: model.first_element ? 0 : task.border.width
+                bBorderwidth: taskList.border.width
+                borderColor: taskList.border.color
             }
 
-            // Popup {
-            //     id: popup
-            //     width: parent.width
-            //     modal: true
-            //     focus: true
-            //     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-            //     padding: 0
+            RowLayout {
+                anchors.horizontalCenter: parent.horizontalCenter
+                height: taskListView.taskHeight
+                width: parent.width * 0.9
+                spacing: 0
 
-            //     property var projectModel: model
+                TaskElementInfo {
+                    rect_width: parent.width / 6
+                    rect_height: parent.height
+                    img_source: "../../assets/project.png"
+                    txt_color: (settings.light_mode ? colorPalette.primary600 : colorPalette.primary700)
+                    txt: model.name
+                    displayImg: model.first_element
+                }
 
-            //     background: Rectangle{
-            //         color: "transparent"
-            //     }
+                TaskElementInfo {
+                    rect_width: parent.width / 6
+                    rect_height: parent.height
+                    img_source: "../../assets/user2.png"
+                    txt_color: (settings.light_mode ? colorPalette.primary600 : colorPalette.primary700)
+                    txt: model.first_element ? model.assignee : model.assignee.host + ":" + model.assignee.port
+                    displayImg: model.first_element
+                }
 
-            //     ColumnLayout {
-            //         Repeater {
-            //             model: customFunctions.length
+                TaskElementInfo {
+                    rect_width: parent.width / 6
+                    rect_height: parent.height
+                    img_source: "../../assets/calendar.png"
+                    txt_color: (settings.light_mode ? colorPalette.primary600 : colorPalette.primary700)
+                    txt: model.due_date
+                    displayImg: model.first_element
+                }
 
-            //             Loader {
-            //                 active: customFunctions[index].isVisible
+                TaskElementInfo {
+                    rect_width: parent.width / 6
+                    rect_height: parent.height
+                    img_source: "../../assets/tag.png"
+                    txt_color: (settings.light_mode ? colorPalette.primary600 : colorPalette.primary700)
+                    txt: model.first_element ? model.tags : getTags(model.tags)
+                    displayImg: model.first_element
+                }
 
-            //                 sourceComponent: MyButton {
-            //                     text: customFunctions[index].text
-            //                     buttonHeight: projectListView.projectHeight
-            //                     buttonWidth: popup.width
+                TaskElementInfo {
+                    rect_width: parent.width / 6
+                    rect_height: parent.height
+                    img_source: "../../assets/flag.png"
+                    txt_color: (settings.light_mode ? colorPalette.primary600 : colorPalette.primary700)
+                    txt: model.priority
+                    displayImg: model.first_element
+                }
 
-            //                     onClicked: {
-            //                         if (typeof customFunctions[index].action === "function") {
-            //                             customFunctions[index].action(popup.projectModel);
-            //                         }
-            //                     }
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
+                TaskElementInfo {
+                    rect_width: parent.width / 6
+                    rect_height: parent.height
+                    img_source: "../../assets/clock.png"
+                    txt_color: (settings.light_mode ? colorPalette.primary600 : colorPalette.primary700)
+                    txt: model.status
+                    displayImg: model.first_element
+                }
+            }
         }
+    }
+
+    function getTags(tags) {
+        return tags.join(", ");
     }
 }

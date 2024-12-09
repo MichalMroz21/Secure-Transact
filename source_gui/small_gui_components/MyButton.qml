@@ -5,26 +5,25 @@ import Qt5Compat.GraphicalEffects
 
 import "../app_style"
 
-Button {
+Rectangle {
     id: control
 
     ColorPalette { id: colorPalette }
     FontStyle { id: fontStyle }
 
-    //width: 600
-    //buttonWidth: 125
-    //buttonHeight: 40
-
-    //width: 1920
-    //buttonWidth: 250
-    //buttonHeight: 80
+    property real widthHeightScale: 1
 
     //Expressions below are combinations of both settings above
-    property int buttonWidth: root.width * 40 / 264 + 750 / 11
-    property int buttonHeight: root.height / 15 + 40 / 3
+    property int buttonWidth: root.width * 40 / 264 + 750 / 11 / widthHeightScale
+    property int buttonHeight: root.height / 15 + 40 / 3 / widthHeightScale
     property int fontSize: fontStyle.display_h6
 
-    property real radius: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_sm, root.width, root.height, false)
+    property var onClickedFunction
+    property string buttonText: "test"
+
+    property bool richtext: false
+
+    property real buttonRadius: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_sm, root.width, root.height, false)
     property real borderWidth: 0
 
     property color borderColor: "transparent"
@@ -37,19 +36,6 @@ Button {
 
     property real textWidthFill: 0.5
     property real textHeightFill: 0.5
-
-    // function getFontSize(autoScale){
-    //     if (!autoScale) return fontSize;
-    //     label.font.pixelSize = fontStyle.mobile_h6
-    //     while(true){
-    //         if(label.width < buttonWidth - radius*2) {
-    //             label.font.pixelSize += 2;
-    //         }
-    //         else{
-    //             return label.font.pixelSize;
-    //         }
-    //     }
-    // }
 
     function getFontSize(autoScale) {
         if (!autoScale) return fontSize; // If scaling is disabled, return the default font size.
@@ -84,108 +70,31 @@ Button {
     implicitWidth: buttonWidth
     implicitHeight: buttonHeight
 
-    font.family: fontStyle.getLatoRegular.name
+    color: control.backgroundColor
+    radius: buttonRadius
 
-    contentItem: ColumnLayout {
-        z: 2
-        height: control.implicitHeight
-        width: control.implicitWidth
+    border.width: control.borderWidth
+    border.color: control.borderColor
 
-        anchors.horizontalCenter: parent.horizontalCenter
+    Label {
+        id: label
+        font: control.font
+        text: buttonText
+        color: control.textColor
+        visible: !setIcon
+        textFormat: richtext ? Text.AutoText : Text.RichText
 
-        Image {
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-            sourceSize: Qt.size(control.implicitWidth * 0.6, control.implicitHeight * 0.6)
-            source: setIcon
-        }
-    }
-
-    background: Rectangle {
-        height: control.implicitHeight
-        width: control.implicitWidth
-        radius: control.radius
-        color: control.backgroundColor
-        visible: false
-
-        border.width: control.borderWidth
-        border.color: control.borderColor
-
-        Behavior on color {
-            ColorAnimation {
-                easing.type: Easing.Linear
-                duration: 200
-            }
-        }
-
-        Label {
-            id: label
-            z: 3
-            anchors.centerIn: parent
-            font: control.font
-            text: control.text
-            color: control.textColor
-            visible: !setIcon
-        }
-
-        Rectangle {
-            id: indicator
-            property int mx
-            property int my
-            x: mx-width  / 2
-            y: my-height / 2
-            height: width
-            radius: control.radius
-            color: Qt.darker(control.backgroundColor)
-        }
-    }
-
-    Rectangle{
-        id: mask
-        radius: control.radius
-        visible: false
-
-        anchors.fill: parent
-    }
-
-    OpacityMask {
-        source: background
-        maskSource: mask
-
-        anchors.fill: background
+        anchors.centerIn: parent
     }
 
     MouseArea {
         id: mouseArea
+        anchors.fill: parent
         hoverEnabled: true
-        acceptedButtons: Qt.NoButton
         cursorShape: Qt.PointingHandCursor
 
-        anchors.fill: parent
-    }
-
-    ParallelAnimation{
-        id: main
-
-        NumberAnimation {
-            target: indicator
-            properties: 'width'
-            from: 0
-            to: control.width * 2.5
-            duration: 200
+        onClicked: {
+            onClickedFunction()
         }
-
-        NumberAnimation {
-            target: indicator
-            properties: 'opacity'
-            from: 0.9
-            to: 0
-            duration: 200
-        }
-    }
-
-    onPressed: {
-        indicator.mx = mouseArea.mouseX
-        indicator.my = mouseArea.mouseY
-        main.restart()
     }
 }

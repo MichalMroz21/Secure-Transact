@@ -18,7 +18,7 @@ Page {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
     }
 
-    TaskList{
+    TaskList {
         currentIndex: projectDetailsPage.currentIndex
     }
 

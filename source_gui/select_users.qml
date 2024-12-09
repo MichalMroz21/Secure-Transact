@@ -8,6 +8,7 @@ import "small_gui_components"
 
 Page {
     id: selectUsersPage
+
     property int currentIndex
     property var selectedUsers: new Array(0)
     property var onReturn
@@ -18,17 +19,22 @@ Page {
     }
 
     ColumnLayout {
-        anchors.centerIn: parent
+        id: formContainer
         width: parent.width
         height: parent.height
 
+        scale: Math.min(root.width / formContainer.width, root.height / formContainer.height) / 1.2
+
+        anchors.centerIn: parent
+
         FriendList {
             id: friendList
-            anchors.horizontalCenter: parent.horizontalCenter
-
             list_height: parent.height - addUserButton.height
             list_fill_width: false
             includeMyself: true
+
+            anchors.horizontalCenter: parent.horizontalCenter
+
             userClicked: function(model, mouseArea, popup) {
                 let index = selectedUsers.findIndex(u => u.host === model.host && u.port === model.port);
 
@@ -37,26 +43,28 @@ Page {
                     console.log(model.host + ":" + model.port);
                     selectedUsers.push(user.find_peer(model.host, model.port, true));
                     console.log(selectedUsers);
-                    mouseArea.parent.color = "lightblue";
+                    mouseArea.parent.color = colorPalette.primary400;
+                    mouseArea.parent.opacity = 0.5;
 
                 }
                 else {
                     selectedUsers.splice(index, 1);
                     model.isSelected = false;
-                    mouseArea.parent.color = "white";
+                    mouseArea.parent.color = (settings.light_mode ? colorPalette.background50 : colorPalette.background900);
+                    mouseArea.parent.opacity = 1;
                 }
             }
         }
 
         MyButton {
             id: addUserButton
-            buttonHeight: 50  // Fixed height for the button
-            buttonWidth: friendList.width
+
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom  // Position the button at the bottom of the parent
-            text: "Continue"
 
-            onClicked: {
+            buttonText: "Continue"
+
+            onClickedFunction: function () {
                 if (onReturn) {
                     if (!selectUsersPage.selectOnlyOne) {
                         onReturn(selectedUsers);
