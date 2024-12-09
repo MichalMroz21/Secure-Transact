@@ -13,7 +13,7 @@ Item {
     FontStyle { id: fontStyle }
     SpacingObjects { id: spacingObjects }
 
-    property color list_color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+    property color list_color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
     property color title_color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
 
     property int border_radius: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_sm, root.width, root.height, false)
@@ -95,7 +95,7 @@ Item {
             Text {
                 text: "<font color=\""+ invitesList.title_color +"\">Friend invites</font>"
 
-                font.pixelSize: fontStyle.getFontSize(root.width, root.height)
+                font.pixelSize: fontStyle.getFontSize(fontStyle.display_h3, root.width, root.height)
                 font.bold: true
 
                 horizontalAlignment: Text.AlignHCenter
@@ -115,7 +115,7 @@ Item {
                     width: parent.width
                     height: inviteListView.inviteHeight
                     id: inviteRectangle
-                    color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+                    color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
 
                     MouseArea {
                         id: inviteMouseArea
@@ -130,7 +130,7 @@ Item {
                         }
 
                         onExited: {
-                            parent.color = settings.light_mode ? colorPalette.background50 : colorPalette.background800
+                            parent.color = settings.light_mode ? colorPalette.background50 : colorPalette.background900
                             inviteMouseArea.cursorShape = Qt.ArrowCursor
                         }
 
@@ -138,7 +138,7 @@ Item {
                             anchors.centerIn: parent
                             text: "<font color=\""+ (settings.light_mode ? colorPalette.primary700 : colorPalette.primary400) +"\">From: </font><font color=\""+ (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) +"\">" + model.host + ":" + model.port + " </font>"
                             color: "#000"
-                            font.pixelSize: fontStyle.getFontSize(root.width, root.height)
+                            font.pixelSize: fontStyle.getFontSize(fontStyle.display_h3, root.width, root.height)
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                         }
@@ -152,7 +152,7 @@ Item {
                         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
                         background: Rectangle{
-                            color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+                            color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
                         }
 
                         property string inviteHost: model.host
@@ -171,11 +171,11 @@ Item {
                                     active: customFunctions[index].isVisible
 
                                     sourceComponent: MyButton {
-                                        text: customFunctions[index].text
+                                        buttonText: customFunctions[index].text
                                         buttonHeight: inviteListView.inviteHeight
                                         buttonWidth: invitePopup.width
 
-                                        onClicked: {
+                                        onClickedFunction: function () {
                                             if (typeof customFunctions[index].action === "function") {
                                                 customFunctions[index].action(invitePopup.inviteHost, invitePopup.invitePort,
                                                     invitePopup.inviteIndex, inviteModel);

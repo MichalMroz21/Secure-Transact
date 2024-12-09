@@ -52,9 +52,9 @@ Page {
 
             // Accept Button
             MyButton {
-                text: "Accept"
+                buttonText: "Accept"
 
-                onClicked:{
+                onClickedFunction: function () {
                     if(addressTextField.downText !== "" && portTextField.downText !== ""){
                         user.send_invitation(addressTextField.downText, portTextField.downText);
                         //user.verify_peer_connection(addressTextField.text, portTextField.text);

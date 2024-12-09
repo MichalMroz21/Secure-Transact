@@ -39,9 +39,9 @@ Page {
         MyButton {
             id: addUserButton
             Layout.alignment: Qt.AlignHCenter
-            text: "New Project"
+            buttonText: "New Project"
 
-            onClicked: {
+            onClickedFunction: function () {
                 stackView.push("add_project.qml");
             }
         }

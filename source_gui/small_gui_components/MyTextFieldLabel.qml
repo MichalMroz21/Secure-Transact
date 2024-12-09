@@ -14,7 +14,7 @@ Item {
     property string upText: ""
 
     property alias downText: downTextField.text
-    property alias placeholder: downTextField.placeholderText
+    property string placeholder : ""
     property alias placeholderColor: downTextField.placeholderTextColor
 
     property color textFieldColor: "transparent"
@@ -23,6 +23,10 @@ Item {
     property alias upTextFontSize: upTextVar.font.pixelSize
     property alias downTextFontSize: downTextField.font.pixelSize
     property alias downTextFieldHeight: downTextField.implicitHeight
+
+    property bool runOnClick: false
+    property var customFunctionClick
+
     signal accepted()
 
     property bool enablePlaceholderWhenTyping: false
@@ -45,7 +49,7 @@ Item {
             color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
             visible: textField.visibleUpText
 
-            font.pixelSize: fontStyle.paragraph_large
+            font.pixelSize: fontStyle.getFontSize(fontStyle.paragraph_large, root.width, root.height)
         }
 
         TextField {
@@ -54,7 +58,7 @@ Item {
             implicitWidth: parent.width
             //implicitHeight: tu zmiana wysokosci textfielda
 
-            font.pixelSize: fontStyle.paragraph_large
+            font.pixelSize: fontStyle.getFontSize(fontStyle.paragraph_large, root.width, root.height)
 
             background: Rectangle {
                 color: textField.textFieldColor
@@ -64,7 +68,25 @@ Item {
                 border.color: textField.borderColor
                 border.width: textField.borderWidth
             }
-            onAccepted:{
+
+            placeholderText: focus || downText ? "" : placeholder
+
+            focus: downTextField.focus
+
+            MouseArea {
+                id: textFieldMouseArea
+                enabled: runOnClick
+
+                anchors.fill: parent
+
+                onClicked: {
+                    if (textField.runOnClick) {
+                        textField.customFunctionClick();
+                    }
+                }
+            }
+
+            onAccepted: {
                 textField.accepted();
             }
         }

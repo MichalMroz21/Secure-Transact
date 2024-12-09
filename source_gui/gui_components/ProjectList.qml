@@ -70,7 +70,7 @@ Rectangle {
     implicitHeight: list_height
 
     radius: border_radius
-    color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+    color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
 
     border.color: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
 
@@ -88,7 +88,7 @@ Rectangle {
             width: parent.width
             height: projectListView.projectHeight
             id: projectRectangle
-            color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+            color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
 
             MouseArea {
                 anchors.fill: parent
@@ -101,7 +101,7 @@ Rectangle {
                     mousearea.cursorShape = Qt.PointingHandCursor
                 }
                 onExited: {
-                    parent.color = settings.light_mode ? colorPalette.background50 : colorPalette.background800
+                    parent.color = settings.light_mode ? colorPalette.background50 : colorPalette.background900
                     mousearea.cursorShape = Qt.ArrowCursor
                 }
 
@@ -119,7 +119,7 @@ Rectangle {
                             Layout.alignment: Qt.AlignLeft
                             id: projectName
                             text: '<span style="color: ' + (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) + '; ">' + model.name + '</span>'
-                            font.pixelSize: fontStyle.getFontSize(root.width, root.height)
+                            font.pixelSize: fontStyle.getFontSize(fontStyle.display_h3, root.width, root.height)
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                             textFormat: Text.RichText
@@ -175,11 +175,11 @@ Rectangle {
                             active: customFunctions[index].isVisible
 
                             sourceComponent: MyButton {
-                                text: customFunctions[index].text
+                                buttonText: customFunctions[index].text
                                 buttonHeight: projectListView.projectHeight
                                 buttonWidth: popup.width
 
-                                onClicked: {
+                                onClickedFunction: function () {
                                     if (typeof customFunctions[index].action === "function") {
                                         customFunctions[index].action(popup.projectModel);
                                     }

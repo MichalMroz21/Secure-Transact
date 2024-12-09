@@ -39,79 +39,81 @@ Page {
         user.invitesChanged.connect(updateInvitesModel);
     }
 
-        RowLayout {
-            Layout.preferredHeight: -1
-            Layout.preferredWidth: -1
-            implicitWidth: parent.width * 2 / 3
-            implicitHeight: parent.height * 2 / 3
-            anchors.centerIn: parent
+    RowLayout {
+        Layout.preferredHeight: -1
+        Layout.preferredWidth: -1
+
+        implicitWidth: parent.width * 2 / 3
+        implicitHeight: parent.height * 2 / 3
+
+        anchors.centerIn: parent
+
+        spacing: 0
+
+        ColumnLayout {
+            id: formContainer
+            Layout.fillWidth: false  // Make it scale horizontally
+            Layout.fillHeight: false  // Make it scale vertically
+            Layout.preferredWidth: 1 / 2 * parent.width
+            Layout.preferredHeight: 256
+            Layout.alignment: Qt.AlignTop ^ Qt.AlignHCenter
 
             spacing: 0
 
-            ColumnLayout {
-                id: formContainer
-                Layout.fillWidth: false  // Make it scale horizontally
-                Layout.fillHeight: false  // Make it scale vertically
-                Layout.preferredWidth: 1 / 2 * parent.width
-                Layout.preferredHeight: 256
-                Layout.alignment: Qt.AlignTop ^ Qt.AlignHCenter
-
-                spacing: 0
-
-                MyTextFieldLabel {
-                    id: usernameTextField
-                    upText: "Username"
-                    downText: user.nickname
-                    parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
-                }
-
-                MyTextFieldLabel {
-                    id: addressTextField
-                    upText: "Address"
-                    downText: user.host
-                    parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
-                }
-
-                MyTextFieldLabel {
-                    id: portTextField
-                    upText: "Port"
-                    downText: user.port
-                    parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
-                }
+            MyTextFieldLabel {
+                id: usernameTextField
+                upText: "Username"
+                downText: user.nickname
+                parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
             }
 
-            ColumnLayout {
-                Layout.fillWidth: true  // Make it scale horizontally
-                Layout.fillHeight: true  // Make it scale vertically
-                Layout.preferredWidth: 1 / 2 * parent.width
-                Layout.preferredHeight: parent.height
+            MyTextFieldLabel {
+                id: addressTextField
+                upText: "Address"
+                downText: user.host
+                parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
+            }
 
-                FriendList {
-                    id: friendList
-                    list_height: parent.height - addUserButton.height
-                    list_width: Math.min(parent.width, 400)
+            MyTextFieldLabel {
+                id: portTextField
+                upText: "Port"
+                downText: user.port
+                parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
+            }
+        }
 
-                    customFunctions: [
-                        {
-                            text: "Delete from friends",
-                            action: function(model, mousearea, popup) {
-                                user.removeFromPeers(model.host, model.port);
-                                user.removeFromGroup(model.host, model.port);
-                            },
-                            isVisible: true
-                        }
-                    ]
-                }
+        ColumnLayout {
+            Layout.fillWidth: true  // Make it scale horizontally
+            Layout.fillHeight: true  // Make it scale vertically
+            Layout.preferredWidth: 1 / 2 * parent.width
+            Layout.preferredHeight: parent.height
 
-                MyButton {
-                    id: addUserButton
-                    Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
-                    text: "Add new user"
+            FriendList {
+                id: friendList
+                list_height: parent.height - addUserButton.height
+                list_width: Math.min(parent.width, 400)
 
-                    onClicked: {
-                        stackView.push("add_user.qml");
+                customFunctions: [
+                    {
+                        text: "Delete from friends",
+                        action: function(model, mousearea, popup) {
+                            user.removeFromPeers(model.host, model.port);
+                            user.removeFromGroup(model.host, model.port);
+                        },
+                        isVisible: true
                     }
+                ]
+            }
+
+            MyButton {
+                id: addUserButton
+                Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
+                buttonText: "Add new user"
+
+                onClickedFunction: function () {
+                    stackView.push("add_user.qml");
                 }
             }
+        }
     }
 }

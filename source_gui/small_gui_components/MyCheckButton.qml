@@ -34,8 +34,8 @@ Rectangle {
         // Checkbox icons
         Rectangle {
             id: checkboxRect
-            width: myCheckBox.autoScale ? fontStyle.getFontSize(root.width, root.height) : myCheckBox.size
-            height: myCheckBox.autoScale ? fontStyle.getFontSize(root.width, root.height) : myCheckBox.size
+            width: myCheckBox.autoScale ? fontStyle.getFontSize(fontStyle.display_h3, root.width, root.height) : myCheckBox.size
+            height: myCheckBox.autoScale ? fontStyle.getFontSize(fontStyle.display_h3, root.width, root.height) : myCheckBox.size
             radius: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_xx_sm, root.width, root.height, false)
             color: myCheckBox.isToggled ? myCheckBox.boxColor : colorPalette.generic00
 
@@ -50,7 +50,7 @@ Rectangle {
 
                 anchors.centerIn: parent
                 font.family: fontStyle.contentLatoLight.name
-                font.pixelSize: myCheckBox.autoScale ? fontStyle.getFontSize(root.width, root.height) : myCheckBox.size
+                font.pixelSize: myCheckBox.autoScale ? fontStyle.getFontSize(fontStyle.display_h3, root.width, root.height) : myCheckBox.size
             }
         }
 
@@ -60,7 +60,7 @@ Rectangle {
             text: "<font color=\""+ myCheckBox.textColor +"\">" + myCheckBox.text + "</font>"
 
             font.family: fontStyle.contentLatoLight.name
-            font.pixelSize: myCheckBox.autoScale ? fontStyle.getFontSize(root.width, root.height) : myCheckBox.size
+            font.pixelSize: myCheckBox.autoScale ? fontStyle.getFontSize(fontStyle.display_h3, root.width, root.height) : myCheckBox.size
             anchors.verticalCenter: parent.verticalCenter
         }
     }
