@@ -257,7 +257,8 @@ class User(QObject):
 
         tags_list = tags.split(", ")
         date = datetime.datetime.strptime(due_date, "%Y-%m-%d")
-        self.projects[project_index].tasks.append(Task(assignee=assignee, name=name, priority=parsed_priority, due_date=date, tags=tags_list))
+        new_task = Task(assignee=assignee, name=name, priority=parsed_priority, due_date=date, tags=tags_list)
+        self.projects[project_index].tasks.append(new_task)
         #self.projects[project_index].tasksChanged.emit()
         print(self.projects[project_index].tasks)
 

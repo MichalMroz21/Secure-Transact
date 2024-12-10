@@ -55,6 +55,7 @@ Rectangle {
         // Iterate over peers array passed from Python
         for (let i = 0; i < user.peers.length; i++) {
             var activeColor = user.peers[i].active > 0 ? colorPalette.primary500 : colorPalette.destructive400
+            var colorString = activeColor.toString();
 
             var isInGroup = false;
             var isSelected = false;
@@ -76,7 +77,7 @@ Rectangle {
                 active: user.peers[i].active,
                 isInGroup: isInGroup,
                 isSelected: isSelected,
-                activeColor: activeColor
+                activeColor: colorString
             });
         }
     }
