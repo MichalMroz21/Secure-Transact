@@ -22,10 +22,9 @@ Page {
         Layout.preferredHeight: 256
 
         Text {
-
             Layout.alignment: Qt.AlignHCenter
             text: "Connect to User"
-            font.pixelSize: fontStyle.getFontSize(root.width, root.height)
+            font.pixelSize: fontStyle.getFontSize(fontStyle.display_h1, root.width, root.height)
             color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
         }
 

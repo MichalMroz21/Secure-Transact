@@ -32,6 +32,8 @@ Item {
     property bool enablePlaceholderWhenTyping: false
     property bool visibleUpText: true
 
+    property bool isEditable: true
+
     property int borderWidth: 1
     property int parentWidth
     property int parentHeight
@@ -57,6 +59,8 @@ Item {
             color: textField.textColor
             implicitWidth: parent.width
             //implicitHeight: tu zmiana wysokosci textfielda
+
+            readOnly: !isEditable
 
             font.pixelSize: fontStyle.getFontSize(fontStyle.paragraph_large, root.width, root.height)
 

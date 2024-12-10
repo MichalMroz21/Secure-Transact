@@ -172,7 +172,7 @@ class User(QObject):
     def nickname(self, new_val):
         if self._nickname != new_val:
             self._nickname = new_val
-            self.nicknameChanged.emit(new_val)
+            self.nicknameChanged.emit()
 
 
     @Slot(str, str, str)

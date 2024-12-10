@@ -52,19 +52,54 @@ Page {
 
         ColumnLayout {
             id: formContainer
-            Layout.fillWidth: false  // Make it scale horizontally
-            Layout.fillHeight: false  // Make it scale vertically
             Layout.preferredWidth: 1 / 2 * parent.width
-            Layout.preferredHeight: 256
-            Layout.alignment: Qt.AlignTop ^ Qt.AlignHCenter
 
-            spacing: 0
+            spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
+
+            property bool isInEdit: false
+
+            ClickableImage {
+                sourceImg: "../../assets/edit.png"
+                image_width: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
+                image_height: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, true)
+                customFunction: function() {
+                    parent.isInEdit = !parent.isInEdit
+                }
+
+                anchors.right: userText.left
+                anchors.rightMargin: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_sm, root.width, root.height, false)
+                anchors.top: userText.top
+                anchors.topMargin: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_sm, root.width, root.height, true)
+            }
+
+            Text {
+                id: userText
+                Layout.alignment: Qt.AlignHCenter
+                text: user.nickname
+                font.pixelSize: fontStyle.getFontSize(fontStyle.display_h1, root.width, root.height)
+                color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
+            }
+
+            ClickableImage {
+                sourceImg: "../../assets/clipboard.png"
+                image_width:  spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
+                image_height:  spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, true)
+                customFunction: function() {
+                    console.log("Image clicked!")
+                }
+
+                anchors.left: userText.right
+                anchors.leftMargin: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_sm, root.width, root.height, false)
+                anchors.top: userText.top
+                anchors.topMargin: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_sm, root.width, root.height, true)
+            }
 
             MyTextFieldLabel {
                 id: usernameTextField
                 upText: "Username"
                 downText: user.nickname
                 parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
+                isEditable: parent.isInEdit
             }
 
             MyTextFieldLabel {
@@ -72,6 +107,7 @@ Page {
                 upText: "Address"
                 downText: user.host
                 parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
+                isEditable: false
             }
 
             MyTextFieldLabel {
@@ -79,6 +115,29 @@ Page {
                 upText: "Port"
                 downText: user.port
                 parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
+                isEditable: false
+            }
+
+            MyButton {
+                id: changeButton
+                Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
+                buttonText: "Save changes"
+                visible: parent.isInEdit
+
+                onClickedFunction: function () {
+                    user.nickname = usernameTextField.downText;
+                    user.host = addressTextField.downText;
+                    user.port = portTextField.downText;
+                }
+            }
+
+            Component.onCompleted: {
+                function loadNickname(){
+                    usernameTextField.downText = user.nickname;
+                    userText.text = user.nickname;
+                }
+
+                user.nicknameChanged.connect(loadNickname);
             }
         }
 
