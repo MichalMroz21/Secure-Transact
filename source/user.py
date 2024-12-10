@@ -175,18 +175,22 @@ class User(QObject):
             self.nicknameChanged.emit()
 
 
-    @Slot(str, str, str)
-    def change_peers_nickname(self, host, port, new_val):
+    @Slot(str)
+    def change_nickname(self, new_val):
         """
         Changes peer's nickname to the new value
-        :param host: str - Peer's IP address
-        :param port: str - Peer's port
-        :param new_val: str - Peer's new nickname
+        :param new_val: str - New nickname
         """
+        self.nickname = new_val
+        print("New nickname was set")
         for peer in self.peers:
-            if peer.host == host and peer.port == int(port):
-                peer.nickname = new_val
-                self.peersChanged.emit()
+            if peer.active == 3:
+                try:
+                    requests.post("http://{}:{}/new_nickname".format(peer.host, peer.port),
+                                     json={"host": self.host, "port": self.port,
+                                           "nickname": self.nickname})
+                except Exception as e:
+                    print(e)
 
 
     @Slot(result=list)

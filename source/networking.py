@@ -104,6 +104,19 @@ class Networking(QObject):
             print("Po dodaniu jest tyle blokow: " + str(len(self.user.chain.blocks)))
             return jsonify({"status": "Signature was successfully used"}), HTTPStatus.OK
 
+        @self.app.route('/new_nickname', methods=['POST'])
+        def new_nickname():
+            json_array = request.json
+            host = json_array.get("host")
+            port = json_array.get("port")
+            nickname = json_array.get("nickname")
+            for peer in self.user.peers:
+                if peer.host == host and int(peer.port) == int(port):
+                    peer.nickname = nickname
+                    self.user.nicknameChanged.emit()
+                    return jsonify({"status": "Nickname was successfully set"}), HTTPStatus.OK
+            return jsonify({"error": "No peer with that IP address and port number was found!"}), HTTPStatus.BAD_REQUEST
+
         @self.app.route('/reject_me', methods=['GET'])
         def reject_me():
             """

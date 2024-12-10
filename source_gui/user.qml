@@ -125,7 +125,7 @@ Page {
                 visible: parent.isInEdit
 
                 onClickedFunction: function () {
-                    user.nickname = usernameTextField.downText;
+                    user.change_nickname(usernameTextField.downText);
                     user.host = addressTextField.downText;
                     user.port = portTextField.downText;
                 }
