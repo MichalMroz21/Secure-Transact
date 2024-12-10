@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from PySide6.QtCore import QObject, Signal, Slot, Property
@@ -35,6 +36,31 @@ class Task(QObject):
         self._comments = [] if comments is None else comments #string list
         self._name = name
         self._tags = [] if tags is None else tags #string list
+
+    def to_JSON(self):
+        JSON = {
+            "assignee": self._assignee,
+            "due_date": self._due_date,
+            "priority": self._priority.value,
+            "status": self._status,
+            "comments": self._comments,
+            "name": self._name,
+            "tags": self._tags
+        }
+        return json.dumps(JSON)
+
+    @staticmethod
+    def to_task(JSON: str):
+        json_array = json.loads(JSON)
+        assignee = json_array["assignee"]
+        due_date = json_array["due_date"]
+        priority = json_array["priority"]
+        status = json_array["status"]
+        comments = json_array["comments"]
+        name = json_array["name"]
+        tags = json_array["tags"]
+        return Task(assignee, due_date, priority, status, comments, name, tags)
+
 
     @Property(QObject, notify=assigneeChanged)
     def assignee(self):

@@ -117,6 +117,19 @@ class Networking(QObject):
                     return jsonify({"status": "Nickname was successfully set"}), HTTPStatus.OK
             return jsonify({"error": "No peer with that IP address and port number was found!"}), HTTPStatus.BAD_REQUEST
 
+
+        @self.app.route('/add_new_project', methods=['POST'])
+        def add_new_project():
+            json_array = request.json
+            host = json_array.get("host")
+            port = json_array.get("port")
+            for peer in self.user.peers:
+                if peer.host == host and int(peer.port) == int(port):
+                    project = json_array.get("project")
+                    project = self.user.projects.from_JSON(project)
+                    self.user.projects.append(project)
+                    self.user.projectsChanged.emit()
+
         @self.app.route('/reject_me', methods=['GET'])
         def reject_me():
             """

@@ -1,3 +1,5 @@
+import json
+
 from PySide6.QtCore import QObject, Signal, Slot, Property
 
 class Project(QObject):
@@ -5,12 +7,28 @@ class Project(QObject):
     nameChanged = Signal()
     usersChanged = Signal()
 
-    def __init__(self, name="Project", users = []):
+    def __init__(self, name="Project", users = None, tasks = None):
         super().__init__()
 
-        self._tasks = []
+        self._tasks = tasks if tasks is not None else []
         self._name = name
-        self._users = users
+        self._users = users if users is not None else []
+
+    def to_JSON(self):
+        JSON = {
+            "tasks": [task.to_JSON() for task in self._tasks],
+            "name": self._name,
+            "users": [user.to_JSON() for user in self._users]
+        }
+        return json.dumps(JSON)
+
+    @staticmethod
+    def from_JSON(JSON):
+        json_array = json.loads(JSON)
+        tasks = json_array["tasks"]
+        names = json_array["name"]
+        users = json_array["users"]
+        return Project(names, users, tasks)
 
     @Property("QVariantList", notify=tasksChanged)
     def tasks(self):

@@ -15,6 +15,8 @@ import string
 import global_constants
 
 from project import Project
+from source.encryption import Encryption
+from source.settings import Settings
 from task import Task
 
 from cryptography.hazmat.backends import default_backend
@@ -84,6 +86,27 @@ class User(QObject):
         self.update_encrypted_string(self.public_key, self.random_key)
 
         self.drawString = ""
+
+
+    def to_JSON(self):
+        JSON = {
+            "host": self._host,
+            "port": self._port,
+            "public_key": self.public_key_to_pem(),
+            "nickname": self._nickname,
+            "stake": self.stake
+        }
+        return json.dumps(JSON)
+
+    @staticmethod
+    def from_JSON(JSON: str):
+        json_array = json.loads(JSON)
+        host = json_array["host"]
+        port = json_array["port"]
+        public_key = json_array["public_key"]
+        nickname = json_array["nickname"]
+        stake = json_array["stake"]
+        return User(Encryption(), Settings(), host, port, global_constants.CONNECTION_ATTEMPTS, Encryption().load_public_key_from_pem(public_key), nickname, stake)
 
 
     #QVariantMap is for Dictionaries and keys must be strings
@@ -443,7 +466,13 @@ class User(QObject):
         new_users_list = [self]
         for user in users:
             new_users_list.append(user)
-        self.projects.append(Project(name, new_users_list))
+        new_project = Project(name, new_users_list)
+        self.projects.append(new_project)
+        json_project = new_project.to_JSON()
+        for user in users:
+            response = requests.post("http://{}:{}/add_new_project".format(user.host, user.port),
+                                     json={"host": self.host, "port" : self.port, "users": new_users_list, "project": json_project})
+
 
 
     @Slot(int, "QVariantList")
