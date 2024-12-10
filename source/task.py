@@ -50,9 +50,11 @@ class Task(QObject):
         return json.dumps(JSON)
 
     @staticmethod
-    def to_task(JSON: str):
+    def from_JSON(JSON: str):
         json_array = json.loads(JSON)
-        assignee = json_array["assignee"]
+        json_assignee = json_array["assignee"]
+        from user import User
+        assignee = User.from_JSON(json_assignee)
         due_date = json_array["due_date"]
         priority = json_array["priority"]
         status = json_array["status"]

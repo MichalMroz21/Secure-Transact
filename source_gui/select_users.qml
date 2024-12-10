@@ -13,6 +13,7 @@ Page {
     property var selectedUsers: new Array(0)
     property var onReturn
     property bool selectOnlyOne: false
+    property bool includeOwner: true
 
     background: Rectangle {
         color: settings.light_mode ? colorPalette.background100 : colorPalette.background900
@@ -31,7 +32,7 @@ Page {
             id: friendList
             list_height: parent.height - addUserButton.height
             list_fill_width: false
-            includeMyself: true
+            includeMyself: selectUsersPage.includeOwner
 
             anchors.horizontalCenter: parent.horizontalCenter
 

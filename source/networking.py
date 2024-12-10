@@ -1,4 +1,5 @@
 import datetime
+import json
 import threading
 import flask
 import global_constants
@@ -6,6 +7,9 @@ import global_constants
 from flask import jsonify, request
 from http import HTTPStatus
 from PySide6.QtCore import QObject
+
+from source.project import Project
+
 
 class Networking(QObject):
     def __init__(self, user):
@@ -120,15 +124,18 @@ class Networking(QObject):
 
         @self.app.route('/add_new_project', methods=['POST'])
         def add_new_project():
-            json_array = request.json
+            json_str = request.json
+            json_array = json.loads(json_str)
             host = json_array.get("host")
             port = json_array.get("port")
             for peer in self.user.peers:
                 if peer.host == host and int(peer.port) == int(port):
-                    project = json_array.get("project")
-                    project = self.user.projects.from_JSON(project)
-                    self.user.projects.append(project)
+                    project_str = json_array.get("project")
+                    project_to_add = Project().from_JSON(project_str)
+                    self.user.projects.append(project_to_add)
                     self.user.projectsChanged.emit()
+                    return jsonify({"status": "Project was successfully added"}), HTTPStatus.OK
+            return jsonify({"error": "No peer with that IP address was found!"}), HTTPStatus.BAD_REQUEST
 
         @self.app.route('/reject_me', methods=['GET'])
         def reject_me():

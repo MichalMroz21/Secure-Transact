@@ -15,8 +15,8 @@ import string
 import global_constants
 
 from project import Project
-from source.encryption import Encryption
-from source.settings import Settings
+from encryption import Encryption
+from settings import Settings
 from task import Task
 
 from cryptography.hazmat.backends import default_backend
@@ -40,7 +40,7 @@ class User(QObject):
     activeChanged = Signal()
     invitesChanged = Signal()
 
-    def __init__(self, encryption, settings, host=None, port=None, active=global_constants.CONNECTION_ATTEMPTS, public_key=None, nickname=None, stake=None):
+    def __init__(self, encryption=None, settings=None, host=None, port=None, active=global_constants.CONNECTION_ATTEMPTS, public_key=None, nickname=None, stake=None):
         super().__init__()
         """
         Creates a user
@@ -54,8 +54,8 @@ class User(QObject):
             backend=default_backend()
         )
 
-        self.encryption = encryption
-        self.settings = settings
+        self.encryption = encryption if encryption is not None else Encryption()
+        self.settings = settings if settings is not None else Settings()
 
         #Connections with other devices
         self.chain = Blockchain()    #Copy of blockchain
@@ -106,7 +106,7 @@ class User(QObject):
         public_key = json_array["public_key"]
         nickname = json_array["nickname"]
         stake = json_array["stake"]
-        return User(Encryption(), Settings(), host, port, global_constants.CONNECTION_ATTEMPTS, Encryption().load_public_key_from_pem(public_key), nickname, stake)
+        return User(Encryption(), Settings(), host, port, global_constants.CONNECTION_ATTEMPTS, public_key, nickname, stake)
 
 
     #QVariantMap is for Dictionaries and keys must be strings
@@ -469,9 +469,11 @@ class User(QObject):
         new_project = Project(name, new_users_list)
         self.projects.append(new_project)
         json_project = new_project.to_JSON()
+        json_users = [user.to_JSON() for user in users]
+        json_request = json.dumps({"host": self.host, "port" : self.port, "users": json_users, "project" : json_project})
         for user in users:
             response = requests.post("http://{}:{}/add_new_project".format(user.host, user.port),
-                                     json={"host": self.host, "port" : self.port, "users": new_users_list, "project": json_project})
+                                     json=json_request)
 
 
 

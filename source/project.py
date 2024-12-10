@@ -2,6 +2,7 @@ import json
 
 from PySide6.QtCore import QObject, Signal, Slot, Property
 
+
 class Project(QObject):
     tasksChanged = Signal()
     nameChanged = Signal()
@@ -25,9 +26,13 @@ class Project(QObject):
     @staticmethod
     def from_JSON(JSON):
         json_array = json.loads(JSON)
-        tasks = json_array["tasks"]
+        json_tasks = json_array["tasks"]
+        from source.task import Task
+        tasks = [Task().from_JSON(task) for task in json_tasks]
         names = json_array["name"]
-        users = json_array["users"]
+        json_users = json_array["users"]
+        from source.user import User
+        users = [User().from_JSON(user) for user in json_users]
         return Project(names, users, tasks)
 
     @Property("QVariantList", notify=tasksChanged)

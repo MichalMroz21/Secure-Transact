@@ -45,6 +45,23 @@ Page {
             upText: "Project name"
             parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
         }
+        MyButton {
+            id: addUserButton
+            Layout.alignment: Qt.AlignHCenter
+            buttonText: "Add new user"
+
+            onClickedFunction: function () {
+                index = user.projects.length
+                stackView.push("select_users.qml", {
+                    currentIndex: index,
+                    includeOwner: false,
+                    onReturn: function(returnedUsers) {
+                        usersInProject = returnedUsers;
+                        console.log("Returned users:", returnedUsers);
+                    }
+               });
+            }
+        }
 
         // Buttons Row
         RowLayout {
