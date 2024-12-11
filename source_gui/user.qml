@@ -58,40 +58,56 @@ Page {
 
             property bool isInEdit: false
 
-            ClickableImage {
-                sourceImg: "../../assets/edit.png"
-                image_width: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
-                image_height: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, true)
-                customFunction: function() {
+            MyTextFieldLabel {
+                upText: "🖊"
+                parentWidth: parent.width
+                fontSize: fontStyle.getFontSize(fontStyle.display_h1, root.width, root.height)
+
+                customFunctionClick: function() {
                     parent.isInEdit = !parent.isInEdit
                 }
 
+                textOnly: true
+                runOnClick: true
+
                 anchors.right: userText.left
-                anchors.rightMargin: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_sm, root.width, root.height, false)
+                anchors.rightMargin: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_xx_lg, root.width, root.height, false)
                 anchors.top: userText.top
-                anchors.topMargin: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_sm, root.width, root.height, true)
+
+                implicitWidthProp: -1
             }
 
             Text {
                 id: userText
                 Layout.alignment: Qt.AlignHCenter
                 text: user.nickname
+                anchors.horizontalCenter: parent.horizontalCenter
                 font.pixelSize: fontStyle.getFontSize(fontStyle.display_h1, root.width, root.height)
                 color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
             }
 
-            ClickableImage {
-                sourceImg: "../../assets/clipboard.png"
-                image_width:  spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
-                image_height:  spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, true)
-                customFunction: function() {
-                    console.log("Image clicked!")
+            MyTextFieldLabel {
+                upText: "📋"
+                parentWidth: parent.width
+                fontSize: fontStyle.getFontSize(fontStyle.display_h1, root.width, root.height)
+
+                customFunctionClick: function() {
+                    cliphelper.text = addressTextField.downText + ":" + portTextField.downText;
+                    cliphelper.selectAll();
+                    cliphelper.copy();
                 }
+
+                textOnly: true
+                runOnClick: true
 
                 anchors.left: userText.right
                 anchors.leftMargin: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_sm, root.width, root.height, false)
                 anchors.top: userText.top
-                anchors.topMargin: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_sm, root.width, root.height, true)
+            }
+
+            TextEdit {
+                id: cliphelper
+                visible: false
             }
 
             MyTextFieldLabel {
@@ -100,6 +116,9 @@ Page {
                 downText: user.nickname
                 parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
                 isEditable: parent.isInEdit
+                maxLengthText: 12
+                anchors.top: userText.bottom
+                anchors.topMargin: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_md, root.width, root.height, false)
             }
 
             MyTextFieldLabel {
@@ -108,6 +127,8 @@ Page {
                 downText: user.host
                 parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
                 isEditable: false
+                anchors.top: usernameTextField.bottom
+                anchors.topMargin: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_md, root.width, root.height, false)
             }
 
             MyTextFieldLabel {
@@ -116,6 +137,8 @@ Page {
                 downText: user.port
                 parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
                 isEditable: false
+                anchors.top: addressTextField.bottom
+                anchors.topMargin: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_md, root.width, root.height, false)
             }
 
             MyButton {

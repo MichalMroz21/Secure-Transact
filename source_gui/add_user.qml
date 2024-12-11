@@ -16,12 +16,13 @@ Page {
     ColumnLayout {
         id: formContainer
         anchors.centerIn: parent
-        spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_md, root.width, root.height, true)
+        spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_big, root.width, root.height, true)
         width: Math.min(parent.width / 3, maxInputWidth)  // Set a maximum width for the form
         height: implicitHeight
         Layout.preferredHeight: 256
 
         Text {
+            id: userText
             Layout.alignment: Qt.AlignHCenter
             text: "Connect to User"
             font.pixelSize: fontStyle.getFontSize(fontStyle.display_h1, root.width, root.height)
@@ -46,7 +47,7 @@ Page {
 
         // Buttons Row
         RowLayout {
-            spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_big, root.width, root.height, false)
+            spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_xxx_big, root.width, root.height, false)
             Layout.alignment: Qt.AlignHCenter
 
             // Accept Button

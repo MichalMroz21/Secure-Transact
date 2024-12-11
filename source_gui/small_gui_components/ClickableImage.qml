@@ -20,18 +20,17 @@ Item {
     Image {
         id: image
         source: sourceImg
-        width: parent.width
-        height: parent.height
-        fillMode: Image.PreserveAspectFit
-    }
-
-    MouseArea {
         anchors.fill: parent
-        onClicked: {
-            if (customFunction) {
-                customFunction()
+        fillMode: Image.PreserveAspectFit
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                if (clickableImage.customFunction) {
+                    clickableImage.customFunction()
+                }
             }
+            cursorShape: Qt.PointingHandCursor
         }
-        cursorShape: Qt.PointingHandCursor
     }
 }

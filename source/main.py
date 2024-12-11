@@ -28,4 +28,5 @@ if __name__ == "__main__":
     engine.rootContext().setContextProperty("settings", settings)
 
     engine.load(global_constants.MAIN_QML_PATH)
+
     app.exec()

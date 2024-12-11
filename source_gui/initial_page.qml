@@ -25,7 +25,7 @@ Page {
 
         ColumnLayout {
             Layout.leftMargin: root.width * 8/165 + 384/11 //Yes.
-            //explaination: for original resolution width (600) it was best to have spacingObjects.spacing_Xx_lg = 64 margin and for full hd width (1920) spacingObjects.spacing_x_huge = 128
+            //explaination: for original resolution width (600) it was best to have spacingObjects.spacing_Xx_lg = 56 margin and for full hd width (1920) spacingObjects.spacing_x_huge = 128
 
             Layout.preferredHeight: -1
             Layout.preferredWidth: parent.width / 2 - Layout.leftMargin

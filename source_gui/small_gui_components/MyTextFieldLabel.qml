@@ -38,7 +38,15 @@ Item {
     property int parentWidth
     property int parentHeight
 
-    implicitWidth: parentWidth
+    property alias fontSize: upTextVar.font.pixelSize
+
+    property int implicitWidthProp: parentWidth
+    property int maxLengthText: 50
+
+    property bool textOnly: false
+    property bool richTextProp: false
+
+    implicitWidth: implicitWidthProp
     implicitHeight: upTextVar.height + downTextField.height
 
     ColumnLayout {
@@ -51,16 +59,33 @@ Item {
             color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
             visible: textField.visibleUpText
 
+            textFormat: richTextProp ? Text.RichText : Text.PlainText
+
             font.pixelSize: fontStyle.getFontSize(fontStyle.paragraph_large, root.width, root.height)
+
+            MouseArea {
+                id: textFieldMouseAreaText
+                enabled: textOnly
+
+                anchors.fill: parent
+
+                onClicked: {
+                    if (textField.runOnClick) {
+                        textField.customFunctionClick();
+                    }
+                }
+            }
         }
 
         TextField {
             id: downTextField
             color: textField.textColor
             implicitWidth: parent.width
+            visible: !textOnly
             //implicitHeight: tu zmiana wysokosci textfielda
 
             readOnly: !isEditable
+            maximumLength: textField.maxLengthText
 
             font.pixelSize: fontStyle.getFontSize(fontStyle.paragraph_large, root.width, root.height)
 
