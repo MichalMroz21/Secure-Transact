@@ -69,7 +69,7 @@ class User(QObject):
         self._host = self.ip() if host is None else host
 
         #User Variables
-        self._projects = [Project()]
+        self._projects = []
         self._messages = {}
         self.indexes = []
         self._group = []
