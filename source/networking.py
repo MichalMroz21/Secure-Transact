@@ -167,6 +167,7 @@ class Networking(QObject):
                         self.user.get_projects()[project_id].get_tasks().append(task)
                     else:
                         self.user.get_projects()[project_id].get_tasks()[task_id] = task
+                    self.user.projectsChanged.emit()
                     return jsonify({"status": "Task was successfully updated"}), HTTPStatus.OK
             return jsonify({"error": "No user with that IP address and port number was found!"}), HTTPStatus.BAD_REQUEST
 
