@@ -49,7 +49,7 @@ class Task(QObject):
         }
 
     def to_JSON(self):
-        return json.dumps(self.to_dict())
+        return json.dumps(self.to_dict(), sort_keys=True, separators=(',', ':'))
 
     @staticmethod
     def from_dict(data):

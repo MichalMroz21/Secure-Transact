@@ -95,7 +95,7 @@ Page {
             onClickedFunction: function () {
                 if(nameTextField.downText !== "" && assigneeTextField.downText !== "" && priorityTextField.downText !== "" && dueDateTextField.downText !== "" && tagsTextField.downText !== ""){
                     user.create_a_new_task(formPage.projectIndex, formPage.assignee, nameTextField.downText, priorityTextField.downText, dueDateTextField.downText, tagsTextField.downText);
-                    stackView.push("project_details.qml");
+                    stackView.pop();
                 }
             }
         }

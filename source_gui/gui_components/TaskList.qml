@@ -101,6 +101,16 @@ Rectangle {
         color: parent.color
         border.color: parent.border.color
 
+        MyButton{
+            id: addUserButton
+            Layout.alignment: Qt.AlignHCenter
+            buttonText: "Add to blockchain"
+
+            onClickedFunction: function () {
+                user.send_block_being_verified(taskList.currentIndex);
+            }
+        }
+
         MyButton {
             id: addNewTaskButton
             buttonText: "Add new task"

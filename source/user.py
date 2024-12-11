@@ -99,7 +99,7 @@ class User(QObject):
         }
 
     def to_JSON(self):
-        return json.dumps(self.to_dict())
+        return json.dumps(self.to_dict(), sort_keys=True, separators=(',', ':'))
 
     @staticmethod
     def from_dict(data):
@@ -318,7 +318,7 @@ class User(QObject):
 
         tags_list = tags.split(", ")
         date = datetime.datetime.strptime(due_date, "%Y-%m-%d")
-        new_task = Task(assignee=assignee, name=name, priority=parsed_priority, due_date=date, tags=tags_list)
+        new_task = Task(assignee=assignee, name=name, priority=parsed_priority, status=Task.TaskStatus.TO_DO.value, due_date=date, tags=tags_list)
         tasks_len = len(self.get_projects()[project_index].get_tasks())
         project_id = self.get_projects()[project_index].id
         json_task = new_task.to_JSON()
@@ -686,7 +686,7 @@ class User(QObject):
         self.staging.append(data)
 
 
-    def group_to_string(self, group):
+    def group_to_string(self, group, includeMyself=True):
         """
         Converts User array to String
         :param group: User array - Group of users
@@ -696,7 +696,8 @@ class User(QObject):
             return None
 
         group_strings = []
-        group_strings.append(str(self.host) + ":" + str(self.port))
+        if includeMyself:
+            group_strings.append(str(self.host) + ":" + str(self.port))
 
         for peer_str in group:
             group_strings.append(str(peer_str.host) + ":" + str(peer_str.port))
@@ -728,7 +729,7 @@ class User(QObject):
                 if self.host == host and self.port == port:
                     group.append(self)
                     continue
-            for peer in self.peers:
+            for peer in self.get_peers():
                 if peer.host == host and peer.port == port:
                     group.append(peer)
                     break
@@ -776,26 +777,35 @@ class User(QObject):
         return decryptedSessionKey
 
 
-    @Slot(str)
-    def send_block_being_verified(self):
+    @Slot(int)
+    def send_block_being_verified(self, project_index=-1):
         """
         Send data to each connected peer which will be included in the block
         """
-        messages_list = list(self.get_messages()[self.group_to_string(self.group)])[
-                        -global_constants.MESSAGES_IN_BLOCK:]
-        json_block = json.dumps(messages_list, sort_keys=True, separators=(',', ':'))
+        if project_index == -1:
+            messages_list = list(self.get_messages()[self.group_to_string(self.get_group())])[
+                            -global_constants.MESSAGES_IN_BLOCK:]
+            group = self.group_to_string(self.get_group())
+            self.buffer = messages_list
+            json_block = json.dumps(messages_list, sort_keys=True, separators=(',', ':'))
+        else:
+            project = self.get_projects()[project_index]
+            group = self.group_to_string(project.get_users(), False)
+            self.buffer = project.to_JSON()
+            json_block = json.dumps(project.to_dict(), sort_keys=True, separators=(',', ':'))
 
-        for peer in self.peers:
+        for peer in self.get_peers():
             if peer.active == global_constants.CONNECTION_ATTEMPTS:
                 #This check prevents from sending to the peer that for sure is not connected to the network
                 try:
                     #Even with a previous check it is not obvious that the peer is connected to the network
                     requests.post("http://{}:{}/receive_messages_to_be_verified".format(peer.host, peer.port),
-                            json={"host": self.host, "port": self.port, "group" : self.group_to_string(self.group), "block": json_block})
+                            json={"host": self.host, "port": self.port, "group" : group, "block": json_block})
                 except Exception as e:
                     print(e)
-        self.buffer = messages_list
-        self.send_digital_signature(self.group_to_string(self.group))
+        if self.draw_verifier(self.string_to_group(group, project_index != -1)) != self:
+            return None
+        self.send_digital_signature(group)
 
 
     @Slot(result=QObject)
@@ -819,13 +829,13 @@ class User(QObject):
 
 
     @Slot(str)
-    def send_digital_signature(self, group):
+    def send_digital_signature(self, group, includeMyself=True):
         """
         Sends signature to others in the network which can be used to creation of the block
         :param group: str - Key in user.messages[Key]
         """
         print(group)
-        grp = self.string_to_group(group, True)
+        grp = self.string_to_group(group, includeMyself)
         drawn_verifier = self.draw_verifier(grp)
         print("Drawn Verifier " + str(drawn_verifier.nickname))
         if drawn_verifier == self:
