@@ -35,15 +35,12 @@ Rectangle {
     property int currentIndex
 
     ListModel {
+        dynamicRoles:true
         id: taskModel
     }
 
     function updateTaskModel(project) {
         taskModel.clear();
-
-        console.log(project);
-        console.log(project.name);
-        console.log(project.tasks);
 
         var tasks = project.tasks;
 
@@ -72,12 +69,14 @@ Rectangle {
         }
     }
 
-    function getProjectData(index) {
-        return user.get_project(index);
+    function getProjectData() {
+        return updateTaskModel(user.projects[taskList.currentIndex]);
     }
 
+
     Component.onCompleted: {
-        updateTaskModel(getProjectData(taskList.currentIndex));
+        user.check_project_index(taskList.currentIndex) ? getProjectData() : null;
+        user.projectsChanged.connect(getProjectData);
     }
 
     Layout.fillWidth: list_fill_width
@@ -144,7 +143,7 @@ Rectangle {
                 commonBorder: false
                 lBorderwidth: taskList.border.width
                 rBorderwidth: taskList.border.width
-                tBorderwidth: model.first_element ? 0 : task.border.width
+                tBorderwidth: model.first_element ? 0 : taskList.border.width
                 bBorderwidth: taskList.border.width
                 borderColor: taskList.border.color
             }

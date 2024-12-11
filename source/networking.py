@@ -1,6 +1,7 @@
 import datetime
 import json
 import threading
+
 import flask
 import global_constants
 
@@ -8,7 +9,7 @@ from flask import jsonify, request
 from http import HTTPStatus
 from PySide6.QtCore import QObject
 
-from source.project import Project
+
 
 
 class Networking(QObject):
@@ -53,8 +54,8 @@ class Networking(QObject):
 
             if message:
                 try:
-                    self.user.messages[group].append(message)
-                    if self.user.group_to_string(self.user.group) == group:
+                    self.user.get_messages()[group].append(message)
+                    if self.user.group_to_string(self.user.get_group()) == group:
                         #Emit signal only if the user is currently displaying given chat group
                         self.user.messagesAppend.emit(self.user.decrypt_single_message(message))
                     self.buffered_messages.append(message)
@@ -128,14 +129,46 @@ class Networking(QObject):
             json_array = json.loads(json_str)
             host = json_array.get("host")
             port = json_array.get("port")
-            for peer in self.user.peers:
+            for peer in self.user.get_peers():
                 if peer.host == host and int(peer.port) == int(port):
                     project_str = json_array.get("project")
+                    from project import Project
                     project_to_add = Project().from_JSON(project_str)
-                    self.user.projects.append(project_to_add)
+                    self.user.get_projects().append(project_to_add)
                     self.user.projectsChanged.emit()
                     return jsonify({"status": "Project was successfully added"}), HTTPStatus.OK
             return jsonify({"error": "No peer with that IP address was found!"}), HTTPStatus.BAD_REQUEST
+
+        @self.app.route('/update_task', methods=['POST'])
+        def update_task():
+            json_str = request.json
+            json_array = json.loads(json_str)
+            host = json_array.get("host")
+            port = json_array.get("port")
+            for peer in self.user.peers:
+                if peer.host == host and int(peer.port) == int(port):
+                    project_id = int(json_array.get("project_id"))
+                    found = False
+                    for project_index, project in enumerate(self.user.get_projects()):
+                        if project.id == project_id:
+                            project_id = project_index
+                            found = True
+                            break
+                    if not found:
+                        return jsonify({"error": "No project with that ID was found!"}), HTTPStatus.BAD_REQUEST
+                    from task import Task
+                    json_task = json_array.get("task")
+                    task = Task().from_JSON(json_task)
+                    task_id = int(json_array.get("task_id"))
+                    tasks_len = len(self.user.get_projects()[project_id].get_tasks())
+                    if task_id > tasks_len or task_id < 0:
+                        return jsonify({"error": "Wrong task ID"}), HTTPStatus.BAD_REQUEST
+                    elif tasks_len == task_id:
+                        self.user.get_projects()[project_id].get_tasks().append(task)
+                    else:
+                        self.user.get_projects()[project_id].get_tasks()[task_id] = task
+                    return jsonify({"status": "Task was successfully updated"}), HTTPStatus.OK
+            return jsonify({"error": "No user with that IP address and port number was found!"}), HTTPStatus.BAD_REQUEST
 
         @self.app.route('/reject_me', methods=['GET'])
         def reject_me():
@@ -164,12 +197,12 @@ class Networking(QObject):
             json_array = request.json
             host = json_array.get("host")
             port = json_array.get("port")
-            for invite in self.user.invites:
+            for invite in self.user.get_invites():
                 if invite["host"] == host and int(invite["port"]) == int(port):
                     return jsonify({"status": "Invitation has been already sent in the past!"}), HTTPStatus.BAD_REQUEST
             #It is a new invitation. Append it to the invites section
-            self.user.invites.append({"host": host, "port": port, "received": True})
-            print(self.user.invites)
+            self.user.get_invites().append({"host": host, "port": port, "received": True})
+            print(self.user.get_invites())
             self.user.invitesChanged.emit()
             if self.user.settings.auto_connection:
                 self.user.accept_invitation(host, port)

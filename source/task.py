@@ -14,17 +14,17 @@ class Task(QObject):
     tagsChanged = Signal()
     due_dateChanged = Signal()
 
-    class TaskPriority(Enum):
-        LOW = 1
-        MEDIUM = 2
-        HIGH = 3
-        URGENT = 4
+    class TaskPriority(int, Enum):
+        LOW: int = 1
+        MEDIUM: int = 2
+        HIGH: int = 3
+        URGENT: int = 4
 
-    class TaskStatus(Enum):
-        TO_DO = 0
-        IN_PROGRESS = 1
-        COMPLETED = 2
-        FAILED = 3
+    class TaskStatus(int, Enum):
+        TO_DO: int = 0
+        IN_PROGRESS: int = 1
+        COMPLETED:int = 2
+        FAILED:int = 3
 
     def __init__(self, assignee=None, due_date=datetime.today().isoformat(), priority=TaskPriority.MEDIUM, status=TaskStatus.TO_DO, comments=None, name="", tags=None):
         super().__init__()
@@ -37,36 +37,43 @@ class Task(QObject):
         self._name = name
         self._tags = [] if tags is None else tags #string list
 
-    def to_JSON(self):
-        JSON = {
-            "assignee": self._assignee,
-            "due_date": self._due_date,
-            "priority": self._priority.value,
+    def to_dict(self):
+        return {
+            "assignee": self._assignee.to_dict(),
+            "due_date": str(self._due_date.date()),#e.g. 2006-09-09 is 10 characters long
+            "priority": self._priority,
             "status": self._status,
-            "comments": self._comments,
+            "comments": [comment for comment in self._comments],
             "name": self._name,
-            "tags": self._tags
+            "tags": [tag for tag in self._tags]
         }
-        return json.dumps(JSON)
+
+    def to_JSON(self):
+        return json.dumps(self.to_dict())
+
+    @staticmethod
+    def from_dict(data):
+        json_assignee = data["assignee"]
+        from user import User
+        assignee = User.from_dict(json_assignee)
+        json_due_date = data["due_date"]
+        due_date = datetime.strptime(json_due_date, "%Y-%m-%d")
+        priority = data["priority"]
+        status = data["status"]
+        json_comments = data["comments"]
+        comments = [comment for comment in json_comments]
+        name = data["name"]
+        json_tags = data["tags"]
+        tags = [tag for tag in json_tags]
+        return Task(assignee, due_date, priority, status, comments, name, tags)
 
     @staticmethod
     def from_JSON(JSON: str):
-        json_array = json.loads(JSON)
-        json_assignee = json_array["assignee"]
-        from user import User
-        assignee = User.from_JSON(json_assignee)
-        due_date = json_array["due_date"]
-        priority = json_array["priority"]
-        status = json_array["status"]
-        comments = json_array["comments"]
-        name = json_array["name"]
-        tags = json_array["tags"]
-        return Task(assignee, due_date, priority, status, comments, name, tags)
-
+        return Task.from_dict(json.loads(JSON))
 
     @Property(QObject, notify=assigneeChanged)
     def assignee(self):
-        return self._assignee
+        return self._assignee.to_dict()
 
     @Property(str, notify=due_dateChanged)
     def due_date(self):
@@ -83,6 +90,9 @@ class Task(QObject):
 
     @Property("QVariantList", notify=commentsChanged)
     def comments(self):
+        return [comment for comment in self._comments]
+
+    def get_comments(self):
         return self._comments
 
     @Property(str, notify=nameChanged)
@@ -91,6 +101,9 @@ class Task(QObject):
 
     @Property("QVariantList", notify=tagsChanged)
     def tags(self):
+        return [tag for tag in self._tags]
+
+    def get_tags(self):
         return self._tags
 
     @assignee.setter

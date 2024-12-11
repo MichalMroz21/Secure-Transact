@@ -39,6 +39,7 @@ class User(QObject):
     projectsChanged = Signal()
     activeChanged = Signal()
     invitesChanged = Signal()
+    stakeChanged = Signal()
 
     def __init__(self, encryption=None, settings=None, host=None, port=None, active=global_constants.CONNECTION_ATTEMPTS, public_key=None, nickname=None, stake=None):
         super().__init__()
@@ -75,7 +76,7 @@ class User(QObject):
         self._peers = []
         self._active = active
         self._invites = []
-        self.stake = stake if stake is not None else global_constants.INITIAL_CURRENCY
+        self._stake = stake if stake is not None else global_constants.INITIAL_CURRENCY
 
         self._nickname = self.generate_random_string(global_constants.MAX_NICKNAME_LENGTH) if nickname is None else nickname
 
@@ -88,41 +89,60 @@ class User(QObject):
         self.drawString = ""
 
 
-    def to_JSON(self):
-        JSON = {
+    def to_dict(self):
+        return {
             "host": self._host,
             "port": self._port,
             "public_key": self.public_key_to_pem(),
             "nickname": self._nickname,
             "stake": self.stake
         }
-        return json.dumps(JSON)
+
+    def to_JSON(self):
+        return json.dumps(self.to_dict())
+
+    @staticmethod
+    def from_dict(data):
+        host = data["host"]
+        port = data["port"]
+        public_key = data["public_key"]
+        nickname = data["nickname"]
+        stake = data["stake"]
+        return User(Encryption(), Settings(), host, port, global_constants.CONNECTION_ATTEMPTS, public_key, nickname,
+                    stake)
+
 
     @staticmethod
     def from_JSON(JSON: str):
-        json_array = json.loads(JSON)
-        host = json_array["host"]
-        port = json_array["port"]
-        public_key = json_array["public_key"]
-        nickname = json_array["nickname"]
-        stake = json_array["stake"]
-        return User(Encryption(), Settings(), host, port, global_constants.CONNECTION_ATTEMPTS, public_key, nickname, stake)
+        return User.from_dict(json.loads(JSON))
 
 
     #QVariantMap is for Dictionaries and keys must be strings
     @Property("QVariantMap", notify=groupChanged)
     def messages(self):
+        return [message for message in self._messages]
+
+    def get_messages(self):
+        return self._messages
+
+    def get_messages(self):
         return self._messages
 
 
     #QVariantList is for Lists
     @Property("QVariantList", notify=groupChanged)
     def group(self):
+        return [group for group in self._group]
+
+    def get_group(self):
         return self._group
 
 
     @Property("QVariantList", notify=peersChanged)
     def peers(self):
+        return [peer for peer in self._peers]
+
+    def get_peers(self):
         return self._peers
 
 
@@ -143,6 +163,9 @@ class User(QObject):
 
     @Property("QVariantList", notify=projectsChanged)
     def projects(self):
+        return [project.to_dict() for project in self._projects]
+
+    def get_projects(self):
         return self._projects
 
 
@@ -150,10 +173,22 @@ class User(QObject):
     def active(self):
         return self._active
 
+    @Property(int, notify=stakeChanged)
+    def stake(self):
+        return self._stake
 
     @Property("QVariantList", notify=invitesChanged)
     def invites(self):
+        return [invite for invite in self._invites]
+
+
+    def get_invites(self):
         return self._invites
+
+    def set_invites(self, new_val):
+        if self._invites != new_val:
+            self._invites = new_val
+            self.activeChanged.emit()
 
 
     @invites.setter
@@ -222,13 +257,13 @@ class User(QObject):
         Retrieves messages from the memory
         :return: str array - List of messages
         """
-        group_str = self.group_to_string(self.group)
+        group_str = self.group_to_string(self.get_group())
 
         if group_str is None:
             return []
-        print(self.messages)
+        print(self.get_messages())
 
-        not_parsed_messages = self.messages[group_str]
+        not_parsed_messages = self.get_messages()[group_str]
 
         if not_parsed_messages is (None or []):
             return []
@@ -241,18 +276,17 @@ class User(QObject):
         return messages
 
 
-    @Slot(int, result=QObject)
-    def get_project(self, project_index):
+    @Slot(int, result=bool)
+    def check_project_index(self, project_index):
         """
         Gets a project
         :param project_index: int - Project index
         :return: Project - Project
         """
         if project_index is None or project_index < 0 or project_index >= len(self.projects):
-            return None
+            return False
         else:
-            return self.projects[project_index]
-
+            return True
 
     @Slot(int, QObject, str, str, str, str)
     def create_a_new_task(self, project_index, assignee, name, priority, due_date, tags):
@@ -285,9 +319,17 @@ class User(QObject):
         tags_list = tags.split(", ")
         date = datetime.datetime.strptime(due_date, "%Y-%m-%d")
         new_task = Task(assignee=assignee, name=name, priority=parsed_priority, due_date=date, tags=tags_list)
-        self.projects[project_index].tasks.append(new_task)
-        #self.projects[project_index].tasksChanged.emit()
-        print(self.projects[project_index].tasks)
+        tasks_len = len(self.get_projects()[project_index].get_tasks())
+        project_id = self.get_projects()[project_index].id
+        json_task = new_task.to_JSON()
+        json_str = json.dumps({"host": self.host, "port": self.port, "project_id" : project_id, "task" : json_task, "task_id": tasks_len})
+        self.get_projects()[project_index].get_tasks().append(new_task)
+        self.get_projects()[project_index].tasksChanged.emit()
+        self.projectsChanged.emit() #If task has changed, then project changed too. Thanks to this signal task can be updated in QML
+        print(self.get_projects()[project_index].get_tasks())
+        for user in self.get_projects()[project_index].get_users():
+            if not (user.host == self.host and user.port == self.port):
+                response = requests.post("http://{}:{}/update_task".format(user.host, user.port), json=json_str)
 
 
     @Slot(str, int)
@@ -297,18 +339,18 @@ class User(QObject):
         :param host: User's IP address
         :param port: User's port number
         """
-        for peer in self.peers:
+        for peer in self.get_peers():
             if peer.host == host and peer.port == port:
-                for member in self.group:
+                for member in self.get_group():
                     if member == peer:
                         #Do not add the same member to the group again
                         return None
-                self.group.append(peer)
+                self.get_group().append(peer)
 
                 group_str = self.group_to_string(self.group)
 
-                if group_str not in self.messages:
-                    self.messages[group_str] = []
+                if group_str not in self.get_messages():
+                    self.get_messages()[group_str] = []
 
                 self.groupChanged.emit()
                 break
@@ -321,12 +363,12 @@ class User(QObject):
         :param host: User's IP address
         :param port: User's port number
         """
-        for peer in self.peers:
+        for peer in self.get_peers():
             if peer.host == host and peer.port == port:
-                for member in self.group:
+                for member in self.get_group():
                     if member == peer:
                         #Delete only if the given peer is in the group
-                        self.group.remove(peer)
+                        self.get_group().remove(peer)
                         self.groupChanged.emit()
                         return None
 
@@ -338,9 +380,9 @@ class User(QObject):
         :param host: User's IP address
         :param port: User's port number
         """
-        for peer in self.peers:
+        for peer in self.get_peers():
             if peer.host == host and peer.port == port:
-                self.peers.remove(peer)
+                self.get_peers().remove(peer)
                 self.peersChanged.emit()
                 break
 
@@ -362,15 +404,15 @@ class User(QObject):
         temp_group = [new_user]
         group_str = self.group_to_string(temp_group)
 
-        if group_str not in self.messages:
+        if group_str not in self.get_messages():
             #In case if this person was a peer in the past but was deleted from the peers list
-            self.messages[group_str] = []
+            self.get_messages()[group_str] = []
 
-        print(self.group)
+        print(self.get_group())
 
         self.update_encrypted_string(self.public_key, self.random_key)
 
-        for peer in self._peers:
+        for peer in self.get_peers():
             peer.update_encrypted_string(peer.public_key, self.random_key)
 
         self.send_encrypted_keys()
@@ -384,7 +426,7 @@ class User(QObject):
         :param port: User's port
         :return:
         """
-        for invite in self.invites:
+        for invite in self.get_invites():
             if invite["host"] == host and int(invite["port"]) == int(port):
                 #Invitation has been already sent to that person
                 return None
@@ -395,7 +437,7 @@ class User(QObject):
                                           "nickname": self.nickname, "stake": self.stake})
             if response.status_code == http.HTTPStatus.OK:
                 #Remember the user which was invited
-                self.invites.append({"host": host, "port": port, "received": False})
+                self.get_invites().append({"host": host, "port": port, "received": False})
                 print(self.invites)
         except Exception as e:
             print(e)
@@ -408,10 +450,10 @@ class User(QObject):
         :param host: str - User's IP address
         :param port: str - User's port
         """
-        for invite in self.invites:
+        for invite in self.get_invites():
             if invite["host"] == host and int(invite["port"]) == int(port):
                 if self.verify_peer_connection(host, port):
-                    self.invites.remove(invite)
+                    self.get_invites().remove(invite)
                     self.invitesChanged.emit()
                 break
 
@@ -467,7 +509,7 @@ class User(QObject):
         for user in users:
             new_users_list.append(user)
         new_project = Project(name, new_users_list)
-        self.projects.append(new_project)
+        self.get_projects().append(new_project)
         json_project = new_project.to_JSON()
         json_users = [user.to_JSON() for user in users]
         json_request = json.dumps({"host": self.host, "port" : self.port, "users": json_users, "project" : json_project})
@@ -500,20 +542,20 @@ class User(QObject):
 
         date = datetime.datetime.now().isoformat()
 
-        for peer in self.group:
+        for peer in self.get_group():
             encrypted_message = self.encryption.encrypt_data_ecb(message, self.useful_key)
-            group = self.group_to_string(self.group)
+            group = self.group_to_string(self.get_group())
 
             response = requests.post("http://{}:{}/receive_message".format(peer.host, peer.port),
                                      json={"host": self.host, "port": self.port, "message": encrypted_message,
                                            "date": date, "group": group})
 
             if response.status_code == HTTPStatus.OK and not appended_message:
-                self.messages[self.group_to_string(self.group)].append({"host": self.host, "port": self.port, "message": encrypted_message,
+                self.get_messages()[self.group_to_string(self.group)].append({"host": self.host, "port": self.port, "message": encrypted_message,
                                                "date": date, "group": group})
                 self.messagesAppend.emit(str(self.port) + " (" + date + "): " + message)
                 appended_message = True
-                if len(self.messages[self.group_to_string(self.group)]) % global_constants.MESSAGES_IN_BLOCK == 0:
+                if len(self.get_messages()[self.group_to_string(self.group)]) % global_constants.MESSAGES_IN_BLOCK == 0:
                     self.send_block_being_verified()
 
 
@@ -739,7 +781,7 @@ class User(QObject):
         """
         Send data to each connected peer which will be included in the block
         """
-        messages_list = list(self.messages[self.group_to_string(self.group)])[
+        messages_list = list(self.get_messages()[self.group_to_string(self.group)])[
                         -global_constants.MESSAGES_IN_BLOCK:]
         json_block = json.dumps(messages_list, sort_keys=True, separators=(',', ':'))
 
