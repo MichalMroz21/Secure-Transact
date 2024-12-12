@@ -66,59 +66,15 @@ QtObject {
         source: "../../assets/fonts/Lato-ThinItalic.ttf"
     }
 
-        function getFontSize(width, height) {
-            // Determine the smaller dimension (to handle portrait vs. landscape)
-            let sizeBaseline = Math.min(width, height);
+    readonly property var base_x: 1280.0
+    readonly property var base_y: 720.0
 
-            // Font size selection based on the size of the window
-            if (sizeBaseline < 400) {
-                return mobile_h6; // For very small screens
-            } else if (sizeBaseline >= 400 && sizeBaseline < 500) {
-                return mobile_h5; // Small mobile screens
-            } else if (sizeBaseline >= 500 && sizeBaseline < 600) {
-                return mobile_h4; // Medium mobile screens
-            } else if (sizeBaseline >= 600 && sizeBaseline < 700) {
-                return mobile_h3; // Larger mobile screens
-            } else if (sizeBaseline >= 700 && sizeBaseline < 800) {
-                return mobile_h2; // Medium tablets
-            } else if (sizeBaseline >= 800 && sizeBaseline < 900) {
-                return mobile_h1; // Large tablets
-            } else if (sizeBaseline >= 900 && sizeBaseline < 1000) {
-                return display_h6; // Small desktops
-            } else if (sizeBaseline >= 1000 && sizeBaseline < 1100) {
-                return display_h5; // Medium desktops
-            } else if (sizeBaseline >= 1100 && sizeBaseline < 1200) {
-                return display_h4; // Larger desktops
-            } else if (sizeBaseline >= 1200 && sizeBaseline < 1300) {
-                return display_h3; // Extra-large desktops
-            } else if (sizeBaseline >= 1300 && sizeBaseline < 1400) {
-                return display_h2; // Huge displays
-            } else if (sizeBaseline >= 1400 && sizeBaseline < 1500) {
-                return display_h1; // Very large displays
-            } else if (sizeBaseline >= 1500 && sizeBaseline < 1600) {
-                return display_small; // Large ultra-wide displays
-            } else if (sizeBaseline >= 1600 && sizeBaseline < 1700) {
-                return display_large; // Extra-large ultra-wide displays
-            } else if (sizeBaseline >= 1700) {
-                return display_large; // Extreme large screens (e.g., 4K+)
-            }
+    function getFontSize(baseFontSize, width, height) {
+        var scaleX = width / base_x;
+        var scaleY = height / base_y;
 
-            // Now considering paragraph and label sizes:
-            // Small devices or small windows should use the paragraph and label small sizes
-            if (sizeBaseline < 600) {
-                return paragraph_xsmall; // Smallest text
-            } else if (sizeBaseline >= 600 && sizeBaseline < 800) {
-                return paragraph_small; // Small paragraphs and labels
-            } else if (sizeBaseline >= 800 && sizeBaseline < 1000) {
-                return paragraph_medium; // Medium paragraph size
-            } else if (sizeBaseline >= 1000 && sizeBaseline < 1200) {
-                return label_xsmall; // Small labels
-            } else if (sizeBaseline >= 1200 && sizeBaseline < 1400) {
-                return label_small; // Small labels for larger screens
-            } else if (sizeBaseline >= 1400 && sizeBaseline < 1600) {
-                return label_medium; // Larger labels for even larger screens
-            } else {
-                return label_large; // For very large screens or extreme cases
-            }
-        }
+        var scale = (scaleX + scaleY) / 2;
+
+        return baseFontSize * scale;
+    }
 }

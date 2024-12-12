@@ -49,16 +49,16 @@ Page {
     }
 
 
-        RowLayout {
-            width: parent.width / 1.5
-            height: parent.height / 1.5
-            anchors.centerIn: parent
+    RowLayout {
+        width: parent.width / 1.5
+        height: parent.height / 1.5
+        anchors.centerIn: parent
 
-            ColumnLayout{
-                Layout.preferredWidth: parent.width * 2 / 3
-                Layout.preferredHeight: parent.height
-                // Chat Window (left side)
-                Rectangle {
+        ColumnLayout {
+            Layout.preferredWidth: parent.width * 2 / 3
+            Layout.preferredHeight: parent.height
+
+            Rectangle {
                 Layout.fillWidth: true  // Make it scale horizontally
                 Layout.fillHeight: true  // Make it scale vertically
                 width: parent.width  // 2/3 for chat window (2x space)
@@ -78,7 +78,6 @@ Page {
                     anchors.left: parent.left
                     anchors.right: parent.right
 
-
                     // Enable automatic scrolling when new messages are added
                     onContentYChanged: {
                         if (contentY + height >= contentHeight) {
@@ -94,7 +93,7 @@ Page {
                             width: parent.width
                             text: model.messageText
                             color: "#000"
-                            font.pixelSize: 16
+                            font.pixelSize: fontStyle.getFontSize(fontStyle.mobile_h2, root.width, root.height)
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.margins: 10
@@ -111,64 +110,51 @@ Page {
                     border.color: settings.light_mode ? colorPalette.accent700 : colorPalette.accent400
                     anchors.bottom: parent.bottom
 
-                    MyTextFieldLabel{
+                    MyTextFieldLabel {
                         id: inputField
                         parentWidth: parent.width - 20
                         parentHeight: parent.height - 10
-                        anchors.centerIn: parent
                         placeholder: "Type a message..."
                         placeholderColor: settings.light_mode ? colorPalette.accent700 : colorPalette.accent400
                         borderWidth: 0
                         textColor: settings.light_mode ? colorPalette.accent700 : colorPalette.accent400
                         visibleUpText: false
-                    }
 
-                    // TextField {
-                    //     id: inputField
-                    //     width: parent.width - 20
-                    //     height: parent.height - 10
-                    //     anchors.centerIn: parent
-                    //     padding: 5
-                    //     placeholderText: "Type a message..."
-                    //     color: colorPalette.background800
+                        anchors.centerIn: parent
 
-                    //     // When the user presses Enter, append the message to the ListView
-                    //     onAccepted: {
-                    //         if (inputField.text.trim() !== "") {
-                    //             // Append new message to the model
-                    //             user.send_mes(inputField.text);
-                    //             // Clear the input field
-                    //             inputField.text = "";
-                    //         }
-                    //     }
-                    // }
-                }
-            }
-            }
-
-            ColumnLayout{
-                Layout.preferredWidth: parent.width * 1 / 3
-                Layout.preferredHeight: parent.height
-                FriendList{
-
-                    customFunctions: [
-                         {
-                             text: "Add to group",
-                             action: function(model, mouseArea, popup) {
-                                 user.addToGroup(model.host, model.port);
-                             },
-                             isVisible: true
-                         },
-                        {
-                            text: "Remove from group",
-                            action: function (model, mouseArea, popup) {
-                                user.removeFromGroup(model.host, model.port);
-                            },
-                            isVisible: true
+                        onAccepted: {
+                            if (inputField.downText.trim() !== "") {
+                                user.send_mes(inputField.downText);
+                                inputField.downText = "";
+                            }
                         }
-                    ]
+                    }
                 }
             }
         }
 
+        ColumnLayout {
+            Layout.preferredWidth: parent.width * 1 / 3
+            Layout.preferredHeight: parent.height
+
+            FriendList {
+                customFunctions: [
+                     {
+                         text: "Add to group",
+                         action: function(model, mouseArea, popup) {
+                             user.add_to_group(model.host, model.port);
+                         },
+                         isVisible: true
+                     },
+                    {
+                        text: "Remove from group",
+                        action: function (model, mouseArea, popup) {
+                            user.remove_from_group(model.host, model.port);
+                        },
+                        isVisible: true
+                    }
+                ]
+            }
+        }
+    }
 }

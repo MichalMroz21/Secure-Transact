@@ -35,7 +35,7 @@ Page {
         Text {
             Layout.alignment: Qt.AlignHCenter
             text: "<font color=\""+ (settings.light_mode ? colorPalette.primary600 : colorPalette.primary300) +"\">New project info</font>"
-            font.pixelSize: fontStyle.getFontSize(root.width, root.height)
+            font.pixelSize: fontStyle.getFontSize(fontStyle.display_h3, root.width, root.height)
             color: "black"
         }
 
@@ -45,6 +45,23 @@ Page {
             upText: "Project name"
             parentWidth: parent.width - spacingObjects.preserveSpacingProportion(spacingObjects.spacing_x_big, root.width, root.height, false)
         }
+        MyButton {
+            id: addUserButton
+            Layout.alignment: Qt.AlignHCenter
+            buttonText: "Add new user"
+
+            onClickedFunction: function () {
+                index = user.projects.length
+                stackView.push("select_users.qml", {
+                    currentIndex: index,
+                    includeOwner: false,
+                    onReturn: function(returnedUsers) {
+                        usersInProject = returnedUsers;
+                        console.log("Returned users:", returnedUsers);
+                    }
+               });
+            }
+        }
 
         // Buttons Row
         RowLayout {
@@ -53,9 +70,9 @@ Page {
 
             MyButton {
                 Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
-                text: "Create project"
+                buttonText: "Create project"
 
-                onClicked: {
+                onClickedFunction: function () {
                     if(projectNameField.text !== ""){
                         user.add_new_project_from_FE(projectNameField.downText, usersInProject);
                         stackView.push("chat_module.qml");

@@ -1,3 +1,4 @@
+import hashlib
 import json
 import base64
 
@@ -103,6 +104,11 @@ class Encryption(QObject):
         """
 
     def private_key_to_pem(self, private_key):
+        """
+        Converts private key encoded in bytes to PEM format
+        :param private_key: byte array - private key
+        :return: str - PEM encoded private key
+        """
         pem_private_key = private_key.private_bytes(
             encoding=serialization.Encoding.PEM, #PEM encoding
             format=serialization.PrivateFormat.TraditionalOpenSSL, #Key format
@@ -112,6 +118,11 @@ class Encryption(QObject):
         return pem_private_key.decode('utf-8')
 
     def public_key_to_pem(self, public_key):
+        """
+        Converts public key encoded in bytes to PEM format
+        :param public_key: byte array - public key
+        :return: str - PEM encoded public key
+        """
         pem = public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
@@ -120,6 +131,11 @@ class Encryption(QObject):
         return pem.decode('utf-8') #Convert to text
 
     def load_public_key_from_pem(self, pem_data):
+        """
+        Loads public key from PEM encoded data to bytes
+        :param pem_data: str - PEM encoded public key
+        :return: bytes array - public key in RSA
+        """
         public_key = serialization.load_pem_public_key(
             pem_data.encode('utf-8'), #Convert text to bytes
             backend=default_backend()
@@ -142,3 +158,36 @@ class Encryption(QObject):
         except Exception as e:
             print(e)
 
+    def deterministic_hash(self, data_string):
+        """
+        Hashes the given string using SHA256 algorithm in a deterministic manner.
+        :param data_string: str - data to be hashed
+        :return: int - Numeric seed
+        """
+        numeric_seed = int.from_bytes(hashlib.sha256(data_string.encode('utf-8')).digest())
+        return numeric_seed
+
+    def create_signature(self, user, data_string):
+        """
+        Creates a signature using user's private key and given data
+        :param user: User - User which has to make a signature
+        :param data_string: str - data to be hashed
+        :return: 
+        """
+        data = data_string.encode('utf-8')
+        signature = user.private_key.sign(
+            data,
+            padding.PKCS1v15(),  # Deterministyczny algorytm podpisu
+            hashes.SHA256()
+        )
+        return signature
+
+    def create_signature_base64(self, user, data_string):
+        """
+        Creates a signature encoded in Base64 using user's private key and given data.
+        :param user: User - User which has to make a signature
+        :param data_string: str - data to be hashed
+        :return:
+        """
+        bytes_signature = self.create_signature(user, data_string)
+        return base64.b64encode(bytes_signature).decode('utf-8')

@@ -1,11 +1,16 @@
 import datetime
+import json
 import threading
+
 import flask
 import global_constants
 
 from flask import jsonify, request
 from http import HTTPStatus
 from PySide6.QtCore import QObject
+
+
+
 
 class Networking(QObject):
     def __init__(self, user):
@@ -29,24 +34,44 @@ class Networking(QObject):
 
         @self.app.route("/chain")
         def chain():
-            return self.user.chain.jsonrep()
+            """
+            Sends back a blockchain
+            :return: HTTPStatus.OK with str - JSON representation of the chain. | HTTPStatus.IM_USED
+            """
+            if self.user.buffer is None:
+                return self.user.chain.jsonrep()
+            else:
+                return jsonify({"error": "This peer is currently proceeding adding a new block to its blockchain! Try again later!"}), HTTPStatus.IM_USED
 
         @self.app.route('/receive_message', methods=['POST'])
         def receive_message():
+            """
+            Receives a message from the other peer
+            :return: HTTPStatus.OK | HTTPStatus.BAD_REQUEST
+            """
             message = request.json
             group = message["group"]
 
             if message:
-                self.user.messages[group].append(message)
-                self.user.messagesAppend.emit(self.user.decrypt_single_message(message))
-                self.buffered_messages.append(message)
+                try:
+                    self.user.get_messages()[group].append(message)
+                    if self.user.group_to_string(self.user.get_group()) == group:
+                        #Emit signal only if the user is currently displaying given chat group
+                        self.user.messagesAppend.emit(self.user.decrypt_single_message(message))
+                    self.buffered_messages.append(message)
 
-                return jsonify({"status": "Message received!"}), HTTPStatus.OK
+                    return jsonify({"status": "Message received!"}), HTTPStatus.OK
+                except KeyError:
+                    return jsonify({"error": "There is no group chat with given key!"}), HTTPStatus.BAD_REQUEST
             else:
                 return jsonify({"error": "Got no message"}), HTTPStatus.BAD_REQUEST
 
         @self.app.route('/receive_pk', methods=['POST'])
         def receive_pk():
+            """
+            Receives a public key from the other peer
+            :return: HTTPStatus.OK | HTTPStatus.BAD_REQUEST
+            """
             public_key = request.json
             editedMessage = public_key["message"].replace(global_constants.ENCRYPTED_KEY_BEGIN, "").replace("\n", "")
 
@@ -56,6 +81,95 @@ class Networking(QObject):
                 return jsonify({"status": "Public key received!"}), HTTPStatus.OK
             else:
                 return jsonify({"error": "Got no public key"}), HTTPStatus.BAD_REQUEST
+
+        @self.app.route('/receive_messages_to_be_verified', methods=['POST'])
+        def receive_messages_to_be_verified():
+            """
+            Receives messages block and saves it to the buffer
+            :return: HTTPStatus.OK
+            """
+            json_array = request.json
+            self.user.buffer = json_array.get("block")
+            group = json_array.get("group")
+            self.user.send_digital_signature(group)
+            return jsonify({"status": "Messages were successfully saved"}), HTTPStatus.OK
+
+        @self.app.route('/receive_signature', methods=['POST'])
+        def receive_signature():
+            """
+            Receives a signature to use in the creation of the block
+            :return: HTTPStatus.OK
+            """
+            json_array = request.json
+            host = json_array.get("host")
+            port = json_array.get("port")
+            signature = json_array.get("signature")
+            print("Przed dodaniem jest tyle blokow: " + str(len(self.user.chain.blocks)))
+            self.user.create_a_block(host, port, signature)
+            print("Po dodaniu jest tyle blokow: " + str(len(self.user.chain.blocks)))
+            return jsonify({"status": "Signature was successfully used"}), HTTPStatus.OK
+
+        @self.app.route('/new_nickname', methods=['POST'])
+        def new_nickname():
+            json_array = request.json
+            host = json_array.get("host")
+            port = json_array.get("port")
+            nickname = json_array.get("nickname")
+            for peer in self.user.peers:
+                if peer.host == host and int(peer.port) == int(port):
+                    peer.nickname = nickname
+                    self.user.nicknameChanged.emit()
+                    return jsonify({"status": "Nickname was successfully set"}), HTTPStatus.OK
+            return jsonify({"error": "No peer with that IP address and port number was found!"}), HTTPStatus.BAD_REQUEST
+
+
+        @self.app.route('/add_new_project', methods=['POST'])
+        def add_new_project():
+            json_str = request.json
+            json_array = json.loads(json_str)
+            host = json_array.get("host")
+            port = json_array.get("port")
+            for peer in self.user.get_peers():
+                if peer.host == host and int(peer.port) == int(port):
+                    project_str = json_array.get("project")
+                    from project import Project
+                    project_to_add = Project().from_JSON(project_str)
+                    self.user.get_projects().append(project_to_add)
+                    self.user.projectsChanged.emit()
+                    return jsonify({"status": "Project was successfully added"}), HTTPStatus.OK
+            return jsonify({"error": "No peer with that IP address was found!"}), HTTPStatus.BAD_REQUEST
+
+        @self.app.route('/update_task', methods=['POST'])
+        def update_task():
+            json_str = request.json
+            json_array = json.loads(json_str)
+            host = json_array.get("host")
+            port = json_array.get("port")
+            for peer in self.user.peers:
+                if peer.host == host and int(peer.port) == int(port):
+                    project_id = int(json_array.get("project_id"))
+                    found = False
+                    for project_index, project in enumerate(self.user.get_projects()):
+                        if project.id == project_id:
+                            project_id = project_index
+                            found = True
+                            break
+                    if not found:
+                        return jsonify({"error": "No project with that ID was found!"}), HTTPStatus.BAD_REQUEST
+                    from task import Task
+                    json_task = json_array.get("task")
+                    task = Task().from_JSON(json_task)
+                    task_id = int(json_array.get("task_id"))
+                    tasks_len = len(self.user.get_projects()[project_id].get_tasks())
+                    if task_id > tasks_len or task_id < 0:
+                        return jsonify({"error": "Wrong task ID"}), HTTPStatus.BAD_REQUEST
+                    elif tasks_len == task_id:
+                        self.user.get_projects()[project_id].get_tasks().append(task)
+                    else:
+                        self.user.get_projects()[project_id].get_tasks()[task_id] = task
+                    self.user.projectsChanged.emit()
+                    return jsonify({"status": "Task was successfully updated"}), HTTPStatus.OK
+            return jsonify({"error": "No user with that IP address and port number was found!"}), HTTPStatus.BAD_REQUEST
 
         @self.app.route('/reject_me', methods=['GET'])
         def reject_me():
@@ -84,12 +198,12 @@ class Networking(QObject):
             json_array = request.json
             host = json_array.get("host")
             port = json_array.get("port")
-            for invite in self.user.invites:
+            for invite in self.user.get_invites():
                 if invite["host"] == host and int(invite["port"]) == int(port):
                     return jsonify({"status": "Invitation has been already sent in the past!"}), HTTPStatus.BAD_REQUEST
             #It is a new invitation. Append it to the invites section
-            self.user.invites.append({"host": host, "port": port, "received": True})
-            print(self.user.invites)
+            self.user.get_invites().append({"host": host, "port": port, "received": True})
+            print(self.user.get_invites())
             self.user.invitesChanged.emit()
             if self.user.settings.auto_connection:
                 self.user.accept_invitation(host, port)
@@ -97,77 +211,28 @@ class Networking(QObject):
 
         @self.app.route('/establish_a_connection', methods=['GET'])
         def establish_a_connection():
+            """
+            Etablishes a connection with other peer
+            :return: HTTPStatus.OK | HTTPStatus.SERVICE_UNAVAILABLE
+            """
             json_array = request.json
             host = json_array.get("host")
             port = json_array.get("port")
             pk = json_array.get("pk")
             nickname = json_array.get("nickname")
+            stake = int(json_array.get("stake"))
 
             try:
-                # TODO: coś w stylu get_pk
-                self.user.peer(host, int(port), pk, nickname)
-                return jsonify({"status": "Connection established", "pk": self.user.public_key_to_pem(), "nickname": self.user.nickname}), HTTPStatus.OK
+                self.user.peer(host, int(port), pk, nickname, stake)
+                return jsonify({"status": "Connection established", "pk": self.user.public_key_to_pem(), "nickname": self.user.nickname, "stake": self.user.stake}), HTTPStatus.OK
             except Exception as e:
                 return jsonify({"error": str(e)}), HTTPStatus.SERVICE_UNAVAILABLE
 
-        @self.app.route('/get_messages', methods=['GET'])
-        def get_messages():
-            return jsonify(self.buffered_messages)
-
-        @self.app.route('/block_notify', methods=['POST'])
-        def block_notify():
-            hash = self.user.chain.blocks[-1].hash
-            request_hash = request.json.get("hash")
-            self.new_block_creation = (request_hash == hash)
-
-            if request_hash == hash:
-                self.block_time_creation = datetime.datetime.now()
-                return jsonify({"status": "Notified about new block in creation!"}), HTTPStatus.OK
-            else:
-                return jsonify({"error": "Hash mismatch! Aborting creation..."}), HTTPStatus.BAD_REQUEST
-
-        @self.app.route('/get_new_block_notification', methods=['GET'])
-        def get_new_block_notification():
-            return jsonify({
-                "status": "Ok",
-                "new_block_creation": self.new_block_creation,
-                "date": self.block_time_creation.isoformat()
-            }), HTTPStatus.OK
-
-        @self.app.route('/participation_signal', methods=['POST'])
-        def participation_signal():
-            port = request.json.get("port")
-            host = request.json.get("host")
-            hash = request.json.get("hash")
-            date = request.json.get("date")
-            stake = request.json.get("stake")
-
-            time_delta = self.block_time_creation + datetime.timedelta(seconds=global_constants.PARTICIPATION_ADDITIONAL_SECONDS)
-            time_from_request = datetime.datetime.fromisoformat(date)
-
-            if time_delta > time_from_request:
-                self.participants.append({
-                    "port": port,
-                    "host": host,
-                    "hash": hash,
-                    "date": date,
-                    "stake": stake
-                })
-                return jsonify({"status": "Participant added!"}), HTTPStatus.OK
-            else:
-                return jsonify({"error": "It is too late to add participant!"}), HTTPStatus.BAD_REQUEST
-
-        @self.app.route('/get_participants', methods=['GET'])
-        def get_participants():
-            self.participants.sort(key=lambda x: x["stake"])
-            return jsonify({"status": "Ok", "participants": self.participants}), HTTPStatus.OK
-
-        @self.app.route('/send_drawn_indexes', methods=['POST'])
-        def send_drawn_indexes():
-            self.drawn_indexes.append(request.json.get("indexes"))
-            return jsonify({"status": "Ok"}), HTTPStatus.OK
-
     def start(self):
+        """
+        Starts new threads
+        :return: Thread array - Started threads
+        """
         server_thread = threading.Thread(target=self.user.serve_chain, args=(self.app,), daemon=True)
         consensus_thread = threading.Thread(target=self.user.check_consensus, daemon=True)
         miner_thread = threading.Thread(target=self.user.add_blocks, daemon=True)

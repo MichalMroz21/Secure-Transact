@@ -16,16 +16,16 @@ Page {
     ColumnLayout {
         id: formContainer
         anchors.centerIn: parent
-        spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_md, root.width, root.height, true)
+        spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_big, root.width, root.height, true)
         width: Math.min(parent.width / 3, maxInputWidth)  // Set a maximum width for the form
         height: implicitHeight
         Layout.preferredHeight: 256
 
         Text {
-
+            id: userText
             Layout.alignment: Qt.AlignHCenter
             text: "Connect to User"
-            font.pixelSize: fontStyle.getFontSize(root.width, root.height)
+            font.pixelSize: fontStyle.getFontSize(fontStyle.display_h1, root.width, root.height)
             color: settings.light_mode ? colorPalette.primary600 : colorPalette.primary300
         }
 
@@ -47,29 +47,20 @@ Page {
 
         // Buttons Row
         RowLayout {
-            spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_big, root.width, root.height, false)
+            spacing: spacingObjects.preserveSpacingProportion(spacingObjects.spacing_xxx_big, root.width, root.height, false)
             Layout.alignment: Qt.AlignHCenter
 
             // Accept Button
             MyButton {
-                text: "Accept"
+                buttonText: "Accept"
 
-                onClicked:{
+                onClickedFunction: function () {
                     if(addressTextField.downText !== "" && portTextField.downText !== ""){
                         user.send_invitation(addressTextField.downText, portTextField.downText);
                         //user.verify_peer_connection(addressTextField.text, portTextField.text);
                         stackView.push("chat_module.qml");
                     }
                 }
-            }
-        }
-    }
-    ColumnLayout{
-        MyButton {
-            text: "Project's details"
-
-            onClicked:{
-                stackView.push("project_details.qml");
             }
         }
     }

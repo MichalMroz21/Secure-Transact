@@ -12,7 +12,7 @@ Rectangle {
     FontStyle { id: fontStyle }
     SpacingObjects { id: spacingObjects }
 
-    property string list_color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+    property string list_color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
 
     property int list_width: parent.width / 3
     property int list_height: parent.height / 2 * 3
@@ -26,6 +26,8 @@ Rectangle {
 
     property var customFunctions: new Array(0);
 
+    property bool includeMyself: false
+
     property var userClicked: function(model, mouseArea, popup) {
         popup.open();
     }
@@ -38,9 +40,22 @@ Rectangle {
     function updateUserModel() {
         userModel.clear();
 
+        if(includeMyself) {
+            userModel.append({
+                nickname: user.nickname,
+                host: user.host,
+                port: user.port,
+                active: user.active,
+                isInGroup: true,
+                isSelected: false,
+                activeColor: colorPalette.primary500
+            });
+        }
+
         // Iterate over peers array passed from Python
         for (let i = 0; i < user.peers.length; i++) {
             var activeColor = user.peers[i].active > 0 ? colorPalette.primary500 : colorPalette.destructive400
+            var colorString = activeColor.toString();
 
             var isInGroup = false;
             var isSelected = false;
@@ -62,7 +77,7 @@ Rectangle {
                 active: user.peers[i].active,
                 isInGroup: isInGroup,
                 isSelected: isSelected,
-                activeColor: activeColor
+                activeColor: colorString
             });
         }
     }
@@ -82,7 +97,7 @@ Rectangle {
     implicitHeight: list_height
 
     radius: border_radius
-    color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+    color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
 
     border.color: settings.light_mode ? colorPalette.primary700 : colorPalette.primary400
 
@@ -102,7 +117,7 @@ Rectangle {
             width: parent.width  // Set width explicitly for user list items
             height: friendListView.userHeight
             id: userRectangle
-            color: settings.light_mode ? colorPalette.background50 : colorPalette.background800
+            color: settings.light_mode ? colorPalette.background50 : colorPalette.background900
 
             MouseArea {
                 id: mousearea
@@ -117,14 +132,14 @@ Rectangle {
                     mousearea.cursorShape = Qt.PointingHandCursor;
                 }
                 onExited: {
-                    model.isSelected === false ? parent.color = (settings.light_mode ? colorPalette.background50 : colorPalette.background800) : null;
+                    model.isSelected === false ? parent.color = (settings.light_mode ? colorPalette.background50 : colorPalette.background900) : null;
                     mousearea.cursorShape = Qt.ArrowCursor
                 }
 
                 // Use a single Text element to concatenate the name and IP address
                 Text {
                     anchors.centerIn: parent
-                    font.pixelSize: fontStyle.getFontSize(root.width, root.height)
+                    font.pixelSize: fontStyle.getFontSize(fontStyle.display_h3, root.width, root.height)
                     text: '<span style="color: ' + model.activeColor + '; ">' + '▮ ' + ' </span><span style="color: ' + (settings.light_mode ? colorPalette.background600 : colorPalette.primary300) + '; ">' + model.nickname + ' </span>'
                     color: "#000"
                     horizontalAlignment: Text.AlignHCenter
@@ -161,11 +176,11 @@ Rectangle {
                             active: customFunctions[index].isVisible
 
                             sourceComponent: MyButton {
-                                text: customFunctions[index].text
+                                buttonText: customFunctions[index].text
                                 buttonHeight: friendListView.userHeight
                                 buttonWidth: popup.width
 
-                                onClicked: {
+                                onClickedFunction: function () {
                                     if (typeof customFunctions[index].action === "function") {
                                         customFunctions[index].action(popup.myModel, popup.mouseArea, popup.myPopup);
                                     }

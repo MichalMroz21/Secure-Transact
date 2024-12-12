@@ -13,7 +13,7 @@ QtObject {
     readonly property int spacing_xxx_big: 32
     readonly property int spacing_lg: 40
     readonly property int spacing_x_lg: 48
-    readonly property int spacing_xx_lg: 64
+    readonly property int spacing_xx_lg: 56
     readonly property int spacing_xxx_lg: 80
     readonly property int spacing_huge: 96
     readonly property int spacing_x_huge: 128

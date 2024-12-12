@@ -144,7 +144,7 @@ ApplicationWindow {
                     Text {
                         anchors.centerIn: parent
                         text: model.text
-                        font.pixelSize: fontStyle.getFontSize(parent.width, parent.height);
+                        font.pixelSize: fontStyle.getFontSize(fontStyle.display_h3, root.width, root.height)
                         opacity: 0
                     }
 

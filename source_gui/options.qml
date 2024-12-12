@@ -44,8 +44,8 @@ Page {
         }
 
         MyButton {
-            text: "Save settings"
-            onClicked: {
+            buttonText: "Save settings"
+            onClickedFunction: function () {
                 settings.auto_connection = autoConnectionCheckbox.isToggled;
                 settings.light_mode = lightModeCheckbox.isToggled;
                 updateCheckbox()

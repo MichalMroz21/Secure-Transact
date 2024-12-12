@@ -4,7 +4,7 @@ import json
 from PySide6.QtCore import QObject
 
 class Block(QObject):
-    def __init__(self, index, data, powval, lastHash, powlib, hash=None):
+    def __init__(self, index, data, digitalEncryption, hostVerifier, portVerifier, publicKeyVerifier, lastDigitalEncryption):
         """
         Creates new Block object
         :param index: Which block in blockchain it is
@@ -13,14 +13,13 @@ class Block(QObject):
         :param lastHash: Hash value from previous block
         :param hash: Hash value in created block
         """
-        super().__init__()
-
         self.index = index
         self.data = data
-        self.powval = powval
-        self.lastHash = lastHash
-        self.powlib = powlib
-        self.hash = hash or self.hashme()
+        self.digitalEncryption = digitalEncryption
+        self.hostVerifier = hostVerifier
+        self.portVerifier = portVerifier
+        self.publicKeyVerifier = publicKeyVerifier
+        self.lastDigitalEncryption = lastDigitalEncryption
 
     def __str__(self):
         """ String representation of the block.
@@ -29,8 +28,11 @@ class Block(QObject):
         """
         return json.dumps({"index": self.index,
                            "data": self.data,
-                           "powval": self.powval,
-                           "lastHash": self.lastHash})
+                           "digitalEncryption": self.digitalEncryption,
+                           "hostVerifier": self.hostVerifier,
+                           "portVerifier": self.portVerifier,
+                           "publicKeyVerifier": self.publicKeyVerifier,
+                           "lastDigitalEncryption": self.lastDigitalEncryption})
 
     def hashme(self):
         """
@@ -49,12 +51,14 @@ class Block(QObject):
         """
         return {"index": self.index,
                 "data": self.data,
-                "powval": self.powval,
-                "lastHash": self.lastHash,
-                "hash": self.hash}
+                "digitalEncryption": self.digitalEncryption,
+                "hostVerifier": self.hostVerifier,
+                "portVerifier": self.portVerifier,
+                "publicKeyVerifier": self.publicKeyVerifier,
+                "lastDigitalEncryption": self.lastDigitalEncryption}
 
 class Blockchain(QObject):
-    def __init__(self, powlib, blocks=[]):
+    def __init__(self, blocks=[]):
         """
         Creates blockchain
         :param blocks: List of blocks in created blockchain
@@ -62,24 +66,18 @@ class Blockchain(QObject):
         super().__init__()
 
         self.blocks = blocks
-        self.powlib = powlib
 
     def genesis(self):
         """
         Sets first block in blockchain
         :return:
         """
-        self.blocks = [Block(0, ["Opening block"], 0, "0", self.powlib)]
+        self.blocks = [Block(0, ["Opening block"], "", "",0, "", "")]
 
-    def add_block(self, data):
-        """
-        Add new block to existing blockchain
-        :param data: Data to be stored in the block
-        """
+    def add_signature_block(self, data, digitalEncryption, hostVerifier, portVerifier, publicKeyVerifier):
         last = self.blocks[-1]
-        powval = self.powlib.compute(last.powval)
-
-        self.blocks.append(Block(last.index + 1, data, powval, last.hash, self.powlib))
+        currentBlock = Block(last.index + 1, data, digitalEncryption, hostVerifier, portVerifier, publicKeyVerifier, last.digitalEncryption)
+        self.blocks.append(currentBlock)
 
     def verify(self) -> bool:
         """
@@ -87,15 +85,6 @@ class Blockchain(QObject):
         Checks if block's lastHash value equals to the hash value of the previous block
         :return: bool
         """
-        biggestPow = -1
-
-        for i in range(1, len(self.blocks)):
-            if self.blocks[i].lastHash != self.blocks[i-1].hash:
-                return False
-            if self.blocks[i].powval <= biggestPow:
-                return False
-            biggestPow = self.blocks[i].powval
-
         return True
 
     def consensus(self, other) -> bool:
@@ -136,7 +125,7 @@ class Blockchain(QObject):
 
         for jblock in jblocks:
             chain.append(Block(jblock["index"], jblock["data"],
-                               jblock["powval"], jblock["lastHash"],
-                               self.powlib, jblock["hash"]))
+                               jblock["digitalEncryption"], jblock["hostVerifier"], jblock["portVerifier"],
+                               jblock["publicKeyVerifier"], jblock["lastDigitalEncryption"]))
 
         return Blockchain(chain)
